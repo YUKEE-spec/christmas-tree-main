@@ -84,7 +84,7 @@ export const LightConfigPanel: React.FC<LightConfigPanelProps> = ({
           letterSpacing: '1px'
         }}
       >
-        彩灯 {config.enabled ? '·' : ''}
+        点灯 {config.enabled ? '💡' : ''}
       </button>
 
       {config.enabled && (
@@ -105,7 +105,7 @@ export const LightConfigPanel: React.FC<LightConfigPanelProps> = ({
             letterSpacing: '1px'
           }}
         >
-          彩灯配色
+          灯光配色
         </button>
       )}
 
@@ -118,7 +118,7 @@ export const LightConfigPanel: React.FC<LightConfigPanelProps> = ({
           border: '1px solid rgba(255,255,255,0.1)',
           minWidth: '180px'
         }}>
-          <p style={{ fontSize: '9px', letterSpacing: '1px', color: '#888', margin: '0 0 8px 0' }}>彩灯颜色方案</p>
+          <p style={{ fontSize: '9px', letterSpacing: '1px', color: '#888', margin: '0 0 8px 0' }}>灯光颜色方案</p>
           {LIGHT_COLOR_PRESETS.map((preset, index) => (
             <button
               key={index}

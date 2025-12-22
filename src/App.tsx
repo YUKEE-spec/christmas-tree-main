@@ -17,15 +17,13 @@ import { GestureController } from './components/GestureController';
 import { Experience } from './components/Experience';
 import { ExportCard } from './components/ExportCard';
 
-// 装饰配置类型
+// 装饰配置类型（合并星空、闪烁、星云为"闪耀"）
 interface DecorationSettings {
   showGifts: boolean;
   showPhotos: boolean;
   showLights: boolean;
   showSnow: boolean;
-  showStars: boolean;
-  showSparkles: boolean;
-  showGoldenNebula: boolean;
+  showShine: boolean; // 合并了 showStars, showSparkles, showGoldenNebula
 }
 
 // 主应用组件
@@ -66,16 +64,25 @@ export default function GrandTreeApp() {
   const [showGiftConfig, setShowGiftConfig] = useState(false);
   const [showSettingsConfig, setShowSettingsConfig] = useState(false);
 
-  // 装饰开关状态
+  // 装饰开关状态（合并闪耀效果）
   const [decorations, setDecorations] = useState<DecorationSettings>({
     showGifts: giftConfig.enabled,
     showPhotos: photoConfig.enabled,
     showLights: lightConfig.enabled,
     showSnow: true,
-    showStars: true,
-    showSparkles: true,
-    showGoldenNebula: true
+    showShine: true // 合并了星空、闪烁、星云
   });
+
+  // 为 Experience 组件转换装饰状态
+  const experienceDecorations = {
+    showGifts: decorations.showGifts,
+    showPhotos: decorations.showPhotos,
+    showLights: decorations.showLights,
+    showSnow: decorations.showSnow,
+    showStars: decorations.showShine,
+    showSparkles: decorations.showShine,
+    showGoldenNebula: decorations.showShine
+  };
 
   // 同步配置状态到装饰状态
   useEffect(() => {
@@ -173,7 +180,7 @@ export default function GrandTreeApp() {
             sceneState={sceneState} 
             rotationSpeed={rotationSpeed} 
             treeColor={actualTreeColor} 
-            decorations={decorations} 
+            decorations={experienceDecorations} 
             customPhotos={photoConfig.customPhotos} 
             onPhotoClick={handlePhotoClick} 
             particleCount={settingsConfig.particleCount} 
@@ -270,7 +277,7 @@ export default function GrandTreeApp() {
             letterSpacing: '1px'
           }}
         >
-          礼物 {giftConfig.enabled ? `(${giftConfig.count})` : ''}
+          挂礼物 {giftConfig.enabled ? '🎁' : ''}
         </button>
 
         {/* 照片配置 */}
@@ -310,17 +317,17 @@ export default function GrandTreeApp() {
             letterSpacing: '1px'
           }}
         >
-          雪花 {decorations.showSnow ? '❄️' : ''}
+          下雪 {decorations.showSnow ? '❄️' : ''}
         </button>
 
-        {/* 星空控制 */}
+        {/* 闪耀控制（合并星空、闪烁、星云） */}
         <button
-          onClick={() => toggleDecoration('showStars')}
+          onClick={() => toggleDecoration('showShine')}
           style={{
             padding: '10px 16px',
-            backgroundColor: decorations.showStars ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.6)',
-            border: `1px solid ${decorations.showStars ? '#FFFFFF' : '#444'}`,
-            color: decorations.showStars ? '#FFFFFF' : '#666',
+            backgroundColor: decorations.showShine ? 'rgba(255,215,0,0.15)' : 'rgba(0,0,0,0.6)',
+            border: `1px solid ${decorations.showShine ? '#FFD700' : '#444'}`,
+            color: decorations.showShine ? '#FFD700' : '#666',
             fontFamily: 'sans-serif',
             fontSize: '11px',
             fontWeight: '500',
@@ -331,49 +338,7 @@ export default function GrandTreeApp() {
             letterSpacing: '1px'
           }}
         >
-          星空 {decorations.showStars ? '⭐' : ''}
-        </button>
-
-        {/* 闪烁控制 */}
-        <button
-          onClick={() => toggleDecoration('showSparkles')}
-          style={{
-            padding: '10px 16px',
-            backgroundColor: decorations.showSparkles ? 'rgba(255,215,0,0.15)' : 'rgba(0,0,0,0.6)',
-            border: `1px solid ${decorations.showSparkles ? '#FFD700' : '#444'}`,
-            color: decorations.showSparkles ? '#FFD700' : '#666',
-            fontFamily: 'sans-serif',
-            fontSize: '11px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            backdropFilter: 'blur(4px)',
-            borderRadius: '6px',
-            transition: 'all 0.2s ease',
-            letterSpacing: '1px'
-          }}
-        >
-          闪烁 {decorations.showSparkles ? '✨' : ''}
-        </button>
-
-        {/* 星云控制 */}
-        <button
-          onClick={() => toggleDecoration('showGoldenNebula')}
-          style={{
-            padding: '10px 16px',
-            backgroundColor: decorations.showGoldenNebula ? 'rgba(255,215,0,0.15)' : 'rgba(0,0,0,0.6)',
-            border: `1px solid ${decorations.showGoldenNebula ? '#FFD700' : '#444'}`,
-            color: decorations.showGoldenNebula ? '#FFD700' : '#666',
-            fontFamily: 'sans-serif',
-            fontSize: '11px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            backdropFilter: 'blur(4px)',
-            borderRadius: '6px',
-            transition: 'all 0.2s ease',
-            letterSpacing: '1px'
-          }}
-        >
-          星云 {decorations.showGoldenNebula ? '🌌' : ''}
+          闪耀 {decorations.showShine ? '✨' : ''}
         </button>
       </div>
 
@@ -411,43 +376,48 @@ export default function GrandTreeApp() {
             WebkitTapHighlightColor: 'transparent'
           }}
         >
-           文字 {particleText ? '·' : ''}
+          写祝福 {particleText ? '💌' : ''}
         </button>
-        {!isMobile && (
-          <button 
-            onClick={() => {
-              const newEnabled = !gestureEnabled;
-              setGestureEnabled(newEnabled);
-              if (newEnabled) {
+        {/* 手势控制 - 移动端和桌面端都可用 */}
+        <button 
+          onClick={() => {
+            const newEnabled = !gestureEnabled;
+            setGestureEnabled(newEnabled);
+            if (newEnabled) {
+              // 移动端开启手势时关闭部分特效以节省性能
+              if (isMobile) {
                 setDecorations(prev => ({
                   ...prev,
-                  showSnow: false,
-                  showStars: false,
-                  showSparkles: false,
-                  showGoldenNebula: false
+                  showShine: false
                 }));
-                setAiStatus("正在释放内存并加载 AI 模型...");
               } else {
-                setAiStatus("手势控制已关闭");
+                setDecorations(prev => ({
+                  ...prev,
+                  showShine: false
+                }));
               }
-            }} 
-            style={{ 
-              padding: '10px 14px', 
-              backgroundColor: gestureEnabled ? 'rgba(0,206,209,0.15)' : 'rgba(0,0,0,0.6)', 
-              border: `1px solid ${gestureEnabled ? '#00CED1' : '#444'}`, 
-              color: gestureEnabled ? '#00CED1' : '#666', 
-              fontFamily: 'sans-serif', 
-              fontSize: '10px', 
-              fontWeight: '500', 
-              cursor: 'pointer', 
-              backdropFilter: 'blur(4px)',
-              borderRadius: '6px',
-              letterSpacing: '1px'
-            }}
-          >
-             手势 {gestureEnabled ? '开启' : ''}
-          </button>
-        )}
+              setAiStatus("正在加载魔法...");
+            } else {
+              setAiStatus("魔法控制已关闭");
+            }
+          }} 
+          style={{ 
+            padding: isMobile ? '8px 10px' : '10px 14px', 
+            backgroundColor: gestureEnabled ? 'rgba(0,206,209,0.15)' : 'rgba(0,0,0,0.6)', 
+            border: `1px solid ${gestureEnabled ? '#00CED1' : '#444'}`, 
+            color: gestureEnabled ? '#00CED1' : '#666', 
+            fontFamily: 'sans-serif', 
+            fontSize: isMobile ? '9px' : '10px', 
+            fontWeight: '500', 
+            cursor: 'pointer', 
+            backdropFilter: 'blur(4px)',
+            borderRadius: '6px',
+            letterSpacing: '1px',
+            WebkitTapHighlightColor: 'transparent'
+          }}
+        >
+          {isMobile ? '📷魔法' : '手势魔法'} {gestureEnabled ? '🪄' : ''}
+        </button>
         {!isMobile && (
           <button 
             onClick={() => setDebugMode(!debugMode)} 
@@ -465,7 +435,7 @@ export default function GrandTreeApp() {
               letterSpacing: '1px'
             }}
           >
-             调试 {debugMode ? '开启' : ''}
+            调试 {debugMode ? '🔧' : ''}
           </button>
         )}
         <button 
@@ -479,14 +449,13 @@ export default function GrandTreeApp() {
             fontSize: isMobile ? '10px' : '11px', 
             fontWeight: '600', 
             letterSpacing: '2px', 
-            textTransform: 'uppercase', 
             cursor: 'pointer', 
             backdropFilter: 'blur(4px)',
             borderRadius: '6px',
             WebkitTapHighlightColor: 'transparent'
           }}
         >
-           {sceneState === 'CHAOS' ? '聚合' : '散开'}
+          {sceneState === 'CHAOS' ? '🎄圣诞魔法' : '💫消失'}
         </button>
       </div>
 
@@ -608,18 +577,21 @@ export default function GrandTreeApp() {
       {gestureEnabled && (
         <div style={{ 
           position: 'absolute', 
-          top: '30px', 
-          right: '40px', 
+          top: isMobile ? 'auto' : '30px',
+          bottom: isMobile ? '70px' : 'auto',
+          left: isMobile ? '10px' : 'auto',
+          right: isMobile ? '10px' : '40px', 
           color: '#00CED1', 
-          fontSize: '11px', 
+          fontSize: isMobile ? '10px' : '11px', 
           fontFamily: 'sans-serif', 
           zIndex: 10, 
-          backgroundColor: 'rgba(0,0,0,0.6)', 
-          padding: '8px 12px', 
+          backgroundColor: 'rgba(0,0,0,0.8)', 
+          padding: isMobile ? '6px 10px' : '8px 12px', 
           borderRadius: '6px', 
           backdropFilter: 'blur(4px)',
           border: '1px solid rgba(0,206,209,0.3)',
-          letterSpacing: '1px'
+          letterSpacing: '1px',
+          textAlign: isMobile ? 'center' : 'left'
         }}>
           {aiStatus}
         </div>
