@@ -16,6 +16,7 @@ import type { SettingsConfig } from './components/SettingsConfig';
 import { GestureController } from './components/GestureController';
 import { Experience } from './components/Experience';
 import { ExportCard } from './components/ExportCard';
+import { BackgroundMusic } from './components/BackgroundMusic';
 
 // 装饰配置类型（合并星空、闪烁、星云为"闪耀"）
 interface DecorationSettings {
@@ -598,6 +599,9 @@ export default function GrandTreeApp() {
           {aiStatus}
         </div>
       )}
+
+      {/* 背景音乐控制 */}
+      <BackgroundMusic isMobile={isMobile} />
     </div>
   );
 }
