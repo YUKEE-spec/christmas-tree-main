@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useState, useEffect, Suspense } from 'react';
+import React, { useRef, useMemo, useState, useEffect, Suspense, useCallback } from 'react';
 import { useFrame, extend } from '@react-three/fiber';
 import {
   OrbitControls,
@@ -273,11 +273,21 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
   const borderGeometry = useMemo(() => new THREE.PlaneGeometry(1.3, 1.6), []);
   const photoGeometry = useMemo(() => new THREE.PlaneGeometry(1.1, 1.1), []);
 
-  // 使用 textureArray.length 作为依赖，确保纹理变化时重新计算
+  // 使用稳定的种子生成随机数，避免每次渲染位置变化
+  const seededRandom = useCallback((seed: number) => {
+    const x = Math.sin(seed * 12.9898) * 43758.5453;
+    return x - Math.floor(x);
+  }, []);
+
+  // 只依赖 count，不依赖 textureArray.length，避免闪烁
   const data = useMemo(() => {
-    const textureCount = textureArray.length;
     return new Array(count).fill(0).map((_, i) => {
-      const chaosPos = new THREE.Vector3((Math.random()-0.5)*70, (Math.random()-0.5)*70, (Math.random()-0.5)*70);
+      const seed = i * 1000;
+      const chaosPos = new THREE.Vector3(
+        (seededRandom(seed) - 0.5) * 70,
+        (seededRandom(seed + 1) - 0.5) * 70,
+        (seededRandom(seed + 2) - 0.5) * 70
+      );
       // 照片位置稍微向外偏移，避免被树遮挡
       const baseTargetPos = getSpiralPosition(i, count);
       const targetPos = new THREE.Vector3(
@@ -287,36 +297,44 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
       );
 
       // 增大照片尺寸
-      const isBig = Math.random() < 0.25; // 更多大照片
-      const baseScale = isBig ? 2.5 : 1.2 + Math.random() * 0.8;
-      const weight = 0.8 + Math.random() * 1.2;
+      const isBig = seededRandom(seed + 3) < 0.25;
+      const baseScale = isBig ? 2.5 : 1.2 + seededRandom(seed + 4) * 0.8;
+      const weight = 0.8 + seededRandom(seed + 5) * 1.2;
       
       const borderColors = [
         '#FFD700', '#C0C0C0', '#CD7F32', '#FFFAF0', 
         '#F5F5DC', '#DDA0DD', '#FFB6C1', '#98FB98',
       ];
-      const borderColor = borderColors[Math.floor(Math.random() * borderColors.length)];
+      const borderColor = borderColors[Math.floor(seededRandom(seed + 6) * borderColors.length)];
 
       const rotationSpeed = {
-        x: (Math.random() - 0.5) * 0.5,
-        y: (Math.random() - 0.5) * 0.5,
-        z: (Math.random() - 0.5) * 0.5
+        x: (seededRandom(seed + 7) - 0.5) * 0.5,
+        y: (seededRandom(seed + 8) - 0.5) * 0.5,
+        z: (seededRandom(seed + 9) - 0.5) * 0.5
       };
-      const chaosRotation = new THREE.Euler(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
+      const chaosRotation = new THREE.Euler(
+        seededRandom(seed + 10) * Math.PI,
+        seededRandom(seed + 11) * Math.PI,
+        seededRandom(seed + 12) * Math.PI
+      );
 
       return {
         chaosPos, targetPos, scale: baseScale, weight,
-        textureIndex: i % textureCount,
         borderColor,
         currentPos: chaosPos.clone(),
         chaosRotation,
         rotationSpeed,
-        wobbleOffset: Math.random() * 10,
-        wobbleSpeed: 0.3 + Math.random() * 0.4,
-        frameType: Math.random() < 0.3 ? 'ornate' : 'simple'
+        wobbleOffset: seededRandom(seed + 13) * 10,
+        wobbleSpeed: 0.3 + seededRandom(seed + 14) * 0.4,
+        frameType: seededRandom(seed + 15) < 0.3 ? 'ornate' : 'simple'
       };
     });
-  }, [count, textureArray.length]);
+  }, [count, seededRandom]);
+
+  // 纹理索引单独计算，这样纹理变化不会影响位置
+  const getTextureIndex = useCallback((i: number) => {
+    return i % textureArray.length;
+  }, [textureArray.length]);
 
   useFrame((stateObj, delta) => {
     if (!groupRef.current) return;
@@ -349,7 +367,9 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
 
   return (
     <group ref={groupRef}>
-      {data.map((obj, i) => (
+      {data.map((obj, i) => {
+        const texIdx = getTextureIndex(i);
+        return (
         <group key={i} scale={[obj.scale, obj.scale, obj.scale]} rotation={state === 'CHAOS' ? obj.chaosRotation : [0,0,0]}>
           {/* 正面 */}
           <group position={[0, 0, 0.02]}>
@@ -357,15 +377,15 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
               geometry={photoGeometry}
               onDoubleClick={(e) => {
                 e.stopPropagation();
-                onPhotoClick?.(obj.textureIndex);
+                onPhotoClick?.(texIdx);
               }}
             >
               <meshStandardMaterial
-                map={textureArray[obj.textureIndex]}
+                map={textureArray[texIdx]}
                 roughness={0.2} 
                 metalness={0.1}
                 emissive={CONFIG.colors.white} 
-                emissiveMap={textureArray[obj.textureIndex]} 
+                emissiveMap={textureArray[texIdx]} 
                 emissiveIntensity={1.2}
                 side={THREE.FrontSide}
               />
@@ -410,15 +430,15 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
               geometry={photoGeometry}
               onDoubleClick={(e) => {
                 e.stopPropagation();
-                onPhotoClick?.(obj.textureIndex);
+                onPhotoClick?.(texIdx);
               }}
             >
               <meshStandardMaterial
-                map={textureArray[obj.textureIndex]}
+                map={textureArray[texIdx]}
                 roughness={0.3} 
                 metalness={0.1}
                 emissive={CONFIG.colors.white} 
-                emissiveMap={textureArray[obj.textureIndex]} 
+                emissiveMap={textureArray[texIdx]} 
                 emissiveIntensity={0.8}
                 side={THREE.FrontSide}
               />
@@ -442,7 +462,8 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
             />
           </mesh>
         </group>
-      ))}
+        );
+      })}
     </group>
   );
 };

@@ -349,6 +349,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
       const frameCanvas = captureFrame();
       if (!frameCanvas) {
         setIsExporting(false);
+        alert('无法获取画面，请重试');
         return;
       }
       
@@ -356,10 +357,46 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
       const cardCanvas = await createCardCanvas(frameCanvas, false);
       
       setExportProgress(100);
-      const link = document.createElement('a');
-      link.download = `christmas-card-${Date.now()}.png`;
-      link.href = cardCanvas.toDataURL('image/png', 1.0);
-      link.click();
+      
+      // 移动端使用不同的下载方式
+      const dataUrl = cardCanvas.toDataURL('image/png', 1.0);
+      
+      if (isMobile) {
+        // 移动端：打开新窗口显示图片，用户可以长按保存
+        const newWindow = window.open('', '_blank');
+        if (newWindow) {
+          newWindow.document.write(`
+            <html>
+              <head>
+                <title>圣诞贺卡</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                  body { margin: 0; padding: 20px; background: #000; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+                  img { max-width: 100%; height: auto; border-radius: 8px; }
+                  p { color: #FFD700; font-family: sans-serif; margin-top: 20px; text-align: center; }
+                </style>
+              </head>
+              <body>
+                <img src="${dataUrl}" alt="圣诞贺卡" />
+                <p>长按图片保存到相册 📱</p>
+              </body>
+            </html>
+          `);
+          newWindow.document.close();
+        } else {
+          // 如果无法打开新窗口，尝试直接下载
+          const link = document.createElement('a');
+          link.download = `christmas-card-${Date.now()}.png`;
+          link.href = dataUrl;
+          link.click();
+        }
+      } else {
+        // 桌面端：直接下载
+        const link = document.createElement('a');
+        link.download = `christmas-card-${Date.now()}.png`;
+        link.href = dataUrl;
+        link.click();
+      }
       
       setIsExporting(false);
       setShowPreview(false);
@@ -368,7 +405,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
     } else {
       exportGif();
     }
-  }, [captureFrame, createCardCanvas, exportType, exportGif]);
+  }, [captureFrame, createCardCanvas, exportType, exportGif, isMobile]);
 
   const handlePreview = () => {
     generatePreview();
