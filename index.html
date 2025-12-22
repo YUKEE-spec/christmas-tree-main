@@ -46,10 +46,160 @@
           padding-bottom: env(safe-area-inset-bottom);
         }
       }
+      /* 不支持浏览器提示样式 */
+      .browser-warning {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+        color: #FFD700;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        text-align: center;
+        padding: 40px 20px;
+        z-index: 9999;
+      }
+      .browser-warning h1 {
+        font-size: 48px;
+        margin-bottom: 20px;
+      }
+      .browser-warning p {
+        font-size: 18px;
+        color: #aaa;
+        margin-bottom: 30px;
+        line-height: 1.6;
+      }
+      .browser-warning .browsers {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        flex-wrap: wrap;
+        margin-top: 40px;
+      }
+      .browser-warning .browser-item {
+        text-decoration: none;
+        color: #fff;
+        padding: 20px 30px;
+        border: 2px solid #FFD700;
+        border-radius: 12px;
+        transition: all 0.3s;
+      }
+      .browser-warning .browser-item:hover {
+        background: rgba(255, 215, 0, 0.1);
+        transform: translateY(-5px);
+      }
+      /* 加载提示 */
+      .loading-hint {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #FFD700;
+        font-family: sans-serif;
+        font-size: 14px;
+        z-index: 100;
+        text-align: center;
+      }
+      .loading-hint .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 215, 0, 0.2);
+        border-top-color: #FFD700;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
     </style>
   </head>
   <body>
+    <!-- 浏览器不支持提示 -->
+    <div class="browser-warning" id="browserWarning">
+      <h1>🎄</h1>
+      <h2 style="color: #FFD700; margin-bottom: 20px;">5114 圣诞树</h2>
+      <p>
+        抱歉，您的浏览器不支持 WebGL 或版本过旧。<br>
+        请使用以下现代浏览器访问：
+      </p>
+      <div class="browsers">
+        <a href="https://www.google.com/chrome/" class="browser-item" target="_blank">
+          Chrome
+        </a>
+        <a href="https://www.microsoft.com/edge" class="browser-item" target="_blank">
+          Edge
+        </a>
+        <a href="https://www.mozilla.org/firefox/" class="browser-item" target="_blank">
+          Firefox
+        </a>
+        <a href="https://www.apple.com/safari/" class="browser-item" target="_blank">
+          Safari
+        </a>
+      </div>
+      <p style="margin-top: 40px; font-size: 14px; color: #666;">
+        夸克浏览器、QQ浏览器、UC浏览器等也可正常访问
+      </p>
+    </div>
+
+    <!-- 加载提示 -->
+    <div class="loading-hint" id="loadingHint">
+      <div class="spinner"></div>
+      <p>正在加载圣诞树...</p>
+    </div>
+
     <div id="root"></div>
+
+    <!-- 浏览器兼容性检测 -->
+    <script>
+      (function() {
+        // 检测 WebGL 支持
+        function checkWebGL() {
+          try {
+            var canvas = document.createElement('canvas');
+            return !!(window.WebGLRenderingContext && 
+              (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+          } catch(e) {
+            return false;
+          }
+        }
+        
+        // 检测是否为 IE 浏览器
+        function isIE() {
+          return /*@cc_on!@*/false || !!document.documentMode;
+        }
+        
+        // 检测是否支持 ES6
+        function supportsES6() {
+          try {
+            new Function('(a = 0) => a');
+            return true;
+          } catch (e) {
+            return false;
+          }
+        }
+        
+        // 如果不支持，显示警告
+        if (isIE() || !checkWebGL() || !supportsES6()) {
+          document.getElementById('browserWarning').style.display = 'block';
+          document.getElementById('loadingHint').style.display = 'none';
+          document.getElementById('root').style.display = 'none';
+        }
+      })();
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- 隐藏加载提示 -->
+    <script type="module">
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var hint = document.getElementById('loadingHint');
+          if (hint) hint.style.display = 'none';
+        }, 1000);
+      });
+    </script>
   </body>
 </html>
