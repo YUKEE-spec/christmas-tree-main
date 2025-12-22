@@ -61,13 +61,22 @@ const CONFIG = {
 // Shader Material (Foliage) - 增强版粒子效果
 const FoliageMaterial = shaderMaterial(
   { uTime: 0, uColor: new THREE.Color('#006C35'), uProgress: 0 },
-  `uniform float uTime; uniform float uProgress; attribute vec3 aTargetPos; attribute float aRandom;
-  varying vec2 vUv; varying float vMix; varying float vRandom;
-  float cubicInOut(float t) { return t < 0.5 ? 4.0 * t * t * t : 0.5 * pow(2.0 * t - 2.0, 3.0) + 1.0; }
+  // Vertex Shader
+  `
+  precision highp float;
+  uniform float uTime;
+  uniform float uProgress;
+  attribute vec3 aTargetPos;
+  attribute float aRandom;
+  varying float vMix;
+  varying float vRandom;
+  
+  float cubicInOut(float t) {
+    return t < 0.5 ? 4.0 * t * t * t : 0.5 * pow(2.0 * t - 2.0, 3.0) + 1.0;
+  }
+  
   void main() {
-    vUv = uv;
     vRandom = aRandom;
-    // 增强的噪声动画
     float noiseScale = 0.25;
     vec3 noise = vec3(
       sin(uTime * 2.0 + position.x * 0.5 + aRandom * 10.0),
@@ -77,23 +86,29 @@ const FoliageMaterial = shaderMaterial(
     float t = cubicInOut(uProgress);
     vec3 finalPos = mix(position, aTargetPos + noise, t);
     vec4 mvPosition = modelViewMatrix * vec4(finalPos, 1.0);
-    // 更大的粒子尺寸，更炫酷
     gl_PointSize = (100.0 * (1.0 + aRandom * 0.8)) / -mvPosition.z;
     gl_Position = projectionMatrix * mvPosition;
     vMix = t;
-  }`,
-  `uniform vec3 uColor; uniform float uTime; varying float vMix; varying float vRandom;
+  }
+  `,
+  // Fragment Shader
+  `
+  precision highp float;
+  uniform vec3 uColor;
+  uniform float uTime;
+  varying float vMix;
+  varying float vRandom;
+  
   void main() {
-    float r = distance(gl_PointCoord, vec2(0.5)); if (r > 0.5) discard;
-    // 柔和的边缘渐变
+    float r = distance(gl_PointCoord, vec2(0.5));
+    if (r > 0.5) discard;
     float alpha = 1.0 - smoothstep(0.3, 0.5, r);
-    // 闪烁效果
     float sparkle = sin(uTime * 3.0 + vRandom * 20.0) * 0.3 + 0.7;
     vec3 finalColor = mix(uColor * 0.4, uColor * 1.5 * sparkle, vMix);
-    // 添加发光效果
     finalColor += uColor * 0.3 * (1.0 - r * 2.0);
     gl_FragColor = vec4(finalColor, alpha);
-  }`
+  }
+  `
 );
 extend({ FoliageMaterial });
 
