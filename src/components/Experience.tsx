@@ -1296,6 +1296,15 @@ export const Experience: React.FC<ExperienceProps> = ({
 }) => {
   const controlsRef = useRef<any>(null);
   
+  // 检测移动端
+  const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
+  
+  // 移动端相机更近，FOV更大
+  const cameraPosition: [number, number, number] = isMobile ? [0, 8, 55] : [0, 10, 75];
+  const cameraFov = isMobile ? 60 : 50;
+  const minDistance = isMobile ? 30 : 40;
+  const maxDistance = isMobile ? 100 : 150;
+  
   useFrame(() => {
     if (controlsRef.current) {
       controlsRef.current.setAzimuthalAngle(controlsRef.current.getAzimuthalAngle() + rotationSpeed);
@@ -1305,16 +1314,17 @@ export const Experience: React.FC<ExperienceProps> = ({
 
   return (
     <>
-      <PerspectiveCamera makeDefault position={[0, 10, 75]} fov={50} />
+      <PerspectiveCamera makeDefault position={cameraPosition} fov={cameraFov} />
       <OrbitControls 
         ref={controlsRef} 
         enablePan={false} 
         enableZoom={true} 
-        minDistance={40} 
-        maxDistance={150} 
+        minDistance={minDistance} 
+        maxDistance={maxDistance} 
         autoRotate={rotationSpeed === 0 && sceneState === 'FORMED'} 
         autoRotateSpeed={0.3} 
-        maxPolarAngle={Math.PI / 1.7} 
+        maxPolarAngle={Math.PI / 1.7}
+        touches={{ ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN }}
       />
 
       <color attach="background" args={['#000300']} />
