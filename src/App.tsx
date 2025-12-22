@@ -32,7 +32,7 @@ interface DecorationSettings {
 // 主应用组件
 export default function GrandTreeApp() {
   // 核心状态
-  const [sceneState, setSceneState] = useState<'CHAOS' | 'FORMED'>('CHAOS');
+  const [sceneState, setSceneState] = useState<'CHAOS' | 'FORMED'>('FORMED');
   const [rotationSpeed, setRotationSpeed] = useState(0);
   const [aiStatus, setAiStatus] = useState("手势控制已关闭");
   const [debugMode, setDebugMode] = useState(false);
