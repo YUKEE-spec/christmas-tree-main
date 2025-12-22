@@ -456,19 +456,29 @@ const PhotoOrnamentsDefault = ({ state, onPhotoClick }: { state: 'CHAOS' | 'FORM
 const PhotoOrnamentsCustom = ({ state, customPhotos, onPhotoClick }: { state: 'CHAOS' | 'FORMED'; customPhotos: string[]; onPhotoClick?: (index: number) => void }) => {
   const [textures, setTextures] = useState<THREE.Texture[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [loadKey, setLoadKey] = useState(0);
+  const prevPhotosRef = useRef<string[]>([]);
 
-  // 当照片列表变化时，强制重新加载
+  // 当照片列表变化时，重新加载纹理
   useEffect(() => {
+    // 检查照片是否真的变化了
+    const photosChanged = customPhotos.length !== prevPhotosRef.current.length ||
+      customPhotos.some((url, i) => url !== prevPhotosRef.current[i]);
+    
+    if (!photosChanged && textures.length > 0) {
+      return;
+    }
+    
+    prevPhotosRef.current = [...customPhotos];
+    
     const loader = new THREE.TextureLoader();
     let mounted = true;
     setIsLoading(true);
-    setTextures([]); // 清空旧纹理
 
-    console.log('Loading custom photos:', customPhotos.length, customPhotos);
+    console.log('Loading custom photos:', customPhotos.length);
 
     if (customPhotos.length === 0) {
       setIsLoading(false);
+      setTextures([]);
       return;
     }
 
@@ -480,7 +490,6 @@ const PhotoOrnamentsCustom = ({ state, customPhotos, onPhotoClick }: { state: 'C
               url,
               (texture) => {
                 texture.colorSpace = THREE.SRGBColorSpace;
-                console.log('Texture loaded successfully');
                 resolve(texture);
               },
               undefined,
@@ -503,7 +512,6 @@ const PhotoOrnamentsCustom = ({ state, customPhotos, onPhotoClick }: { state: 'C
         console.log('All textures loaded:', results.length);
         setTextures(results);
         setIsLoading(false);
-        setLoadKey(prev => prev + 1); // 强制更新 key
       }
     });
 
@@ -512,19 +520,17 @@ const PhotoOrnamentsCustom = ({ state, customPhotos, onPhotoClick }: { state: 'C
     };
   }, [customPhotos]);
 
+  // 加载中或没有纹理时返回空组件（不返回 null 避免闪烁）
   if (isLoading || textures.length === 0) {
-    return null;
+    return <group />;
   }
   
-  // 使用 key 强制重新创建组件
-  return <PhotoOrnamentsInner key={loadKey} state={state} textureArray={textures} onPhotoClick={onPhotoClick} />;
+  return <PhotoOrnamentsInner state={state} textureArray={textures} onPhotoClick={onPhotoClick} />;
 };
 
 const PhotoOrnaments = ({ state, customPhotos, onPhotoClick }: { state: 'CHAOS' | 'FORMED'; customPhotos?: string[]; onPhotoClick?: (index: number) => void }) => {
   // 明确判断：有自定义照片就只用自定义的，不混用
   const hasCustomPhotos = customPhotos && customPhotos.length > 0;
-  
-  console.log('PhotoOrnaments render - hasCustomPhotos:', hasCustomPhotos, 'count:', customPhotos?.length || 0);
   
   if (hasCustomPhotos) {
     return <PhotoOrnamentsCustom state={state} customPhotos={customPhotos} onPhotoClick={onPhotoClick} />;
