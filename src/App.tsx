@@ -160,9 +160,9 @@ export default function GrandTreeApp() {
   const actualLightColors = getActualLightColors(lightConfig);
 
   return (
-    <div style={{ width: '100vw', height: '100vh', backgroundColor: '#000', position: 'relative', overflow: 'hidden', touchAction: 'none' }}>
+    <div style={{ width: '100vw', height: '100vh', backgroundColor: '#000', position: 'relative', overflow: 'hidden' }}>
       {/* 3D 场景 */}
-      <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
+      <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 1, touchAction: 'none' }}>
         <Canvas 
           dpr={isMobile ? [1, 1.5] : [1, 2]} 
           gl={{ 
