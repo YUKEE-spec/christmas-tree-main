@@ -2,23 +2,20 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 interface BackgroundMusicProps {
   isMobile: boolean;
+  inline?: boolean; // 是否作为内联按钮
 }
 
-// 免费圣诞音乐 URL（可替换为自己的音乐文件）
 const MUSIC_URL = '/music/christmas.mp3';
 
-export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ isMobile }) => {
+export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ isMobile, inline = false }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.3);
-  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // 创建音频元素
     const audio = new Audio(MUSIC_URL);
     audio.preload = 'auto';
     audio.loop = true;
-    audio.volume = volume;
+    audio.volume = 0.3;
     audioRef.current = audio;
 
     return () => {
@@ -28,12 +25,6 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ isMobile }) =>
       }
     };
   }, []);
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-    }
-  }, [volume]);
 
   const togglePlay = useCallback(async () => {
     const audio = audioRef.current;
@@ -53,130 +44,60 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ isMobile }) =>
     }
   }, [isPlaying]);
 
+  // 内联按钮样式（用于底部按钮栏）
+  if (inline) {
+    return (
+      <button
+        onClick={togglePlay}
+        style={{
+          padding: isMobile ? '8px 10px' : '10px 14px',
+          backgroundColor: isPlaying ? 'rgba(255,215,0,0.15)' : 'rgba(0,0,0,0.6)',
+          border: `1px solid ${isPlaying ? '#FFD700' : '#444'}`,
+          color: isPlaying ? '#FFD700' : '#666',
+          fontFamily: 'sans-serif',
+          fontSize: isMobile ? '9px' : '10px',
+          fontWeight: '500',
+          cursor: 'pointer',
+          backdropFilter: 'blur(4px)',
+          borderRadius: '6px',
+          letterSpacing: '1px',
+          WebkitTapHighlightColor: 'transparent',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px'
+        }}
+      >
+        {isPlaying ? '🔊' : '🔇'} 音乐
+      </button>
+    );
+  }
+
+  // 原有的浮动按钮样式
   return (
-    <div
+    <button
+      onClick={togglePlay}
       style={{
         position: 'fixed',
         bottom: isMobile ? 'calc(70px + env(safe-area-inset-bottom, 0px))' : '30px',
         left: isMobile ? '10px' : '40px',
         zIndex: 20,
+        width: isMobile ? '36px' : '40px',
+        height: isMobile ? '36px' : '40px',
+        borderRadius: '50%',
+        backgroundColor: isPlaying ? 'rgba(255,215,0,0.2)' : 'rgba(0,0,0,0.6)',
+        border: `1px solid ${isPlaying ? '#FFD700' : '#444'}`,
+        color: isPlaying ? '#FFD700' : '#666',
+        fontSize: isMobile ? '14px' : '16px',
+        cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
+        justifyContent: 'center',
+        backdropFilter: 'blur(4px)',
+        WebkitTapHighlightColor: 'transparent',
       }}
+      title={isPlaying ? '暂停音乐' : '播放音乐'}
     >
-      {/* 播放/暂停按钮 */}
-      <button
-        onClick={togglePlay}
-        style={{
-          width: isMobile ? '36px' : '40px',
-          height: isMobile ? '36px' : '40px',
-          borderRadius: '50%',
-          backgroundColor: isPlaying ? 'rgba(255,215,0,0.2)' : 'rgba(0,0,0,0.6)',
-          border: `1px solid ${isPlaying ? '#FFD700' : '#444'}`,
-          color: isPlaying ? '#FFD700' : '#666',
-          fontSize: isMobile ? '14px' : '16px',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backdropFilter: 'blur(4px)',
-          transition: 'all 0.2s ease',
-          WebkitTapHighlightColor: 'transparent',
-        }}
-        onMouseEnter={() => !isMobile && setShowVolumeSlider(true)}
-        onMouseLeave={() => !isMobile && setShowVolumeSlider(false)}
-        title={isPlaying ? '暂停音乐' : '播放音乐'}
-      >
-        {isPlaying ? '🔊' : '🔇'}
-      </button>
-
-      {/* 音量滑块（桌面端悬停显示） */}
-      {!isMobile && showVolumeSlider && (
-        <div
-          style={{
-            backgroundColor: 'rgba(0,0,0,0.8)',
-            padding: '8px 12px',
-            borderRadius: '6px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            backdropFilter: 'blur(4px)',
-            border: '1px solid rgba(255,255,255,0.1)',
-          }}
-          onMouseEnter={() => setShowVolumeSlider(true)}
-          onMouseLeave={() => setShowVolumeSlider(false)}
-        >
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.1"
-            value={volume}
-            onChange={(e) => setVolume(parseFloat(e.target.value))}
-            style={{
-              width: '80px',
-              height: '4px',
-              cursor: 'pointer',
-              accentColor: '#FFD700',
-            }}
-          />
-          <span style={{ color: '#888', fontSize: '10px', minWidth: '30px' }}>
-            {Math.round(volume * 100)}%
-          </span>
-        </div>
-      )}
-
-      {/* 移动端点击显示音量控制 */}
-      {isMobile && isPlaying && (
-        <button
-          onClick={() => setShowVolumeSlider(!showVolumeSlider)}
-          style={{
-            padding: '6px 10px',
-            backgroundColor: 'rgba(0,0,0,0.6)',
-            border: '1px solid #444',
-            borderRadius: '4px',
-            color: '#888',
-            fontSize: '10px',
-            cursor: 'pointer',
-          }}
-        >
-          音量
-        </button>
-      )}
-
-      {/* 移动端音量滑块 */}
-      {isMobile && showVolumeSlider && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '45px',
-            left: '0',
-            backgroundColor: 'rgba(0,0,0,0.9)',
-            padding: '10px',
-            borderRadius: '6px',
-            border: '1px solid rgba(255,255,255,0.1)',
-          }}
-        >
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.1"
-            value={volume}
-            onChange={(e) => setVolume(parseFloat(e.target.value))}
-            style={{
-              width: '100px',
-              height: '4px',
-              cursor: 'pointer',
-              accentColor: '#FFD700',
-            }}
-          />
-          <p style={{ color: '#888', fontSize: '9px', margin: '5px 0 0 0', textAlign: 'center' }}>
-            {Math.round(volume * 100)}%
-          </p>
-        </div>
-      )}
-    </div>
+      {isPlaying ? '🔊' : '🔇'}
+    </button>
   );
 };

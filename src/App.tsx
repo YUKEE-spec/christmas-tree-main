@@ -361,48 +361,40 @@ export default function GrandTreeApp() {
         backdropFilter: isMobile ? 'blur(4px)' : 'none',
         pointerEvents: 'auto'
       }}>
-        <ExportCard 
-          canvasRef={{ current: null }}
-          treeColor={actualTreeColor}
-          particleText={particleText}
-        />
+        {/* 1. 音乐开关 */}
+        <BackgroundMusic isMobile={isMobile} inline={true} />
+        
+        {/* 2. 消失/点我 */}
         <button 
-          onClick={() => setShowTextInput(!showTextInput)}
+          onClick={() => setSceneState(s => s === 'CHAOS' ? 'FORMED' : 'CHAOS')} 
           style={{ 
-            padding: isMobile ? '8px 10px' : '10px 14px', 
-            backgroundColor: particleText ? 'rgba(255,105,180,0.15)' : 'rgba(0,0,0,0.6)', 
-            border: `1px solid ${particleText ? '#FF69B4' : '#444'}`, 
-            color: particleText ? '#FF69B4' : '#666', 
+            padding: isMobile ? '8px 16px' : '10px 24px', 
+            backgroundColor: sceneState === 'FORMED' ? 'rgba(255,215,0,0.1)' : 'rgba(0,0,0,0.6)', 
+            border: `1px solid ${sceneState === 'FORMED' ? 'rgba(255,215,0,0.6)' : 'rgba(255,215,0,0.3)'}`, 
+            color: '#FFD700', 
             fontFamily: 'sans-serif', 
-            fontSize: isMobile ? '9px' : '10px', 
-            fontWeight: '500', 
+            fontSize: isMobile ? '10px' : '11px', 
+            fontWeight: '600', 
+            letterSpacing: '2px', 
             cursor: 'pointer', 
             backdropFilter: 'blur(4px)',
             borderRadius: '6px',
-            letterSpacing: '1px',
             WebkitTapHighlightColor: 'transparent'
           }}
         >
-          写祝福 {particleText ? '💌' : ''}
+          {sceneState === 'CHAOS' ? '🎄点我' : '🎄消失'}
         </button>
-        {/* 手势控制 - 移动端和桌面端都可用 */}
+        
+        {/* 3. 进阶魔法 */}
         <button 
           onClick={() => {
             const newEnabled = !gestureEnabled;
             setGestureEnabled(newEnabled);
             if (newEnabled) {
-              // 移动端开启手势时关闭部分特效以节省性能
-              if (isMobile) {
-                setDecorations(prev => ({
-                  ...prev,
-                  showShine: false
-                }));
-              } else {
-                setDecorations(prev => ({
-                  ...prev,
-                  showShine: false
-                }));
-              }
+              setDecorations(prev => ({
+                ...prev,
+                showShine: false
+              }));
               setAiStatus("正在加载魔法...");
             } else {
               setAiStatus("魔法控制已关闭");
@@ -425,45 +417,55 @@ export default function GrandTreeApp() {
         >
           {isMobile ? '📷魔法' : '进阶魔法'} {gestureEnabled ? '🪄' : ''}
         </button>
+        
+        {/* 4. 导出贺卡 */}
+        <ExportCard 
+          canvasRef={{ current: null }}
+          treeColor={actualTreeColor}
+          particleText={particleText}
+        />
+        
+        {/* 桌面端额外按钮 */}
         {!isMobile && (
-          <button 
-            onClick={() => setDebugMode(!debugMode)} 
-            style={{ 
-              padding: '10px 14px', 
-              backgroundColor: debugMode ? 'rgba(255,215,0,0.15)' : 'rgba(0,0,0,0.6)', 
-              border: `1px solid ${debugMode ? '#FFD700' : '#444'}`, 
-              color: debugMode ? '#FFD700' : '#666', 
-              fontFamily: 'sans-serif', 
-              fontSize: '10px', 
-              fontWeight: '500', 
-              cursor: 'pointer', 
-              backdropFilter: 'blur(4px)',
-              borderRadius: '6px',
-              letterSpacing: '1px'
-            }}
-          >
-            调试 {debugMode ? '🔧' : ''}
-          </button>
+          <>
+            <button 
+              onClick={() => setShowTextInput(!showTextInput)}
+              style={{ 
+                padding: '10px 14px', 
+                backgroundColor: particleText ? 'rgba(255,105,180,0.15)' : 'rgba(0,0,0,0.6)', 
+                border: `1px solid ${particleText ? '#FF69B4' : '#444'}`, 
+                color: particleText ? '#FF69B4' : '#666', 
+                fontFamily: 'sans-serif', 
+                fontSize: '10px', 
+                fontWeight: '500', 
+                cursor: 'pointer', 
+                backdropFilter: 'blur(4px)',
+                borderRadius: '6px',
+                letterSpacing: '1px'
+              }}
+            >
+              写祝福 {particleText ? '💌' : ''}
+            </button>
+            <button 
+              onClick={() => setDebugMode(!debugMode)} 
+              style={{ 
+                padding: '10px 14px', 
+                backgroundColor: debugMode ? 'rgba(255,215,0,0.15)' : 'rgba(0,0,0,0.6)', 
+                border: `1px solid ${debugMode ? '#FFD700' : '#444'}`, 
+                color: debugMode ? '#FFD700' : '#666', 
+                fontFamily: 'sans-serif', 
+                fontSize: '10px', 
+                fontWeight: '500', 
+                cursor: 'pointer', 
+                backdropFilter: 'blur(4px)',
+                borderRadius: '6px',
+                letterSpacing: '1px'
+              }}
+            >
+              调试 {debugMode ? '🔧' : ''}
+            </button>
+          </>
         )}
-        <button 
-          onClick={() => setSceneState(s => s === 'CHAOS' ? 'FORMED' : 'CHAOS')} 
-          style={{ 
-            padding: isMobile ? '8px 16px' : '10px 24px', 
-            backgroundColor: sceneState === 'FORMED' ? 'rgba(255,215,0,0.1)' : 'rgba(0,0,0,0.6)', 
-            border: `1px solid ${sceneState === 'FORMED' ? 'rgba(255,215,0,0.6)' : 'rgba(255,215,0,0.3)'}`, 
-            color: '#FFD700', 
-            fontFamily: 'sans-serif', 
-            fontSize: isMobile ? '10px' : '11px', 
-            fontWeight: '600', 
-            letterSpacing: '2px', 
-            cursor: 'pointer', 
-            backdropFilter: 'blur(4px)',
-            borderRadius: '6px',
-            WebkitTapHighlightColor: 'transparent'
-          }}
-        >
-          {sceneState === 'CHAOS' ? '🎄点我' : '🎄消失'}
-        </button>
       </div>
 
       {/* 礼物配置模态框 */}
@@ -603,9 +605,6 @@ export default function GrandTreeApp() {
           {aiStatus}
         </div>
       )}
-
-      {/* 背景音乐控制 */}
-      <BackgroundMusic isMobile={isMobile} />
     </div>
   );
 }
