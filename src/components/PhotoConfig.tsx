@@ -38,24 +38,31 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
   // 处理照片上传
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files) return;
+    if (!files || files.length === 0) return;
+    
+    console.log('Uploading files:', files.length);
     
     const newPhotos: string[] = [];
     Array.from(files).forEach(file => {
       const url = URL.createObjectURL(file);
+      console.log('Created blob URL:', url);
       newPhotos.push(url);
     });
     
-    updateConfig({ 
-      customPhotos: [...config.customPhotos, ...newPhotos],
+    // 合并新照片到现有列表
+    const updatedPhotos = [...config.customPhotos, ...newPhotos];
+    console.log('Total photos after upload:', updatedPhotos.length);
+    
+    onChange({ 
+      ...config,
+      customPhotos: updatedPhotos,
       enabled: true,
       uploadSuccess: true
     });
 
-    // 上传成功后自动关闭上传面板，给用户更好的体验
+    // 上传成功后自动关闭上传面板，但不重置照片
     setTimeout(() => {
       onToggle();
-      updateConfig({ uploadSuccess: false });
     }, 1500);
     
     // 清空文件输入，允许重复上传相同文件
@@ -112,7 +119,6 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
           <button
             onClick={() => {
               onToggle();
-              updateConfig({ uploadSuccess: false });
             }}
             style={{
               position: 'absolute',
