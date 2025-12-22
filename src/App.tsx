@@ -357,8 +357,9 @@ export default function GrandTreeApp() {
         flexWrap: isMobile ? 'wrap' : 'nowrap',
         justifyContent: isMobile ? 'center' : 'flex-end',
         padding: isMobile ? '10px 10px calc(10px + env(safe-area-inset-bottom, 0px))' : '30px 40px',
-        backgroundColor: isMobile ? 'rgba(0,0,0,0.5)' : 'transparent',
-        backdropFilter: isMobile ? 'blur(4px)' : 'none'
+        backgroundColor: isMobile ? 'rgba(0,0,0,0.7)' : 'transparent',
+        backdropFilter: isMobile ? 'blur(4px)' : 'none',
+        pointerEvents: 'auto'
       }}>
         <ExportCard 
           canvasRef={{ current: null }}
