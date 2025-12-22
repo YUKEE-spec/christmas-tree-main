@@ -151,6 +151,9 @@ interface GiftConfigPanelProps {
 
 // 礼物配置面板组件
 export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChange, onClose }) => {
+  // 检测移动端
+  const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
+  
   const updateConfig = (updates: Partial<GiftConfig>) => {
     onChange({ ...config, ...updates });
   };
@@ -199,13 +202,13 @@ export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChan
       top: '50%',
       left: '50%',
       transform: 'translate(-50%, -50%)',
-      width: '500px',
-      maxHeight: '80vh',
+      width: isMobile ? '90vw' : '500px',
+      maxHeight: isMobile ? '85vh' : '80vh',
       backgroundColor: 'rgba(0,0,0,0.95)',
       borderRadius: '12px',
       backdropFilter: 'blur(10px)',
       border: '1px solid rgba(255,255,255,0.1)',
-      padding: '20px',
+      padding: isMobile ? '15px' : '20px',
       zIndex: 1000,
       overflowY: 'auto'
     }}>

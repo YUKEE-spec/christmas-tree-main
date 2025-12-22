@@ -58,6 +58,9 @@ export const TreeConfigPanel: React.FC<TreeConfigPanelProps> = ({
   isOpen, 
   onToggle 
 }) => {
+  // 检测移动端
+  const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
+  
   const updateConfig = (updates: Partial<TreeConfig>) => {
     onChange({ ...config, ...updates });
   };
@@ -69,28 +72,34 @@ export const TreeConfigPanel: React.FC<TreeConfigPanelProps> = ({
   const currentColorName = TREE_COLOR_OPTIONS.find(c => c.value === config.color)?.name || '自定义';
 
   return (
-    <div style={{ position: 'absolute', top: '70px', left: '40px', zIndex: 10 }}>
+    <div style={{ 
+      position: 'absolute', 
+      top: isMobile ? '10px' : '70px', 
+      left: isMobile ? '10px' : '40px', 
+      zIndex: 10 
+    }}>
       <button
         onClick={onToggle}
         style={{
-          padding: '10px 20px',
+          padding: isMobile ? '8px 12px' : '10px 20px',
           backgroundColor: 'rgba(0,0,0,0.6)',
           border: `2px solid ${getActualColor()}`,
           color: getActualColor(),
           fontFamily: 'sans-serif',
-          fontSize: '12px',
+          fontSize: isMobile ? '10px' : '12px',
           fontWeight: 'bold',
           cursor: 'pointer',
           backdropFilter: 'blur(4px)',
           borderRadius: '8px',
           display: 'flex',
           alignItems: 'center',
-          gap: '8px'
+          gap: isMobile ? '6px' : '8px',
+          WebkitTapHighlightColor: 'transparent'
         }}
       >
         <span style={{ 
-          width: '16px', 
-          height: '16px', 
+          width: isMobile ? '12px' : '16px', 
+          height: isMobile ? '12px' : '16px', 
           backgroundColor: getActualColor(), 
           borderRadius: '50%', 
           display: 'inline-block' 
@@ -101,17 +110,25 @@ export const TreeConfigPanel: React.FC<TreeConfigPanelProps> = ({
       {isOpen && (
         <div style={{
           marginTop: '10px',
-          padding: '15px',
-          backgroundColor: 'rgba(0,0,0,0.8)',
+          padding: isMobile ? '12px' : '15px',
+          backgroundColor: 'rgba(0,0,0,0.9)',
           borderRadius: '12px',
           backdropFilter: 'blur(8px)',
           border: '1px solid rgba(255,255,255,0.1)',
-          minWidth: '220px'
+          minWidth: isMobile ? '180px' : '220px',
+          maxWidth: isMobile ? '85vw' : 'none',
+          maxHeight: isMobile ? '60vh' : 'none',
+          overflowY: isMobile ? 'auto' : 'visible'
         }}>
           {/* 颜色选择 */}
           <div style={{ marginBottom: '15px' }}>
             <p style={{ fontSize: '9px', letterSpacing: '2px', color: '#888', margin: '0 0 8px 0' }}>树颜色</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '15px' }}>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(2, 1fr)', 
+              gap: isMobile ? '6px' : '8px', 
+              marginBottom: '15px' 
+            }}>
               {TREE_COLOR_OPTIONS.map((color) => (
                 <button
                   key={color.value}
@@ -120,28 +137,30 @@ export const TreeConfigPanel: React.FC<TreeConfigPanelProps> = ({
                     if (color.value !== 'custom') onToggle(); 
                   }}
                   style={{
-                    padding: '10px 12px',
+                    padding: isMobile ? '8px 8px' : '10px 12px',
                     backgroundColor: config.color === color.value ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
                     border: `2px solid ${color.value === 'custom' ? config.customColor : color.value}`,
                     color: color.value === 'custom' ? config.customColor : color.value,
                     fontFamily: 'sans-serif',
-                    fontSize: '11px',
+                    fontSize: isMobile ? '9px' : '11px',
                     fontWeight: 'bold',
                     cursor: 'pointer',
                     borderRadius: '6px',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
-                    transition: 'all 0.2s ease'
+                    transition: 'all 0.2s ease',
+                    WebkitTapHighlightColor: 'transparent'
                   }}
                 >
                   <span style={{ 
-                    width: '12px', 
-                    height: '12px', 
+                    width: isMobile ? '10px' : '12px', 
+                    height: isMobile ? '10px' : '12px', 
                     backgroundColor: color.value === 'custom' ? config.customColor : color.value, 
                     borderRadius: '50%', 
                     display: 'inline-block', 
-                    boxShadow: `0 0 8px ${color.value === 'custom' ? config.customColor : color.value}` 
+                    boxShadow: `0 0 8px ${color.value === 'custom' ? config.customColor : color.value}`,
+                    flexShrink: 0
                   }}></span>
                   {color.name}
                 </button>
@@ -182,7 +201,8 @@ export const TreeConfigPanel: React.FC<TreeConfigPanelProps> = ({
                     color: config.shape === shape.value ? '#fff' : '#666',
                     fontSize: '10px',
                     cursor: 'pointer',
-                    borderRadius: '4px'
+                    borderRadius: '4px',
+                    WebkitTapHighlightColor: 'transparent'
                   }}
                 >
                   {shape.name}
@@ -206,7 +226,8 @@ export const TreeConfigPanel: React.FC<TreeConfigPanelProps> = ({
                     color: config.particleCount === option.value ? '#fff' : '#666',
                     fontSize: '10px',
                     cursor: 'pointer',
-                    borderRadius: '4px'
+                    borderRadius: '4px',
+                    WebkitTapHighlightColor: 'transparent'
                   }}
                 >
                   {option.name}

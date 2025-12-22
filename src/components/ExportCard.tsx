@@ -15,6 +15,9 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
   const [greeting, setGreeting] = useState('Merry Christmas');
   const [fromName, setFromName] = useState('');
   const recordingRef = useRef(false);
+  
+  // 检测移动端
+  const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
 
   // 获取 canvas 元素
   const getCanvas = useCallback((): HTMLCanvasElement | null => {
@@ -345,17 +348,18 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
       <button
         onClick={() => setIsOpen(true)}
         style={{
-          padding: '10px 14px',
+          padding: isMobile ? '8px 10px' : '10px 14px',
           backgroundColor: 'rgba(255,215,0,0.15)',
           border: '1px solid #FFD700',
           color: '#FFD700',
           fontFamily: 'sans-serif',
-          fontSize: '10px',
+          fontSize: isMobile ? '9px' : '10px',
           fontWeight: '500',
           cursor: 'pointer',
           backdropFilter: 'blur(4px)',
           borderRadius: '6px',
-          letterSpacing: '1px'
+          letterSpacing: '1px',
+          WebkitTapHighlightColor: 'transparent'
         }}
       >
         导出贺卡
@@ -380,15 +384,24 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
           <div
             style={{
               backgroundColor: 'rgba(20,20,40,0.95)',
-              padding: '30px',
+              padding: isMobile ? '20px' : '30px',
               borderRadius: '12px',
               border: '2px solid #FFD700',
-              minWidth: '350px',
-              maxWidth: '400px'
+              width: isMobile ? '90vw' : 'auto',
+              minWidth: isMobile ? 'auto' : '350px',
+              maxWidth: isMobile ? '90vw' : '400px',
+              maxHeight: isMobile ? '85vh' : 'auto',
+              overflowY: isMobile ? 'auto' : 'visible'
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 style={{ color: '#FFD700', margin: '0 0 20px 0', textAlign: 'center', fontFamily: 'serif' }}>
+            <h3 style={{ 
+              color: '#FFD700', 
+              margin: '0 0 20px 0', 
+              textAlign: 'center', 
+              fontFamily: 'serif',
+              fontSize: isMobile ? '16px' : '18px'
+            }}>
               ✨ 导出圣诞贺卡 ✨
             </h3>
 
@@ -402,12 +415,12 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
                 placeholder="Merry Christmas"
                 style={{
                   width: '100%',
-                  padding: '10px',
+                  padding: isMobile ? '12px' : '10px',
                   backgroundColor: 'rgba(255,255,255,0.1)',
                   border: '1px solid rgba(255,215,0,0.3)',
                   borderRadius: '4px',
                   color: '#fff',
-                  fontSize: '14px',
+                  fontSize: isMobile ? '16px' : '14px',
                   boxSizing: 'border-box'
                 }}
               />
@@ -423,12 +436,12 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
                 placeholder="From: Your Name"
                 style={{
                   width: '100%',
-                  padding: '10px',
+                  padding: isMobile ? '12px' : '10px',
                   backgroundColor: 'rgba(255,255,255,0.1)',
                   border: '1px solid rgba(255,215,0,0.3)',
                   borderRadius: '4px',
                   color: '#fff',
-                  fontSize: '14px',
+                  fontSize: isMobile ? '16px' : '14px',
                   boxSizing: 'border-box'
                 }}
               />
@@ -442,13 +455,14 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
                   onClick={() => setExportType('image')}
                   style={{
                     flex: 1,
-                    padding: '10px',
+                    padding: isMobile ? '12px' : '10px',
                     backgroundColor: exportType === 'image' ? 'rgba(255,215,0,0.2)' : 'rgba(255,255,255,0.05)',
                     border: `1px solid ${exportType === 'image' ? '#FFD700' : '#444'}`,
                     borderRadius: '4px',
                     color: exportType === 'image' ? '#FFD700' : '#888',
                     fontSize: '12px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    WebkitTapHighlightColor: 'transparent'
                   }}
                 >
                   📷 图片
@@ -457,13 +471,14 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
                   onClick={() => setExportType('gif')}
                   style={{
                     flex: 1,
-                    padding: '10px',
+                    padding: isMobile ? '12px' : '10px',
                     backgroundColor: exportType === 'gif' ? 'rgba(255,215,0,0.2)' : 'rgba(255,255,255,0.05)',
                     border: `1px solid ${exportType === 'gif' ? '#FFD700' : '#444'}`,
                     borderRadius: '4px',
                     color: exportType === 'gif' ? '#FFD700' : '#888',
                     fontSize: '12px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    WebkitTapHighlightColor: 'transparent'
                   }}
                 >
                   🎬 动图
@@ -500,7 +515,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
               disabled={isExporting}
               style={{
                 width: '100%',
-                padding: '12px',
+                padding: isMobile ? '14px' : '12px',
                 backgroundColor: isExporting ? 'rgba(255,215,0,0.1)' : 'rgba(255,215,0,0.2)',
                 border: '2px solid #FFD700',
                 borderRadius: '6px',
@@ -508,7 +523,8 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
                 fontSize: '14px',
                 fontWeight: 'bold',
                 cursor: isExporting ? 'wait' : 'pointer',
-                letterSpacing: '2px'
+                letterSpacing: '2px',
+                WebkitTapHighlightColor: 'transparent'
               }}
             >
               {isExporting ? '正在生成...' : '生成贺卡'}
