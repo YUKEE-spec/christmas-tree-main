@@ -284,8 +284,9 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
     recordingRef.current = true;
     
     const frames: HTMLCanvasElement[] = [];
-    const frameCount = 30; // 30帧，约2秒
-    const frameDelay = 66; // ~15fps
+    // 移动端减少帧数
+    const frameCount = isMobile ? 15 : 30;
+    const frameDelay = isMobile ? 100 : 66; // 移动端 10fps，桌面端 15fps
     
     // 录制帧
     for (let i = 0; i < frameCount; i++) {
@@ -305,16 +306,17 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
     
     if (frames.length === 0) {
       setIsExporting(false);
+      alert('录制失败，请重试');
       return;
     }
     
     // 创建 GIF
     const gif = new GIF({
-      workers: 2,
-      quality: 10,
+      workers: isMobile ? 1 : 2, // 移动端使用单线程减少内存
+      quality: isMobile ? 15 : 10, // 移动端降低质量
       width: frames[0].width,
       height: frames[0].height,
-      workerScript: '/node_modules/gif.js/dist/gif.worker.js'
+      workerScript: '/gif.worker.js'
     });
     
     // 添加帧
@@ -328,19 +330,75 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
     
     gif.on('finished', (blob: Blob) => {
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.download = `christmas-card-${Date.now()}.gif`;
-      link.href = url;
-      link.click();
-      URL.revokeObjectURL(url);
-      setIsExporting(false);
-      setShowPreview(false);
-      setPreviewUrl(null);
-      setIsOpen(false);
+      
+      if (isMobile) {
+        // 移动端：打开新窗口显示 GIF
+        const newWindow = window.open('', '_blank');
+        if (newWindow) {
+          newWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>圣诞贺卡动图</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                  * { margin: 0; padding: 0; box-sizing: border-box; }
+                  body { 
+                    background: #000; 
+                    min-height: 100vh; 
+                    display: flex; 
+                    flex-direction: column; 
+                    align-items: center; 
+                    padding: 20px;
+                  }
+                  img { 
+                    max-width: 100%; 
+                    height: auto; 
+                    border-radius: 8px;
+                  }
+                  .tip { 
+                    color: #FFD700; 
+                    font-family: sans-serif; 
+                    margin-top: 20px; 
+                    text-align: center;
+                    font-size: 14px;
+                  }
+                </style>
+              </head>
+              <body>
+                <img src="${url}" alt="圣诞贺卡动图" />
+                <p class="tip">👆 长按保存动图</p>
+              </body>
+            </html>
+          `);
+          newWindow.document.close();
+        } else {
+          // 尝试直接下载
+          const link = document.createElement('a');
+          link.download = `christmas-card-${Date.now()}.gif`;
+          link.href = url;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+        setIsExporting(false);
+        setExportDone(true);
+      } else {
+        // 桌面端：直接下载
+        const link = document.createElement('a');
+        link.download = `christmas-card-${Date.now()}.gif`;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+        setIsExporting(false);
+        setShowPreview(false);
+        setPreviewUrl(null);
+        setIsOpen(false);
+      }
     });
     
     gif.render();
-  }, [captureFrame, createCardCanvas]);
+  }, [captureFrame, createCardCanvas, isMobile]);
 
   // 导出完成状态（移动端用于显示"完成"按钮）
   const [exportDone, setExportDone] = useState(false);
@@ -368,33 +426,79 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
       const dataUrl = cardCanvas.toDataURL('image/png', 1.0);
       
       if (isMobile) {
-        // 移动端：打开新窗口显示图片，用户可以长按保存
+        // 移动端：创建一个可以长按保存的图片页面
+        // 使用 Blob URL 而不是 data URL，更可靠
+        const byteString = atob(dataUrl.split(',')[1]);
+        const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ab], { type: mimeString });
+        const blobUrl = URL.createObjectURL(blob);
+        
+        // 尝试打开新窗口
         const newWindow = window.open('', '_blank');
         if (newWindow) {
           newWindow.document.write(`
+            <!DOCTYPE html>
             <html>
               <head>
                 <title>圣诞贺卡</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+                <meta name="apple-mobile-web-app-capable" content="yes">
                 <style>
-                  body { margin: 0; padding: 20px; background: #000; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-                  img { max-width: 100%; height: auto; border-radius: 8px; }
-                  p { color: #FFD700; font-family: sans-serif; margin-top: 20px; text-align: center; }
+                  * { margin: 0; padding: 0; box-sizing: border-box; }
+                  body { 
+                    background: #000; 
+                    min-height: 100vh; 
+                    display: flex; 
+                    flex-direction: column; 
+                    align-items: center; 
+                    padding: 20px;
+                    -webkit-touch-callout: default;
+                  }
+                  img { 
+                    max-width: 100%; 
+                    height: auto; 
+                    border-radius: 8px;
+                    -webkit-touch-callout: default;
+                    -webkit-user-select: auto;
+                    user-select: auto;
+                  }
+                  .tip { 
+                    color: #FFD700; 
+                    font-family: sans-serif; 
+                    margin-top: 20px; 
+                    text-align: center;
+                    font-size: 14px;
+                    line-height: 1.6;
+                  }
+                  .sub-tip {
+                    color: #888;
+                    font-size: 12px;
+                    margin-top: 10px;
+                  }
                 </style>
               </head>
               <body>
-                <img src="${dataUrl}" alt="圣诞贺卡" />
-                <p>长按图片保存到相册 📱</p>
+                <img src="${blobUrl}" alt="圣诞贺卡" />
+                <p class="tip">👆 长按图片保存到相册</p>
+                <p class="sub-tip">如果无法保存，请截图或使用浏览器的"保存图片"功能</p>
               </body>
             </html>
           `);
           newWindow.document.close();
         } else {
-          // 如果无法打开新窗口，尝试直接下载
+          // 如果无法打开新窗口（如微信），尝试直接下载
           const link = document.createElement('a');
           link.download = `christmas-card-${Date.now()}.png`;
-          link.href = dataUrl;
+          link.href = blobUrl;
+          document.body.appendChild(link);
           link.click();
+          document.body.removeChild(link);
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
         }
         // 移动端：保持面板打开，显示"完成"按钮
         setIsExporting(false);
