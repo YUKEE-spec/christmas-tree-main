@@ -448,7 +448,10 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
   };
 
   // 打开导出面板
-  const handleOpenPanel = useCallback(() => {
+  const handleOpenPanel = useCallback((e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     setIsOpen(true);
   }, []);
 
@@ -456,10 +459,6 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
     <>
       <button
         onClick={handleOpenPanel}
-        onTouchEnd={(e) => {
-          e.preventDefault();
-          handleOpenPanel();
-        }}
         style={{
           padding: isMobile ? '8px 10px' : '10px 14px',
           backgroundColor: 'rgba(255,215,0,0.15)',
@@ -473,7 +472,9 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
           borderRadius: '6px',
           letterSpacing: '1px',
           WebkitTapHighlightColor: 'transparent',
-          touchAction: 'manipulation'
+          touchAction: 'manipulation',
+          userSelect: 'none',
+          WebkitUserSelect: 'none'
         }}
       >
         导出贺卡

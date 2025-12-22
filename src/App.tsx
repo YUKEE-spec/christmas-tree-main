@@ -346,21 +346,23 @@ export default function GrandTreeApp() {
       </div>
 
       {/* UI - 控制按钮 */}
-      <div style={{ 
-        position: 'fixed', 
-        bottom: 0,
-        right: 0,
-        left: 0,
-        zIndex: 100, 
-        display: 'flex', 
-        gap: isMobile ? '4px' : '8px',
-        flexWrap: isMobile ? 'wrap' : 'nowrap',
-        justifyContent: isMobile ? 'center' : 'flex-end',
-        padding: isMobile ? '10px 10px calc(10px + env(safe-area-inset-bottom, 0px))' : '30px 40px',
-        backgroundColor: isMobile ? 'rgba(0,0,0,0.7)' : 'transparent',
-        backdropFilter: isMobile ? 'blur(4px)' : 'none',
-        pointerEvents: 'auto'
-      }}>
+      <div 
+        style={{ 
+          position: 'fixed', 
+          bottom: 0,
+          right: 0,
+          left: 0,
+          zIndex: 100, 
+          display: 'flex', 
+          gap: isMobile ? '4px' : '8px',
+          flexWrap: isMobile ? 'wrap' : 'nowrap',
+          justifyContent: isMobile ? 'center' : 'flex-end',
+          padding: isMobile ? '10px 10px calc(10px + env(safe-area-inset-bottom, 0px))' : '30px 40px',
+          backgroundColor: isMobile ? 'rgba(0,0,0,0.8)' : 'transparent',
+          backdropFilter: isMobile ? 'blur(4px)' : 'none'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* 1. 音乐开关 */}
         <BackgroundMusic isMobile={isMobile} inline={true} />
         
