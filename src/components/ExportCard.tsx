@@ -329,6 +329,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
     });
     
     gif.on('finished', (blob: Blob) => {
+      clearTimeout(gifTimeout);
       const url = URL.createObjectURL(blob);
       
       if (isMobile) {
@@ -349,8 +350,31 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
         setIsOpen(false);
       }
     });
+
+    gif.on('abort', () => {
+      clearTimeout(gifTimeout);
+      console.warn('GIF生成被中止');
+      setIsExporting(false);
+    });
+
+    // 移动端添加超时处理（30秒）
+    const gifTimeout = setTimeout(() => {
+      if (recordingRef.current || isExporting) {
+        console.warn('GIF生成超时');
+        gif.abort();
+        setIsExporting(false);
+        alert('GIF生成超时，移动端建议使用图片格式');
+      }
+    }, 30000);
     
-    gif.render();
+    try {
+      gif.render();
+    } catch (err) {
+      clearTimeout(gifTimeout);
+      console.error('GIF渲染失败:', err);
+      setIsExporting(false);
+      alert('GIF生成失败，请尝试导出图片格式');
+    }
   }, [captureFrame, createCardCanvas, isMobile]);
 
   // 导出完成状态（移动端用于显示"完成"按钮）

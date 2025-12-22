@@ -212,7 +212,7 @@ export default function GrandTreeApp() {
       {/* UI - 粒子数量显示 */}
       <div style={{ 
         position: 'absolute', 
-        bottom: isMobile ? '80px' : '30px', 
+        bottom: isMobile ? 'calc(90px + env(safe-area-inset-bottom, 0px))' : '30px', 
         left: isMobile ? '15px' : '40px', 
         color: '#888', 
         zIndex: 10, 
@@ -347,15 +347,18 @@ export default function GrandTreeApp() {
 
       {/* UI - 控制按钮 */}
       <div style={{ 
-        position: 'absolute', 
-        bottom: isMobile ? '15px' : '30px', 
-        right: isMobile ? '10px' : '40px', 
-        left: isMobile ? '10px' : 'auto',
-        zIndex: 10, 
+        position: 'fixed', 
+        bottom: 0,
+        right: 0,
+        left: 0,
+        zIndex: 100, 
         display: 'flex', 
         gap: isMobile ? '4px' : '8px',
         flexWrap: isMobile ? 'wrap' : 'nowrap',
-        justifyContent: isMobile ? 'center' : 'flex-end'
+        justifyContent: isMobile ? 'center' : 'flex-end',
+        padding: isMobile ? '10px 10px calc(10px + env(safe-area-inset-bottom, 0px))' : '30px 40px',
+        backgroundColor: isMobile ? 'rgba(0,0,0,0.5)' : 'transparent',
+        backdropFilter: isMobile ? 'blur(4px)' : 'none'
       }}>
         <ExportCard 
           canvasRef={{ current: null }}
@@ -478,7 +481,7 @@ export default function GrandTreeApp() {
       {showTextInput && (
         <div style={{
           position: 'fixed',
-          bottom: isMobile ? '70px' : '80px',
+          bottom: isMobile ? 'calc(80px + env(safe-area-inset-bottom, 0px))' : '80px',
           right: isMobile ? '10px' : '40px',
           left: isMobile ? '10px' : 'auto',
           backgroundColor: 'rgba(0,0,0,0.9)',
@@ -581,7 +584,7 @@ export default function GrandTreeApp() {
         <div style={{ 
           position: 'absolute', 
           top: isMobile ? 'auto' : '30px',
-          bottom: isMobile ? '70px' : 'auto',
+          bottom: isMobile ? 'calc(80px + env(safe-area-inset-bottom, 0px))' : 'auto',
           left: isMobile ? '10px' : 'auto',
           right: isMobile ? '10px' : '40px', 
           color: '#00CED1', 

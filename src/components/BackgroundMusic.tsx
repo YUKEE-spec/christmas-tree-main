@@ -14,14 +14,48 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ isMobile }) =>
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // 创建音频元素
-    audioRef.current = new Audio(MUSIC_URL);
-    audioRef.current.loop = true;
-    audioRef.current.volume = volume;
+    // 创建音频元素，优化移动端加载
+    const audio = new Audio();
+    audio.preload = 'auto'; // 预加载
+    audio.loop = true;
+    audio.volume = volume;
+    
+    // 监听加载完成
+    audio.addEventListener('canplaythrough', () => {
+      console.log('音乐加载完成');
+    });
+    
+    // 监听播放结束（循环时重置）
+    audio.addEventListener('ended', () => {
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    });
+    
+    // 监听播放错误
+    audio.addEventListener('error', (e) => {
+      console.warn('音频加载失败:', e);
+    });
+    
+    // 监听播放暂停（处理浏览器自动暂停）
+    audio.addEventListener('pause', () => {
+      if (isPlaying && !audio.ended) {
+        // 浏览器可能自动暂停，尝试恢复
+        setTimeout(() => {
+          if (isPlaying) {
+            audio.play().catch(() => {});
+          }
+        }, 100);
+      }
+    });
+    
+    // 设置音频源
+    audio.src = MUSIC_URL;
+    audioRef.current = audio;
 
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.src = '';
         audioRef.current = null;
       }
     };
@@ -32,6 +66,22 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ isMobile }) =>
       audioRef.current.volume = volume;
     }
   }, [volume]);
+  
+  // 同步播放状态
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    
+    const handlePlay = () => setIsPlaying(true);
+    
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('playing', handlePlay);
+    
+    return () => {
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('playing', handlePlay);
+    };
+  }, []);
 
   const togglePlay = async () => {
     if (!audioRef.current) return;
@@ -41,12 +91,28 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ isMobile }) =>
         audioRef.current.pause();
         setIsPlaying(false);
       } else {
-        await audioRef.current.play();
-        setIsPlaying(true);
+        // 重置播放位置如果接近结尾
+        if (audioRef.current.currentTime > audioRef.current.duration - 0.5) {
+          audioRef.current.currentTime = 0;
+        }
+        
+        // 使用 play() 的 Promise
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsPlaying(true);
+            })
+            .catch((error) => {
+              console.log('音乐播放失败:', error);
+              // 某些浏览器需要用户交互才能播放
+              setIsPlaying(false);
+            });
+        }
       }
     } catch (error) {
       console.log('音乐播放失败:', error);
-      // 某些浏览器需要用户交互才能播放
+      setIsPlaying(false);
     }
   };
 
@@ -54,7 +120,7 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ isMobile }) =>
     <div
       style={{
         position: 'fixed',
-        bottom: isMobile ? '60px' : '30px',
+        bottom: isMobile ? 'calc(70px + env(safe-area-inset-bottom, 0px))' : '30px',
         left: isMobile ? '10px' : '40px',
         zIndex: 20,
         display: 'flex',
