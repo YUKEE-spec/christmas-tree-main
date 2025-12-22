@@ -521,7 +521,12 @@ const PhotoOrnamentsCustom = ({ state, customPhotos, onPhotoClick }: { state: 'C
 };
 
 const PhotoOrnaments = ({ state, customPhotos, onPhotoClick }: { state: 'CHAOS' | 'FORMED'; customPhotos?: string[]; onPhotoClick?: (index: number) => void }) => {
-  if (customPhotos && customPhotos.length > 0) {
+  // 明确判断：有自定义照片就只用自定义的，不混用
+  const hasCustomPhotos = customPhotos && customPhotos.length > 0;
+  
+  console.log('PhotoOrnaments render - hasCustomPhotos:', hasCustomPhotos, 'count:', customPhotos?.length || 0);
+  
+  if (hasCustomPhotos) {
     return <PhotoOrnamentsCustom state={state} customPhotos={customPhotos} onPhotoClick={onPhotoClick} />;
   }
   return <PhotoOrnamentsDefault state={state} onPhotoClick={onPhotoClick} />;

@@ -170,6 +170,7 @@ export default function GrandTreeApp() {
           frameloop="always"
         >
           <Experience 
+            key={`exp-${photoConfig.customPhotos.length}`}
             sceneState={sceneState} 
             rotationSpeed={rotationSpeed} 
             treeColor={actualTreeColor} 
