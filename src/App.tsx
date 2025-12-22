@@ -395,7 +395,7 @@ export default function GrandTreeApp() {
                 ...prev,
                 showShine: false
               }));
-              setAiStatus("正在加载魔法...");
+              setAiStatus("请允许使用摄像头，正在加载...");
             } else {
               setAiStatus("魔法控制已关闭");
             }
@@ -418,7 +418,28 @@ export default function GrandTreeApp() {
           {isMobile ? '📷魔法' : '进阶魔法'} {gestureEnabled ? '🪄' : ''}
         </button>
         
-        {/* 4. 导出贺卡 */}
+        {/* 4. 写祝福 */}
+        <button 
+          onClick={() => setShowTextInput(!showTextInput)}
+          style={{ 
+            padding: isMobile ? '8px 10px' : '10px 14px', 
+            backgroundColor: particleText ? 'rgba(255,105,180,0.15)' : 'rgba(0,0,0,0.6)', 
+            border: `1px solid ${particleText ? '#FF69B4' : '#444'}`, 
+            color: particleText ? '#FF69B4' : '#666', 
+            fontFamily: 'sans-serif', 
+            fontSize: isMobile ? '9px' : '10px', 
+            fontWeight: '500', 
+            cursor: 'pointer', 
+            backdropFilter: 'blur(4px)',
+            borderRadius: '6px',
+            letterSpacing: '1px',
+            WebkitTapHighlightColor: 'transparent'
+          }}
+        >
+          写祝福 {particleText ? '💌' : ''}
+        </button>
+        
+        {/* 5. 导出贺卡 */}
         <ExportCard 
           canvasRef={{ current: null }}
           treeColor={actualTreeColor}
@@ -428,24 +449,6 @@ export default function GrandTreeApp() {
         {/* 桌面端额外按钮 */}
         {!isMobile && (
           <>
-            <button 
-              onClick={() => setShowTextInput(!showTextInput)}
-              style={{ 
-                padding: '10px 14px', 
-                backgroundColor: particleText ? 'rgba(255,105,180,0.15)' : 'rgba(0,0,0,0.6)', 
-                border: `1px solid ${particleText ? '#FF69B4' : '#444'}`, 
-                color: particleText ? '#FF69B4' : '#666', 
-                fontFamily: 'sans-serif', 
-                fontSize: '10px', 
-                fontWeight: '500', 
-                cursor: 'pointer', 
-                backdropFilter: 'blur(4px)',
-                borderRadius: '6px',
-                letterSpacing: '1px'
-              }}
-            >
-              写祝福 {particleText ? '💌' : ''}
-            </button>
             <button 
               onClick={() => setDebugMode(!debugMode)} 
               style={{ 
