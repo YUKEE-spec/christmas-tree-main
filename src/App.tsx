@@ -248,7 +248,16 @@ export default function GrandTreeApp() {
       }}>
         {!isMobile && <p style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: '#666', margin: 0, marginBottom: '5px' }}>装饰控制</p>}
         
-        {/* 彩灯配置 */}
+        {/* 1. 种树（设置配置） */}
+        <SettingsConfigPanel 
+          config={settingsConfig}
+          onChange={setSettingsConfig}
+          isOpen={showSettingsConfig}
+          onToggle={() => setShowSettingsConfig(!showSettingsConfig)}
+          buttonLabel="种树"
+        />
+
+        {/* 2. 点灯（彩灯配置） */}
         <LightConfigPanel 
           config={lightConfig}
           onChange={(config) => {
@@ -259,7 +268,7 @@ export default function GrandTreeApp() {
           onToggle={() => setShowLightConfig(!showLightConfig)}
         />
 
-        {/* 礼物配置 */}
+        {/* 3. 挂礼物 */}
         <button
           onClick={() => setShowGiftConfig(!showGiftConfig)}
           style={{
@@ -277,10 +286,10 @@ export default function GrandTreeApp() {
             letterSpacing: '1px'
           }}
         >
-          挂礼物 {giftConfig.enabled ? '🎁' : ''}
+          挂礼物
         </button>
 
-        {/* 照片配置 */}
+        {/* 4. 挂照片 */}
         <PhotoConfigPanel 
           config={photoConfig}
           onChange={(config) => {
@@ -289,17 +298,10 @@ export default function GrandTreeApp() {
           }}
           isOpen={showPhotoConfig}
           onToggle={() => setShowPhotoConfig(!showPhotoConfig)}
+          buttonLabel="挂照片"
         />
 
-        {/* 设置配置 */}
-        <SettingsConfigPanel 
-          config={settingsConfig}
-          onChange={setSettingsConfig}
-          isOpen={showSettingsConfig}
-          onToggle={() => setShowSettingsConfig(!showSettingsConfig)}
-        />
-
-        {/* 雪花控制 */}
+        {/* 5. 下雪 */}
         <button
           onClick={() => toggleDecoration('showSnow')}
           style={{
@@ -317,10 +319,10 @@ export default function GrandTreeApp() {
             letterSpacing: '1px'
           }}
         >
-          下雪 {decorations.showSnow ? '❄️' : ''}
+          下雪
         </button>
 
-        {/* 闪耀控制（合并星空、闪烁、星云） */}
+        {/* 6. 闪耀 */}
         <button
           onClick={() => toggleDecoration('showShine')}
           style={{
@@ -338,7 +340,7 @@ export default function GrandTreeApp() {
             letterSpacing: '1px'
           }}
         >
-          闪耀 {decorations.showShine ? '✨' : ''}
+          闪耀
         </button>
       </div>
 
@@ -455,7 +457,7 @@ export default function GrandTreeApp() {
             WebkitTapHighlightColor: 'transparent'
           }}
         >
-          {sceneState === 'CHAOS' ? '🎄圣诞魔法' : '💫消失'}
+          {sceneState === 'CHAOS' ? '🎄圣诞魔法' : '🎄消失'}
         </button>
       </div>
 

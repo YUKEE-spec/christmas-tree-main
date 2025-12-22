@@ -38,6 +38,7 @@ interface SettingsConfigPanelProps {
   onChange: (config: SettingsConfig) => void;
   isOpen: boolean;
   onToggle: () => void;
+  buttonLabel?: string;
 }
 
 // 设置配置面板组件
@@ -45,7 +46,8 @@ export const SettingsConfigPanel: React.FC<SettingsConfigPanelProps> = ({
   config, 
   onChange, 
   isOpen, 
-  onToggle 
+  onToggle,
+  buttonLabel = '设置'
 }) => {
   const updateConfig = (updates: Partial<SettingsConfig>) => {
     onChange({ ...config, ...updates });
@@ -70,7 +72,7 @@ export const SettingsConfigPanel: React.FC<SettingsConfigPanelProps> = ({
           letterSpacing: '1px'
         }}
       >
-        设置
+        {buttonLabel}
       </button>
 
       {isOpen && (

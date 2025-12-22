@@ -20,6 +20,7 @@ interface PhotoConfigPanelProps {
   onChange: (config: PhotoConfig) => void;
   isOpen: boolean;
   onToggle: () => void;
+  buttonLabel?: string;
 }
 
 // 照片配置面板组件
@@ -27,7 +28,8 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
   config, 
   onChange, 
   isOpen, 
-  onToggle 
+  onToggle,
+  buttonLabel = '照片'
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -102,7 +104,7 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
           letterSpacing: '1px'
         }}
       >
-        照片 {config.customPhotos.length > 0 ? `(${config.customPhotos.length})` : ''}
+        {buttonLabel} {config.customPhotos.length > 0 ? `(${config.customPhotos.length})` : ''}
       </button>
 
       {isOpen && (

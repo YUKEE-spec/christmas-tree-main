@@ -84,7 +84,7 @@ export const LightConfigPanel: React.FC<LightConfigPanelProps> = ({
           letterSpacing: '1px'
         }}
       >
-        点灯 {config.enabled ? '💡' : ''}
+        点灯
       </button>
 
       {config.enabled && (
