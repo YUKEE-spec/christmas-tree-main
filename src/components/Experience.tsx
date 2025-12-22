@@ -1353,13 +1353,15 @@ export const Experience: React.FC<ExperienceProps> = ({
       />
 
       <color attach="background" args={['#000300']} />
-      {decorations.showStars && <Stars radius={100} depth={50} count={300} factor={3} saturation={0} fade speed={1} />}
-      <Environment preset="night" background={false} />
+      {decorations.showStars && !isMobile && <Stars radius={100} depth={50} count={300} factor={3} saturation={0} fade speed={1} />}
+      {decorations.showStars && isMobile && <Stars radius={80} depth={30} count={100} factor={2} saturation={0} fade speed={0.5} />}
+      {/* 移动端不加载 Environment HDR 贴图，避免内存问题 */}
+      {!isMobile && <Environment preset="night" background={false} />}
 
-      <ambientLight intensity={0.4} color="#003311" />
-      <pointLight position={[30, 30, 30]} intensity={100} color={CONFIG.colors.warmLight} />
-      <pointLight position={[-30, 10, -30]} intensity={50} color={CONFIG.colors.gold} />
-      <pointLight position={[0, -20, 10]} intensity={30} color="#ffffff" />
+      <ambientLight intensity={isMobile ? 0.6 : 0.4} color="#003311" />
+      <pointLight position={[30, 30, 30]} intensity={isMobile ? 50 : 100} color={CONFIG.colors.warmLight} />
+      <pointLight position={[-30, 10, -30]} intensity={isMobile ? 25 : 50} color={CONFIG.colors.gold} />
+      {!isMobile && <pointLight position={[0, -20, 10]} intensity={30} color="#ffffff" />}
 
       {decorations.showGoldenNebula && <GoldenNebula state={sceneState} />}
       {decorations.showSnow && <Snowfall />}
@@ -1385,7 +1387,8 @@ export const Experience: React.FC<ExperienceProps> = ({
            {decorations.showLights && <FairyLights state={sceneState} lightColors={lightColors} />}
            {decorations.showLights && <TopStar state={sceneState} color={lightColors[0]} />}
         </Suspense>
-        {decorations.showSparkles && <Sparkles count={40} scale={50} size={4} speed={0.3} opacity={0.5} color={CONFIG.colors.gold} />}
+        {decorations.showSparkles && !isMobile && <Sparkles count={40} scale={50} size={4} speed={0.3} opacity={0.5} color={CONFIG.colors.gold} />}
+        {decorations.showSparkles && isMobile && <Sparkles count={15} scale={40} size={3} speed={0.2} opacity={0.4} color={CONFIG.colors.gold} />}
       </group>
     </>
   );
