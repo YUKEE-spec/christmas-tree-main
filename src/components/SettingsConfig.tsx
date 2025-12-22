@@ -20,10 +20,12 @@ export interface SettingsConfig {
   particleCount: number;
 }
 
-// 默认设置配置
+// 默认设置配置 - 根据设备自动选择
+const isMobileDevice = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
+
 export const DEFAULT_SETTINGS_CONFIG: SettingsConfig = {
   treeShape: TREE_SHAPE_OPTIONS[0].value, // 经典锥形
-  particleCount: PARTICLE_OPTIONS[3].value, // 极致 30000
+  particleCount: isMobileDevice ? PARTICLE_OPTIONS[1].value : PARTICLE_OPTIONS[3].value, // 移动端用标准，桌面用极致
 };
 
 // 设置配置面板Props

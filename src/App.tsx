@@ -1,7 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useEffect } from 'react';
 
 // Import all modular components
 import { TreeConfigPanel, DEFAULT_TREE_CONFIG, getActualTreeColor, TREE_COLOR_OPTIONS } from './components/TreeConfig';
@@ -31,6 +30,18 @@ interface DecorationSettings {
 
 // 主应用组件
 export default function GrandTreeApp() {
+  // 检测是否为移动设备
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // 核心状态
   const [sceneState, setSceneState] = useState<'CHAOS' | 'FORMED'>('FORMED');
   const [rotationSpeed, setRotationSpeed] = useState(0);
@@ -141,10 +152,20 @@ export default function GrandTreeApp() {
   const actualLightColors = getActualLightColors(lightConfig);
 
   return (
-    <div style={{ width: '100vw', height: '100vh', backgroundColor: '#000', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100vw', height: '100vh', backgroundColor: '#000', position: 'relative', overflow: 'hidden', touchAction: 'none' }}>
       {/* 3D 场景 */}
       <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
-        <Canvas dpr={[1, 2]} gl={{ toneMapping: THREE.ReinhardToneMapping, alpha: true, preserveDrawingBuffer: true }} shadows>
+        <Canvas 
+          dpr={isMobile ? [1, 1.5] : [1, 2]} 
+          gl={{ 
+            toneMapping: THREE.ReinhardToneMapping, 
+            alpha: true, 
+            preserveDrawingBuffer: true,
+            antialias: !isMobile,
+            powerPreference: isMobile ? 'low-power' : 'high-performance'
+          }} 
+          shadows={!isMobile}
+        >
           <Experience 
             sceneState={sceneState} 
             rotationSpeed={rotationSpeed} 
@@ -178,10 +199,18 @@ export default function GrandTreeApp() {
       )}
 
       {/* UI - 粒子数量显示 */}
-      <div style={{ position: 'absolute', bottom: '30px', left: '40px', color: '#888', zIndex: 10, fontFamily: 'sans-serif', userSelect: 'none' }}>
+      <div style={{ 
+        position: 'absolute', 
+        bottom: isMobile ? '80px' : '30px', 
+        left: isMobile ? '15px' : '40px', 
+        color: '#888', 
+        zIndex: 10, 
+        fontFamily: 'sans-serif', 
+        userSelect: 'none' 
+      }}>
         <div style={{ marginBottom: '15px' }}>
-          <p style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '4px', opacity: 0.6 }}>粒子数量</p>
-          <p style={{ fontSize: '24px', color: actualTreeColor, fontWeight: 'bold', margin: 0 }}>
+          <p style={{ fontSize: isMobile ? '8px' : '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '4px', opacity: 0.6 }}>粒子数量</p>
+          <p style={{ fontSize: isMobile ? '18px' : '24px', color: actualTreeColor, fontWeight: 'bold', margin: 0 }}>
             {settingsConfig.particleCount.toLocaleString()}
           </p>
         </div>
@@ -196,8 +225,18 @@ export default function GrandTreeApp() {
       />
 
       {/* UI - 装饰控制面板 */}
-      <div style={{ position: 'absolute', top: '70px', right: '40px', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <p style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: '#666', margin: 0, marginBottom: '5px' }}>装饰控制</p>
+      <div style={{ 
+        position: 'absolute', 
+        top: isMobile ? '10px' : '70px', 
+        right: isMobile ? '10px' : '40px', 
+        zIndex: 10, 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: isMobile ? '6px' : '10px',
+        maxHeight: isMobile ? '50vh' : 'auto',
+        overflowY: isMobile ? 'auto' : 'visible'
+      }}>
+        {!isMobile && <p style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: '#666', margin: 0, marginBottom: '5px' }}>装饰控制</p>}
         
         {/* 彩灯配置 */}
         <LightConfigPanel 
@@ -336,7 +375,17 @@ export default function GrandTreeApp() {
       </div>
 
       {/* UI - 控制按钮 */}
-      <div style={{ position: 'absolute', bottom: '30px', right: '40px', zIndex: 10, display: 'flex', gap: '8px' }}>
+      <div style={{ 
+        position: 'absolute', 
+        bottom: isMobile ? '15px' : '30px', 
+        right: isMobile ? '10px' : '40px', 
+        left: isMobile ? '10px' : 'auto',
+        zIndex: 10, 
+        display: 'flex', 
+        gap: isMobile ? '4px' : '8px',
+        flexWrap: isMobile ? 'wrap' : 'nowrap',
+        justifyContent: isMobile ? 'center' : 'flex-end'
+      }}>
         <ExportCard 
           canvasRef={{ current: null }}
           treeColor={actualTreeColor}
@@ -345,88 +394,93 @@ export default function GrandTreeApp() {
         <button 
           onClick={() => setShowTextInput(!showTextInput)}
           style={{ 
-            padding: '10px 14px', 
+            padding: isMobile ? '8px 10px' : '10px 14px', 
             backgroundColor: particleText ? 'rgba(255,105,180,0.15)' : 'rgba(0,0,0,0.6)', 
             border: `1px solid ${particleText ? '#FF69B4' : '#444'}`, 
             color: particleText ? '#FF69B4' : '#666', 
             fontFamily: 'sans-serif', 
-            fontSize: '10px', 
+            fontSize: isMobile ? '9px' : '10px', 
             fontWeight: '500', 
             cursor: 'pointer', 
             backdropFilter: 'blur(4px)',
             borderRadius: '6px',
-            letterSpacing: '1px'
+            letterSpacing: '1px',
+            WebkitTapHighlightColor: 'transparent'
           }}
         >
            文字 {particleText ? '·' : ''}
         </button>
-        <button 
-          onClick={() => {
-            const newEnabled = !gestureEnabled;
-            setGestureEnabled(newEnabled);
-            if (newEnabled) {
-              // 开启手势时，关闭所有背景效果以释放内存
-              setDecorations(prev => ({
-                ...prev,
-                showSnow: false,
-                showStars: false,
-                showSparkles: false,
-                showGoldenNebula: false
-              }));
-              setAiStatus("正在释放内存并加载 AI 模型...");
-            } else {
-              setAiStatus("手势控制已关闭");
-            }
-          }} 
-          style={{ 
-            padding: '10px 14px', 
-            backgroundColor: gestureEnabled ? 'rgba(0,206,209,0.15)' : 'rgba(0,0,0,0.6)', 
-            border: `1px solid ${gestureEnabled ? '#00CED1' : '#444'}`, 
-            color: gestureEnabled ? '#00CED1' : '#666', 
-            fontFamily: 'sans-serif', 
-            fontSize: '10px', 
-            fontWeight: '500', 
-            cursor: 'pointer', 
-            backdropFilter: 'blur(4px)',
-            borderRadius: '6px',
-            letterSpacing: '1px'
-          }}
-        >
-           手势 {gestureEnabled ? '开启' : ''}
-        </button>
-        <button 
-          onClick={() => setDebugMode(!debugMode)} 
-          style={{ 
-            padding: '10px 14px', 
-            backgroundColor: debugMode ? 'rgba(255,215,0,0.15)' : 'rgba(0,0,0,0.6)', 
-            border: `1px solid ${debugMode ? '#FFD700' : '#444'}`, 
-            color: debugMode ? '#FFD700' : '#666', 
-            fontFamily: 'sans-serif', 
-            fontSize: '10px', 
-            fontWeight: '500', 
-            cursor: 'pointer', 
-            backdropFilter: 'blur(4px)',
-            borderRadius: '6px',
-            letterSpacing: '1px'
-          }}
-        >
-           调试 {debugMode ? '开启' : ''}
-        </button>
+        {!isMobile && (
+          <button 
+            onClick={() => {
+              const newEnabled = !gestureEnabled;
+              setGestureEnabled(newEnabled);
+              if (newEnabled) {
+                setDecorations(prev => ({
+                  ...prev,
+                  showSnow: false,
+                  showStars: false,
+                  showSparkles: false,
+                  showGoldenNebula: false
+                }));
+                setAiStatus("正在释放内存并加载 AI 模型...");
+              } else {
+                setAiStatus("手势控制已关闭");
+              }
+            }} 
+            style={{ 
+              padding: '10px 14px', 
+              backgroundColor: gestureEnabled ? 'rgba(0,206,209,0.15)' : 'rgba(0,0,0,0.6)', 
+              border: `1px solid ${gestureEnabled ? '#00CED1' : '#444'}`, 
+              color: gestureEnabled ? '#00CED1' : '#666', 
+              fontFamily: 'sans-serif', 
+              fontSize: '10px', 
+              fontWeight: '500', 
+              cursor: 'pointer', 
+              backdropFilter: 'blur(4px)',
+              borderRadius: '6px',
+              letterSpacing: '1px'
+            }}
+          >
+             手势 {gestureEnabled ? '开启' : ''}
+          </button>
+        )}
+        {!isMobile && (
+          <button 
+            onClick={() => setDebugMode(!debugMode)} 
+            style={{ 
+              padding: '10px 14px', 
+              backgroundColor: debugMode ? 'rgba(255,215,0,0.15)' : 'rgba(0,0,0,0.6)', 
+              border: `1px solid ${debugMode ? '#FFD700' : '#444'}`, 
+              color: debugMode ? '#FFD700' : '#666', 
+              fontFamily: 'sans-serif', 
+              fontSize: '10px', 
+              fontWeight: '500', 
+              cursor: 'pointer', 
+              backdropFilter: 'blur(4px)',
+              borderRadius: '6px',
+              letterSpacing: '1px'
+            }}
+          >
+             调试 {debugMode ? '开启' : ''}
+          </button>
+        )}
         <button 
           onClick={() => setSceneState(s => s === 'CHAOS' ? 'FORMED' : 'CHAOS')} 
           style={{ 
-            padding: '10px 24px', 
+            padding: isMobile ? '8px 16px' : '10px 24px', 
             backgroundColor: sceneState === 'FORMED' ? 'rgba(255,215,0,0.1)' : 'rgba(0,0,0,0.6)', 
             border: `1px solid ${sceneState === 'FORMED' ? 'rgba(255,215,0,0.6)' : 'rgba(255,215,0,0.3)'}`, 
             color: '#FFD700', 
             fontFamily: 'sans-serif', 
-            fontSize: '11px', 
+            fontSize: isMobile ? '10px' : '11px', 
             fontWeight: '600', 
             letterSpacing: '2px', 
             textTransform: 'uppercase', 
             cursor: 'pointer', 
             backdropFilter: 'blur(4px)',
-            borderRadius: '6px'
+            borderRadius: '6px',
+            WebkitTapHighlightColor: 'transparent'
           }}
         >
            {sceneState === 'CHAOS' ? '聚合' : '散开'}
@@ -449,15 +503,16 @@ export default function GrandTreeApp() {
       {showTextInput && (
         <div style={{
           position: 'fixed',
-          bottom: '80px',
-          right: '40px',
+          bottom: isMobile ? '70px' : '80px',
+          right: isMobile ? '10px' : '40px',
+          left: isMobile ? '10px' : 'auto',
           backgroundColor: 'rgba(0,0,0,0.9)',
           padding: '15px',
           borderRadius: '8px',
           backdropFilter: 'blur(8px)',
           border: '1px solid rgba(255,255,255,0.1)',
           zIndex: 100,
-          minWidth: '250px'
+          minWidth: isMobile ? 'auto' : '250px'
         }}>
           <p style={{ fontSize: '10px', letterSpacing: '1px', color: '#888', margin: '0 0 10px 0' }}>粒子文字</p>
           <input
