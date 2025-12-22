@@ -418,7 +418,7 @@ export default function GrandTreeApp() {
             WebkitTapHighlightColor: 'transparent'
           }}
         >
-          {isMobile ? '📷魔法' : '手势魔法'} {gestureEnabled ? '🪄' : ''}
+          {isMobile ? '📷魔法' : '进阶魔法'} {gestureEnabled ? '🪄' : ''}
         </button>
         {!isMobile && (
           <button 
@@ -457,7 +457,7 @@ export default function GrandTreeApp() {
             WebkitTapHighlightColor: 'transparent'
           }}
         >
-          {sceneState === 'CHAOS' ? '🎄圣诞魔法' : '🎄消失'}
+          {sceneState === 'CHAOS' ? '🎄点我' : '🎄消失'}
         </button>
       </div>
 
