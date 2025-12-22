@@ -48,6 +48,7 @@ export default function GrandTreeApp() {
   const [debugMode, setDebugMode] = useState(false);
   const [gestureEnabled, setGestureEnabled] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
+  const [previewPhotoIndex, setPreviewPhotoIndex] = useState<number>(0);
   const [particleText, setParticleText] = useState('');
   const [showTextInput, setShowTextInput] = useState(false);
 
@@ -95,19 +96,41 @@ export default function GrandTreeApp() {
     }));
   }, [giftConfig.enabled, photoConfig.enabled, lightConfig.enabled]);
 
+  // 获取所有照片列表
+  const getAllPhotos = useCallback(() => {
+    if (photoConfig.customPhotos.length > 0) {
+      return photoConfig.customPhotos;
+    }
+    return [
+      '/photos/top.jpg',
+      ...Array.from({ length: 20 }, (_, i) => `/photos/${i + 1}.jpg`)
+    ];
+  }, [photoConfig.customPhotos]);
+
   // 处理照片点击预览
   const handlePhotoClick = (index: number) => {
-    if (photoConfig.customPhotos.length > 0) {
-      setPreviewPhoto(photoConfig.customPhotos[index]);
-    } else {
-      // 使用默认照片路径
-      const defaultPhotos = [
-        '/photos/top.jpg',
-        ...Array.from({ length: 20 }, (_, i) => `/photos/${i + 1}.jpg`)
-      ];
-      setPreviewPhoto(defaultPhotos[index]);
-    }
+    const photos = getAllPhotos();
+    setPreviewPhotoIndex(index);
+    setPreviewPhoto(photos[index] || photos[0]);
   };
+
+  // 切换到上一张照片
+  const handlePrevPhoto = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    const photos = getAllPhotos();
+    const newIndex = previewPhotoIndex > 0 ? previewPhotoIndex - 1 : photos.length - 1;
+    setPreviewPhotoIndex(newIndex);
+    setPreviewPhoto(photos[newIndex]);
+  }, [previewPhotoIndex, getAllPhotos]);
+
+  // 切换到下一张照片
+  const handleNextPhoto = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    const photos = getAllPhotos();
+    const newIndex = previewPhotoIndex < photos.length - 1 ? previewPhotoIndex + 1 : 0;
+    setPreviewPhotoIndex(newIndex);
+    setPreviewPhoto(photos[newIndex]);
+  }, [previewPhotoIndex, getAllPhotos]);
 
   // 装饰切换
   const toggleDecoration = useCallback((key: keyof DecorationSettings) => {
@@ -564,26 +587,125 @@ export default function GrandTreeApp() {
             left: 0,
             width: '100vw',
             height: '100vh',
-            backgroundColor: 'rgba(0,0,0,0.9)',
+            backgroundColor: 'rgba(0,0,0,0.95)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 1000,
-            cursor: 'pointer'
+            zIndex: 1000
           }}
           onClick={() => setPreviewPhoto(null)}
         >
+          {/* 左箭头 */}
+          <button
+            onClick={handlePrevPhoto}
+            style={{
+              position: 'absolute',
+              left: isMobile ? '10px' : '30px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: isMobile ? '40px' : '50px',
+              height: isMobile ? '40px' : '50px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.3)',
+              color: '#fff',
+              fontSize: isMobile ? '18px' : '24px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(4px)',
+              zIndex: 1001,
+              WebkitTapHighlightColor: 'transparent'
+            }}
+          >
+            ‹
+          </button>
+
+          {/* 照片 */}
           <img 
             src={previewPhoto} 
             alt="预览照片" 
+            onClick={(e) => e.stopPropagation()}
             style={{
-              maxWidth: '90vw',
-              maxHeight: '90vh',
+              maxWidth: isMobile ? '80vw' : '70vw',
+              maxHeight: '80vh',
               objectFit: 'contain',
               borderRadius: '8px',
-              boxShadow: '0 0 50px rgba(255,255,255,0.3)'
+              boxShadow: '0 0 50px rgba(255,255,255,0.3)',
+              cursor: 'default'
             }}
           />
+
+          {/* 右箭头 */}
+          <button
+            onClick={handleNextPhoto}
+            style={{
+              position: 'absolute',
+              right: isMobile ? '10px' : '30px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: isMobile ? '40px' : '50px',
+              height: isMobile ? '40px' : '50px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.3)',
+              color: '#fff',
+              fontSize: isMobile ? '18px' : '24px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(4px)',
+              zIndex: 1001,
+              WebkitTapHighlightColor: 'transparent'
+            }}
+          >
+            ›
+          </button>
+
+          {/* 关闭按钮 */}
+          <button
+            onClick={() => setPreviewPhoto(null)}
+            style={{
+              position: 'absolute',
+              top: isMobile ? '15px' : '30px',
+              right: isMobile ? '15px' : '30px',
+              width: isMobile ? '36px' : '40px',
+              height: isMobile ? '36px' : '40px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.3)',
+              color: '#fff',
+              fontSize: isMobile ? '16px' : '20px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(4px)',
+              zIndex: 1001,
+              WebkitTapHighlightColor: 'transparent'
+            }}
+          >
+            ✕
+          </button>
+
+          {/* 照片计数 */}
+          <div style={{
+            position: 'absolute',
+            bottom: isMobile ? '20px' : '30px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: 'rgba(255,255,255,0.7)',
+            fontSize: isMobile ? '12px' : '14px',
+            fontFamily: 'sans-serif',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            padding: '6px 12px',
+            borderRadius: '20px',
+            backdropFilter: 'blur(4px)'
+          }}>
+            {previewPhotoIndex + 1} / {getAllPhotos().length}
+          </div>
         </div>
       )}
 
