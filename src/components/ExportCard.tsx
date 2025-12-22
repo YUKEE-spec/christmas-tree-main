@@ -14,6 +14,8 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
   const [exportType, setExportType] = useState<'image' | 'gif'>('image');
   const [greeting, setGreeting] = useState('Merry Christmas');
   const [fromName, setFromName] = useState('');
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
   const recordingRef = useRef(false);
   
   // 检测移动端
@@ -250,8 +252,8 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
     });
   }, [greeting, fromName, particleText, treeColor]);
 
-  // 导出图片
-  const exportImage = useCallback(async () => {
+  // 生成预览
+  const generatePreview = useCallback(async () => {
     setIsExporting(true);
     setExportProgress(0);
     
@@ -262,14 +264,13 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
     }
     
     setExportProgress(50);
-    const cardCanvas = await createCardCanvas(frameCanvas, false);
+    // 预览用较小尺寸
+    const cardCanvas = await createCardCanvas(frameCanvas, true);
     
     setExportProgress(100);
-    const link = document.createElement('a');
-    link.download = `christmas-card-${Date.now()}.png`;
-    link.href = cardCanvas.toDataURL('image/png', 1.0);
-    link.click();
-    
+    const url = cardCanvas.toDataURL('image/png', 0.8);
+    setPreviewUrl(url);
+    setShowPreview(true);
     setIsExporting(false);
   }, [captureFrame, createCardCanvas]);
 
@@ -330,17 +331,52 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
       link.click();
       URL.revokeObjectURL(url);
       setIsExporting(false);
+      setShowPreview(false);
+      setPreviewUrl(null);
+      setIsOpen(false);
     });
     
     gif.render();
   }, [captureFrame, createCardCanvas]);
 
-  const handleExport = () => {
+  // 确认导出
+  const confirmExport = useCallback(async () => {
     if (exportType === 'image') {
-      exportImage();
+      // 重新生成高清版本
+      setIsExporting(true);
+      setExportProgress(0);
+      
+      const frameCanvas = captureFrame();
+      if (!frameCanvas) {
+        setIsExporting(false);
+        return;
+      }
+      
+      setExportProgress(50);
+      const cardCanvas = await createCardCanvas(frameCanvas, false);
+      
+      setExportProgress(100);
+      const link = document.createElement('a');
+      link.download = `christmas-card-${Date.now()}.png`;
+      link.href = cardCanvas.toDataURL('image/png', 1.0);
+      link.click();
+      
+      setIsExporting(false);
+      setShowPreview(false);
+      setPreviewUrl(null);
+      setIsOpen(false);
     } else {
       exportGif();
     }
+  }, [captureFrame, createCardCanvas, exportType, exportGif]);
+
+  const handlePreview = () => {
+    generatePreview();
+  };
+
+  const handleBackToEdit = () => {
+    setShowPreview(false);
+    setPreviewUrl(null);
   };
 
   return (
@@ -509,30 +545,97 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
               </div>
             )}
 
-            {/* 导出按钮 */}
-            <button
-              onClick={handleExport}
-              disabled={isExporting}
-              style={{
-                width: '100%',
-                padding: isMobile ? '14px' : '12px',
-                backgroundColor: isExporting ? 'rgba(255,215,0,0.1)' : 'rgba(255,215,0,0.2)',
-                border: '2px solid #FFD700',
-                borderRadius: '6px',
-                color: '#FFD700',
-                fontSize: '14px',
-                fontWeight: 'bold',
-                cursor: isExporting ? 'wait' : 'pointer',
-                letterSpacing: '2px',
-                WebkitTapHighlightColor: 'transparent'
-              }}
-            >
-              {isExporting ? '正在生成...' : '生成贺卡'}
-            </button>
+            {/* 预览图片 */}
+            {showPreview && previewUrl && (
+              <div style={{ marginBottom: '15px' }}>
+                <p style={{ color: '#888', fontSize: '11px', marginBottom: '8px', textAlign: 'center' }}>贺卡预览</p>
+                <div style={{
+                  width: '100%',
+                  maxHeight: isMobile ? '40vh' : '300px',
+                  overflow: 'hidden',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255,215,0,0.3)'
+                }}>
+                  <img 
+                    src={previewUrl} 
+                    alt="贺卡预览" 
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      display: 'block'
+                    }}
+                  />
+                </div>
+              </div>
+            )}
 
-            <p style={{ color: '#555', fontSize: '10px', textAlign: 'center', marginTop: '15px' }}>
-              {exportType === 'gif' ? '动图将录制约2秒的动画' : '请先将圣诞树调整到满意的状态再导出'}
-            </p>
+            {/* 按钮区域 */}
+            {!showPreview ? (
+              <>
+                {/* 预览按钮 */}
+                <button
+                  onClick={handlePreview}
+                  disabled={isExporting}
+                  style={{
+                    width: '100%',
+                    padding: isMobile ? '14px' : '12px',
+                    backgroundColor: isExporting ? 'rgba(255,215,0,0.1)' : 'rgba(255,215,0,0.2)',
+                    border: '2px solid #FFD700',
+                    borderRadius: '6px',
+                    color: '#FFD700',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    cursor: isExporting ? 'wait' : 'pointer',
+                    letterSpacing: '2px',
+                    WebkitTapHighlightColor: 'transparent'
+                  }}
+                >
+                  {isExporting ? '正在生成...' : '预览贺卡'}
+                </button>
+                <p style={{ color: '#555', fontSize: '10px', textAlign: 'center', marginTop: '15px' }}>
+                  {exportType === 'gif' ? '动图将录制约2秒的动画' : '点击预览后可确认效果再导出'}
+                </p>
+              </>
+            ) : (
+              <div style={{ display: 'flex', gap: '10px' }}>
+                {/* 返回修改按钮 */}
+                <button
+                  onClick={handleBackToEdit}
+                  style={{
+                    flex: 1,
+                    padding: isMobile ? '14px' : '12px',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    border: '1px solid #666',
+                    borderRadius: '6px',
+                    color: '#888',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    WebkitTapHighlightColor: 'transparent'
+                  }}
+                >
+                  返回修改
+                </button>
+                {/* 确认导出按钮 */}
+                <button
+                  onClick={confirmExport}
+                  disabled={isExporting}
+                  style={{
+                    flex: 1,
+                    padding: isMobile ? '14px' : '12px',
+                    backgroundColor: 'rgba(255,215,0,0.2)',
+                    border: '2px solid #FFD700',
+                    borderRadius: '6px',
+                    color: '#FFD700',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    cursor: isExporting ? 'wait' : 'pointer',
+                    WebkitTapHighlightColor: 'transparent'
+                  }}
+                >
+                  {isExporting ? '导出中...' : '确认导出'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
