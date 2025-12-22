@@ -112,12 +112,8 @@ export const GestureController: React.FC<GestureControllerProps> = ({
             videoRef.current.play().catch(() => {
               // 忽略 play() 被中断的错误
             });
-            // 移动端显示简化的手势提示
-            if (isMobile) {
-              callbacksRef.current.onStatus("✋消失 ✊圣诞魔法 👍换色");
-            } else {
-              callbacksRef.current.onStatus("✋消失 ✊圣诞魔法 👍点灯 ✌️照片 ☝️换色");
-            }
+            // 显示完整的手势提示
+            callbacksRef.current.onStatus("✋消失 ✊魔法 👍点灯 👎礼物 ✌️照片 ☝️换色");
             predictWebcam();
           }
         } else {
