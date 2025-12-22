@@ -108,22 +108,25 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
       const treeWidth = w - padding * 2;
       const treeHeight = forGif ? 480 : 950;
       
-      // 圣诞树图片 - 保持比例居中裁剪
+      // 圣诞树图片 - 完整显示，不裁剪
       const imgAspect = frameCanvas.width / frameCanvas.height;
       const boxAspect = treeWidth / treeHeight;
       
-      let sx = 0, sy = 0, sw = frameCanvas.width, sh = frameCanvas.height;
+      let dx = padding, dy = treeY, dw = treeWidth, dh = treeHeight;
       
+      // 保持原图比例，完整显示在框内
       if (imgAspect > boxAspect) {
-        sw = frameCanvas.height * boxAspect;
-        sx = (frameCanvas.width - sw) / 2;
+        // 原图更宽，以宽度为准
+        dh = treeWidth / imgAspect;
+        dy = treeY + (treeHeight - dh) / 2;
       } else {
-        sh = frameCanvas.width / boxAspect;
-        sy = (frameCanvas.height - sh) / 2;
+        // 原图更高，以高度为准
+        dw = treeHeight * imgAspect;
+        dx = padding + (treeWidth - dw) / 2;
       }
       
-      // 绘制圣诞树
-      ctx.drawImage(frameCanvas, sx, sy, sw, sh, padding, treeY, treeWidth, treeHeight);
+      // 绘制圣诞树 - 完整显示
+      ctx.drawImage(frameCanvas, 0, 0, frameCanvas.width, frameCanvas.height, dx, dy, dw, dh);
       
       // 圣诞树边框 - 烫金效果
       ctx.strokeStyle = goldGradient;
@@ -339,6 +342,9 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
     gif.render();
   }, [captureFrame, createCardCanvas]);
 
+  // 导出完成状态（移动端用于显示"完成"按钮）
+  const [exportDone, setExportDone] = useState(false);
+
   // 确认导出
   const confirmExport = useCallback(async () => {
     if (exportType === 'image') {
@@ -390,22 +396,33 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
           link.href = dataUrl;
           link.click();
         }
+        // 移动端：保持面板打开，显示"完成"按钮
+        setIsExporting(false);
+        setExportDone(true);
       } else {
-        // 桌面端：直接下载
+        // 桌面端：直接下载并关闭
         const link = document.createElement('a');
         link.download = `christmas-card-${Date.now()}.png`;
         link.href = dataUrl;
         link.click();
+        
+        setIsExporting(false);
+        setShowPreview(false);
+        setPreviewUrl(null);
+        setIsOpen(false);
       }
-      
-      setIsExporting(false);
-      setShowPreview(false);
-      setPreviewUrl(null);
-      setIsOpen(false);
     } else {
       exportGif();
     }
   }, [captureFrame, createCardCanvas, exportType, exportGif, isMobile]);
+
+  // 完成并关闭（移动端用）
+  const handleFinish = useCallback(() => {
+    setExportDone(false);
+    setShowPreview(false);
+    setPreviewUrl(null);
+    setIsOpen(false);
+  }, []);
 
   const handlePreview = () => {
     generatePreview();
@@ -633,6 +650,50 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
                   {exportType === 'gif' ? '动图将录制约2秒的动画' : '点击预览后可确认效果再导出'}
                 </p>
               </>
+            ) : exportDone ? (
+              // 移动端导出完成后显示完成按钮
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <p style={{ color: '#4CAF50', fontSize: '12px', textAlign: 'center', margin: 0 }}>
+                  ✅ 贺卡已在新窗口打开，请长按保存
+                </p>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={() => {
+                      setExportDone(false);
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: isMobile ? '14px' : '12px',
+                      backgroundColor: 'rgba(255,255,255,0.05)',
+                      border: '1px solid #666',
+                      borderRadius: '6px',
+                      color: '#888',
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      WebkitTapHighlightColor: 'transparent'
+                    }}
+                  >
+                    重新导出
+                  </button>
+                  <button
+                    onClick={handleFinish}
+                    style={{
+                      flex: 1,
+                      padding: isMobile ? '14px' : '12px',
+                      backgroundColor: 'rgba(76,175,80,0.2)',
+                      border: '2px solid #4CAF50',
+                      borderRadius: '6px',
+                      color: '#4CAF50',
+                      fontSize: '12px',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      WebkitTapHighlightColor: 'transparent'
+                    }}
+                  >
+                    完成
+                  </button>
+                </div>
+              </div>
             ) : (
               <div style={{ display: 'flex', gap: '10px' }}>
                 {/* 返回修改按钮 */}
