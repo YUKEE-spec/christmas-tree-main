@@ -38,7 +38,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
     return frameCanvas;
   }, [getCanvas]);
 
-  // 创建贺卡 Canvas（用于 GIF 帧）
+  // 创建贺卡 Canvas（用于 GIF 帧）- 烫金效果版
   const createCardCanvas = useCallback((frameCanvas: HTMLCanvasElement, forGif: boolean = false): Promise<HTMLCanvasElement> => {
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
@@ -46,51 +46,64 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
       
       // GIF 用较小尺寸，图片用高分辨率
       const scale = forGif ? 1 : 2;
-      const w = forGif ? 600 : 1200;
-      const h = forGif ? 800 : 1600;
+      const w = forGif ? 600 : 1080;
+      const h = forGif ? 750 : 1350;
       canvas.width = w * scale;
       canvas.height = h * scale;
       ctx.scale(scale, scale);
       
-      // 金色渐变背景
-      const gradient = ctx.createLinearGradient(0, 0, 0, h);
-      gradient.addColorStop(0, '#0a0a15');
-      gradient.addColorStop(0.3, '#0f1525');
-      gradient.addColorStop(0.7, '#0a1020');
-      gradient.addColorStop(1, '#050510');
-      ctx.fillStyle = gradient;
+      // 深色渐变背景 - 更深邃
+      const bgGradient = ctx.createLinearGradient(0, 0, w, h);
+      bgGradient.addColorStop(0, '#0a0812');
+      bgGradient.addColorStop(0.5, '#0d0a18');
+      bgGradient.addColorStop(1, '#08060f');
+      ctx.fillStyle = bgGradient;
       ctx.fillRect(0, 0, w, h);
       
-      // 金色外边框
-      ctx.strokeStyle = '#FFD700';
-      ctx.lineWidth = forGif ? 3 : 6;
-      ctx.strokeRect(15, 15, w - 30, h - 30);
+      // 烫金边框 - 多层渐变效果
+      const borderWidth = forGif ? 4 : 8;
+      const goldGradient = ctx.createLinearGradient(0, 0, w, h);
+      goldGradient.addColorStop(0, '#D4AF37');
+      goldGradient.addColorStop(0.25, '#FFD700');
+      goldGradient.addColorStop(0.5, '#FFF8DC');
+      goldGradient.addColorStop(0.75, '#FFD700');
+      goldGradient.addColorStop(1, '#D4AF37');
       
-      // 内边框
-      ctx.strokeStyle = 'rgba(255, 215, 0, 0.4)';
+      ctx.strokeStyle = goldGradient;
+      ctx.lineWidth = borderWidth;
+      ctx.strokeRect(borderWidth / 2, borderWidth / 2, w - borderWidth, h - borderWidth);
+      
+      // 内边框 - 细金线
+      ctx.strokeStyle = 'rgba(255, 215, 0, 0.5)';
       ctx.lineWidth = forGif ? 1 : 2;
-      ctx.strokeRect(25, 25, w - 50, h - 50);
+      ctx.strokeRect(borderWidth + 8, borderWidth + 8, w - borderWidth * 2 - 16, h - borderWidth * 2 - 16);
       
-      // 顶部装饰线
-      ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
-      ctx.lineWidth = 1;
+      // 顶部装饰 - 烫金花纹线
+      const topY = forGif ? 25 : 40;
+      ctx.strokeStyle = goldGradient;
+      ctx.lineWidth = forGif ? 1 : 2;
       ctx.beginPath();
-      ctx.moveTo(60, 45);
-      ctx.lineTo(w - 60, 45);
+      ctx.moveTo(50, topY);
+      ctx.lineTo(w / 2 - 30, topY);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(w / 2 + 30, topY);
+      ctx.lineTo(w - 50, topY);
       ctx.stroke();
       
-      // 圣诞树区域
-      const padding = forGif ? 30 : 60;
-      const treeX = padding;
-      const treeY = forGif ? 60 : 100;
+      // 顶部中央装饰 - 小星星
+      ctx.fillStyle = '#FFD700';
+      ctx.font = `${forGif ? 14 : 24}px serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText('✦', w / 2, topY + 5);
+      
+      // 圣诞树区域 - 更大更醒目
+      const padding = forGif ? 20 : 35;
+      const treeY = forGif ? 40 : 60;
       const treeWidth = w - padding * 2;
-      const treeHeight = forGif ? 520 : 1050;
+      const treeHeight = forGif ? 480 : 950;
       
-      // 绘制图片背景框
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-      ctx.fillRect(treeX - 2, treeY - 2, treeWidth + 4, treeHeight + 4);
-      
-      // 绘制圣诞树图片 - 保持比例居中裁剪
+      // 圣诞树图片 - 保持比例居中裁剪
       const imgAspect = frameCanvas.width / frameCanvas.height;
       const boxAspect = treeWidth / treeHeight;
       
@@ -104,56 +117,79 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
         sy = (frameCanvas.height - sh) / 2;
       }
       
-      ctx.drawImage(frameCanvas, sx, sy, sw, sh, treeX, treeY, treeWidth, treeHeight);
+      // 绘制圣诞树
+      ctx.drawImage(frameCanvas, sx, sy, sw, sh, padding, treeY, treeWidth, treeHeight);
       
-      // 图片边框
-      ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
-      ctx.lineWidth = forGif ? 2 : 3;
-      ctx.strokeRect(treeX, treeY, treeWidth, treeHeight);
+      // 圣诞树边框 - 烫金效果
+      ctx.strokeStyle = goldGradient;
+      ctx.lineWidth = forGif ? 2 : 4;
+      ctx.strokeRect(padding, treeY, treeWidth, treeHeight);
       
-      // 祝福语
-      ctx.fillStyle = '#FFD700';
-      ctx.font = `bold ${forGif ? 36 : 72}px "Playfair Display", Georgia, serif`;
+      // 祝福语区域背景 - 渐变遮罩
+      const textAreaY = treeY + treeHeight + (forGif ? 10 : 20);
+      const textGradient = ctx.createLinearGradient(0, textAreaY - 20, 0, h);
+      textGradient.addColorStop(0, 'rgba(10, 8, 18, 0)');
+      textGradient.addColorStop(0.3, 'rgba(10, 8, 18, 0.9)');
+      textGradient.addColorStop(1, 'rgba(10, 8, 18, 1)');
+      ctx.fillStyle = textGradient;
+      ctx.fillRect(0, textAreaY - 20, w, h - textAreaY + 20);
+      
+      // 祝福语 - 烫金文字效果
+      ctx.fillStyle = goldGradient;
+      ctx.font = `bold ${forGif ? 32 : 56}px "Playfair Display", "Noto Serif SC", Georgia, serif`;
       ctx.textAlign = 'center';
       ctx.shadowColor = '#FFD700';
-      ctx.shadowBlur = forGif ? 15 : 30;
-      ctx.fillText(greeting, w / 2, forGif ? 620 : 1230);
+      ctx.shadowBlur = forGif ? 20 : 40;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.fillText(greeting, w / 2, forGif ? 570 : 1090);
+      
+      // 二次绘制增强发光
+      ctx.shadowBlur = forGif ? 10 : 20;
+      ctx.fillText(greeting, w / 2, forGif ? 570 : 1090);
       ctx.shadowBlur = 0;
       
       // 自定义文字
       if (particleText) {
         ctx.fillStyle = treeColor;
-        ctx.font = `${forGif ? 18 : 36}px "Noto Serif SC", serif`;
+        ctx.font = `${forGif ? 16 : 28}px "Noto Serif SC", serif`;
         ctx.shadowColor = treeColor;
-        ctx.shadowBlur = forGif ? 8 : 15;
-        ctx.fillText(`"${particleText}"`, w / 2, forGif ? 660 : 1300);
+        ctx.shadowBlur = forGif ? 10 : 20;
+        ctx.fillText(`"${particleText}"`, w / 2, forGif ? 605 : 1145);
         ctx.shadowBlur = 0;
       }
       
-      // 发送者
+      // 发送者 - 斜体金色
       if (fromName) {
-        ctx.fillStyle = 'rgba(255, 215, 0, 0.8)';
-        ctx.font = `italic ${forGif ? 16 : 32}px Georgia, serif`;
-        const fromY = particleText ? (forGif ? 700 : 1380) : (forGif ? 670 : 1320);
+        ctx.fillStyle = 'rgba(255, 215, 0, 0.9)';
+        ctx.font = `italic ${forGif ? 14 : 26}px Georgia, serif`;
+        const fromY = particleText ? (forGif ? 640 : 1200) : (forGif ? 615 : 1165);
         ctx.fillText(`— ${fromName}`, w / 2, fromY);
       }
       
       // 底部装饰线
-      ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
-      ctx.lineWidth = 1;
+      const bottomLineY = forGif ? 700 : 1280;
+      ctx.strokeStyle = goldGradient;
+      ctx.lineWidth = forGif ? 1 : 2;
       ctx.beginPath();
-      ctx.moveTo(60, forGif ? 755 : 1500);
-      ctx.lineTo(w - 60, forGif ? 755 : 1500);
+      ctx.moveTo(80, bottomLineY);
+      ctx.lineTo(w / 2 - 40, bottomLineY);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(w / 2 + 40, bottomLineY);
+      ctx.lineTo(w - 80, bottomLineY);
       ctx.stroke();
       
-      // 年份
-      ctx.fillStyle = 'rgba(255, 215, 0, 0.6)';
-      ctx.font = `${forGif ? 12 : 24}px sans-serif`;
-      ctx.fillText('2025', w / 2, forGif ? 780 : 1550);
+      // 底部中央年份
+      ctx.fillStyle = goldGradient;
+      ctx.font = `${forGif ? 12 : 20}px sans-serif`;
+      ctx.fillText('✦ 2025 ✦', w / 2, bottomLineY + 5);
       
-      // 装饰星星
-      const drawStar = (x: number, y: number, size: number, opacity: number = 1) => {
-        ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
+      // 四角装饰星星 - 烫金效果
+      const drawGoldStar = (x: number, y: number, size: number) => {
+        ctx.fillStyle = goldGradient;
+        ctx.shadowColor = '#FFD700';
+        ctx.shadowBlur = size;
         ctx.beginPath();
         for (let i = 0; i < 5; i++) {
           const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
@@ -164,14 +200,48 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
         }
         ctx.closePath();
         ctx.fill();
+        ctx.shadowBlur = 0;
       };
       
-      const starSize = forGif ? 6 : 12;
-      const margin = forGif ? 30 : 55;
-      drawStar(margin, margin, starSize);
-      drawStar(w - margin, margin, starSize);
-      drawStar(margin, h - margin, starSize);
-      drawStar(w - margin, h - margin, starSize);
+      const starSize = forGif ? 6 : 10;
+      const margin = forGif ? 20 : 30;
+      drawGoldStar(margin, margin, starSize);
+      drawGoldStar(w - margin, margin, starSize);
+      drawGoldStar(margin, h - margin, starSize);
+      drawGoldStar(w - margin, h - margin, starSize);
+      
+      // 额外装饰 - 角落花纹
+      ctx.strokeStyle = 'rgba(255, 215, 0, 0.3)';
+      ctx.lineWidth = 1;
+      const cornerSize = forGif ? 15 : 25;
+      
+      // 左上角
+      ctx.beginPath();
+      ctx.moveTo(margin + cornerSize, margin);
+      ctx.lineTo(margin, margin);
+      ctx.lineTo(margin, margin + cornerSize);
+      ctx.stroke();
+      
+      // 右上角
+      ctx.beginPath();
+      ctx.moveTo(w - margin - cornerSize, margin);
+      ctx.lineTo(w - margin, margin);
+      ctx.lineTo(w - margin, margin + cornerSize);
+      ctx.stroke();
+      
+      // 左下角
+      ctx.beginPath();
+      ctx.moveTo(margin + cornerSize, h - margin);
+      ctx.lineTo(margin, h - margin);
+      ctx.lineTo(margin, h - margin - cornerSize);
+      ctx.stroke();
+      
+      // 右下角
+      ctx.beginPath();
+      ctx.moveTo(w - margin - cornerSize, h - margin);
+      ctx.lineTo(w - margin, h - margin);
+      ctx.lineTo(w - margin, h - margin - cornerSize);
+      ctx.stroke();
       
       resolve(canvas);
     });
