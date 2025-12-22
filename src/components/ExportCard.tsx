@@ -332,55 +332,8 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
       const url = URL.createObjectURL(blob);
       
       if (isMobile) {
-        // 移动端：打开新窗口显示 GIF
-        const newWindow = window.open('', '_blank');
-        if (newWindow) {
-          newWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <title>圣诞贺卡动图</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <style>
-                  * { margin: 0; padding: 0; box-sizing: border-box; }
-                  body { 
-                    background: #000; 
-                    min-height: 100vh; 
-                    display: flex; 
-                    flex-direction: column; 
-                    align-items: center; 
-                    padding: 20px;
-                  }
-                  img { 
-                    max-width: 100%; 
-                    height: auto; 
-                    border-radius: 8px;
-                  }
-                  .tip { 
-                    color: #FFD700; 
-                    font-family: sans-serif; 
-                    margin-top: 20px; 
-                    text-align: center;
-                    font-size: 14px;
-                  }
-                </style>
-              </head>
-              <body>
-                <img src="${url}" alt="圣诞贺卡动图" />
-                <p class="tip">👆 长按保存动图</p>
-              </body>
-            </html>
-          `);
-          newWindow.document.close();
-        } else {
-          // 尝试直接下载
-          const link = document.createElement('a');
-          link.download = `christmas-card-${Date.now()}.gif`;
-          link.href = url;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        }
+        // 移动端：直接在当前面板显示 GIF
+        setMobileImageUrl(url);
         setIsExporting(false);
         setExportDone(true);
       } else {
@@ -402,6 +355,8 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
 
   // 导出完成状态（移动端用于显示"完成"按钮）
   const [exportDone, setExportDone] = useState(false);
+  // 移动端保存的图片URL
+  const [mobileImageUrl, setMobileImageUrl] = useState<string | null>(null);
 
   // 确认导出
   const confirmExport = useCallback(async () => {
@@ -426,81 +381,8 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
       const dataUrl = cardCanvas.toDataURL('image/png', 1.0);
       
       if (isMobile) {
-        // 移动端：创建一个可以长按保存的图片页面
-        // 使用 Blob URL 而不是 data URL，更可靠
-        const byteString = atob(dataUrl.split(',')[1]);
-        const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0];
-        const ab = new ArrayBuffer(byteString.length);
-        const ia = new Uint8Array(ab);
-        for (let i = 0; i < byteString.length; i++) {
-          ia[i] = byteString.charCodeAt(i);
-        }
-        const blob = new Blob([ab], { type: mimeString });
-        const blobUrl = URL.createObjectURL(blob);
-        
-        // 尝试打开新窗口
-        const newWindow = window.open('', '_blank');
-        if (newWindow) {
-          newWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <title>圣诞贺卡</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-                <meta name="apple-mobile-web-app-capable" content="yes">
-                <style>
-                  * { margin: 0; padding: 0; box-sizing: border-box; }
-                  body { 
-                    background: #000; 
-                    min-height: 100vh; 
-                    display: flex; 
-                    flex-direction: column; 
-                    align-items: center; 
-                    padding: 20px;
-                    -webkit-touch-callout: default;
-                  }
-                  img { 
-                    max-width: 100%; 
-                    height: auto; 
-                    border-radius: 8px;
-                    -webkit-touch-callout: default;
-                    -webkit-user-select: auto;
-                    user-select: auto;
-                  }
-                  .tip { 
-                    color: #FFD700; 
-                    font-family: sans-serif; 
-                    margin-top: 20px; 
-                    text-align: center;
-                    font-size: 14px;
-                    line-height: 1.6;
-                  }
-                  .sub-tip {
-                    color: #888;
-                    font-size: 12px;
-                    margin-top: 10px;
-                  }
-                </style>
-              </head>
-              <body>
-                <img src="${blobUrl}" alt="圣诞贺卡" />
-                <p class="tip">👆 长按图片保存到相册</p>
-                <p class="sub-tip">如果无法保存，请截图或使用浏览器的"保存图片"功能</p>
-              </body>
-            </html>
-          `);
-          newWindow.document.close();
-        } else {
-          // 如果无法打开新窗口（如微信），尝试直接下载
-          const link = document.createElement('a');
-          link.download = `christmas-card-${Date.now()}.png`;
-          link.href = blobUrl;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-        }
-        // 移动端：保持面板打开，显示"完成"按钮
+        // 移动端：直接在当前面板显示图片，用户可以长按保存
+        setMobileImageUrl(dataUrl);
         setIsExporting(false);
         setExportDone(true);
       } else {
@@ -522,11 +404,15 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
 
   // 完成并关闭（移动端用）
   const handleFinish = useCallback(() => {
+    if (mobileImageUrl) {
+      URL.revokeObjectURL(mobileImageUrl);
+    }
     setExportDone(false);
+    setMobileImageUrl(null);
     setShowPreview(false);
     setPreviewUrl(null);
     setIsOpen(false);
-  }, []);
+  }, [mobileImageUrl]);
 
   const handlePreview = () => {
     generatePreview();
@@ -755,15 +641,44 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
                 </p>
               </>
             ) : exportDone ? (
-              // 移动端导出完成后显示完成按钮
+              // 移动端导出完成后显示图片和完成按钮
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {/* 显示可长按保存的图片 */}
+                {mobileImageUrl && (
+                  <div style={{
+                    width: '100%',
+                    maxHeight: '50vh',
+                    overflow: 'auto',
+                    borderRadius: '8px',
+                    border: '2px solid #4CAF50',
+                    marginBottom: '10px',
+                    WebkitTouchCallout: 'default'
+                  }}>
+                    <img 
+                      src={mobileImageUrl} 
+                      alt="圣诞贺卡" 
+                      style={{
+                        width: '100%',
+                        height: 'auto',
+                        display: 'block',
+                        WebkitTouchCallout: 'default',
+                        WebkitUserSelect: 'auto',
+                        userSelect: 'auto'
+                      }}
+                    />
+                  </div>
+                )}
                 <p style={{ color: '#4CAF50', fontSize: '12px', textAlign: 'center', margin: 0 }}>
-                  ✅ 贺卡已在新窗口打开，请长按保存
+                  ✅ 长按上方图片保存到相册
                 </p>
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <p style={{ color: '#888', fontSize: '10px', textAlign: 'center', margin: 0 }}>
+                  如无法保存，请截图
+                </p>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
                   <button
                     onClick={() => {
                       setExportDone(false);
+                      setMobileImageUrl(null);
                     }}
                     style={{
                       flex: 1,
