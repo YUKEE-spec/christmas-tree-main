@@ -37,10 +37,10 @@ export interface TreeConfig {
 
 // 默认树配置
 export const DEFAULT_TREE_CONFIG: TreeConfig = {
-  color: TREE_COLOR_OPTIONS[0].value,
+  color: TREE_COLOR_OPTIONS[0].value, // 沙特绿
   customColor: '#006C35',
-  shape: TREE_SHAPE_OPTIONS[1].value,
-  particleCount: PARTICLE_OPTIONS[1].value,
+  shape: TREE_SHAPE_OPTIONS[0].value, // 经典锥形
+  particleCount: PARTICLE_OPTIONS[3].value, // 极致
 };
 
 // 树配置面板Props

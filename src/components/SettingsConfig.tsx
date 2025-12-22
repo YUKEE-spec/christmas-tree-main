@@ -22,8 +22,8 @@ export interface SettingsConfig {
 
 // 默认设置配置
 export const DEFAULT_SETTINGS_CONFIG: SettingsConfig = {
-  treeShape: TREE_SHAPE_OPTIONS[1].value, // 螺旋塔
-  particleCount: PARTICLE_OPTIONS[1].value, // 标准
+  treeShape: TREE_SHAPE_OPTIONS[0].value, // 经典锥形
+  particleCount: PARTICLE_OPTIONS[3].value, // 极致 30000
 };
 
 // 设置配置面板Props
