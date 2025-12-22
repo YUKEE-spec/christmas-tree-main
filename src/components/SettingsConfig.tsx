@@ -20,12 +20,16 @@ export interface SettingsConfig {
   particleCount: number;
 }
 
-// 默认设置配置 - 根据设备自动选择
-const isMobileDevice = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
+// 检测移动设备的函数
+const detectMobile = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  return window.innerWidth <= 768 || 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+};
 
+// 默认设置配置 - 根据设备自动选择
 export const DEFAULT_SETTINGS_CONFIG: SettingsConfig = {
   treeShape: TREE_SHAPE_OPTIONS[0].value, // 经典锥形
-  particleCount: isMobileDevice ? PARTICLE_OPTIONS[1].value : PARTICLE_OPTIONS[3].value, // 移动端用标准，桌面用极致
+  particleCount: detectMobile() ? PARTICLE_OPTIONS[0].value : PARTICLE_OPTIONS[3].value, // 移动端用轻量(5000)，桌面用极致
 };
 
 // 设置配置面板Props

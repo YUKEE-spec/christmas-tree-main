@@ -156,14 +156,15 @@ export default function GrandTreeApp() {
       {/* 3D 场景 */}
       <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
         <Canvas 
-          dpr={isMobile ? 1 : [1, 2]} 
+          dpr={isMobile ? [0.5, 1] : [1, 2]} 
           gl={{ 
             toneMapping: THREE.ACESFilmicToneMapping,
             alpha: true, 
             preserveDrawingBuffer: true,
             antialias: false,
-            powerPreference: isMobile ? 'default' : 'high-performance',
-            failIfMajorPerformanceCaveat: false
+            powerPreference: isMobile ? 'low-power' : 'high-performance',
+            failIfMajorPerformanceCaveat: false,
+            precision: isMobile ? 'lowp' : 'highp'
           }} 
           shadows={false}
           frameloop="always"

@@ -12,6 +12,14 @@
     <!-- 兼容性 -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>5114 圣诞树</title>
+    <!-- vConsole 移动端调试工具 -->
+    <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
+    <script>
+      // 通过 URL 参数 ?debug=1 开启 vConsole
+      if (location.search.includes('debug=1')) {
+        var vConsole = new window.VConsole();
+      }
+    </script>
     <!-- Google Fonts - 高级衬线字体 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

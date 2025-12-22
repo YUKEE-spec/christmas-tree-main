@@ -6,7 +6,9 @@
 > 
 > 🌟 **欢迎大家 Fork 并利用开源代码进一步改造！** 🌟
 
-![Christmas Tree](image/README/1766372442781.png)
+![Christmas Tree](image/README/image.png)
+
+![Christmas Card](image/README/christmas-card-1766408870862.png)
 
 ## ✨ 核心特性
 

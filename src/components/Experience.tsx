@@ -265,7 +265,9 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
   textureArray: THREE.Texture[];
   onPhotoClick?: (textureIndex: number) => void;
 }) => {
-  const count = CONFIG.counts.ornaments;
+  // 移动端使用更少的照片
+  const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
+  const count = isMobile ? 20 : CONFIG.counts.ornaments;
   const groupRef = useRef<THREE.Group>(null);
 
   const borderGeometry = useMemo(() => new THREE.PlaneGeometry(1.3, 1.6), []);
@@ -527,7 +529,9 @@ const PhotoOrnaments = ({ state, customPhotos, onPhotoClick }: { state: 'CHAOS' 
 
 // Component: Fairy Lights
 const FairyLights = ({ state, lightColors }: { state: 'CHAOS' | 'FORMED'; lightColors: string[] }) => {
-  const count = CONFIG.counts.lights;
+  // 移动端使用更少的彩灯
+  const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
+  const count = isMobile ? 80 : CONFIG.counts.lights;
   const groupRef = useRef<THREE.Group>(null);
   const lightColorsLengthRef = useRef(lightColors.length);
 
@@ -1009,7 +1013,9 @@ const CandyCane = ({ scale }: { scale: number }) => {
 
 // Component: Gift Pile (圣诞礼物堆)
 const GiftPile = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
-  const count = 20;
+  // 移动端使用更少的礼物
+  const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
+  const count = isMobile ? 8 : 20;
   const groupRef = useRef<THREE.Group>(null);
 
   const data = useMemo(() => {
@@ -1066,7 +1072,9 @@ const GiftPile = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
 };
 // Component: Golden Nebula - 减少粒子数量以降低内存占用
 const GoldenNebula = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
-  const count = 100;
+  // 移动端使用更少的粒子
+  const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
+  const count = isMobile ? 30 : 100;
   const pointsRef = useRef<THREE.Points>(null);
 
   // 创建圆形星云纹理
@@ -1167,7 +1175,9 @@ const GoldenNebula = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
 
 // Component: Snowfall - 减少粒子数量以降低内存占用
 const Snowfall = () => {
-  const count = 150;
+  // 移动端使用更少的雪花
+  const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
+  const count = isMobile ? 50 : 150;
   const pointsRef = useRef<THREE.Points>(null);
 
   const { positions, velocities } = useMemo(() => {
