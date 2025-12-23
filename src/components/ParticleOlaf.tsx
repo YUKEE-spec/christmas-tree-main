@@ -36,27 +36,6 @@ export const ParticleOlaf: React.FC<ParticleOlafProps> = ({ position = [15, -15,
             }
         };
 
-        // 辅助函数：生成圆锥/胡萝卜粒子
-        const addCone = (base: [number, number, number], length: number, radius: number, count: number, color: string) => {
-            for (let i = 0; i < count; i++) {
-                const h = Math.random() * length; // 高度位置
-                const currentRadius = radius * (1 - h / length); // 当前半径
-                const angle = Math.random() * Math.PI * 2;
-                const r = Math.random() * currentRadius;
-
-                p.push({
-                    pos: [
-                        base[0] + r * Math.cos(angle),
-                        base[1] + r * Math.sin(angle),
-                        base[2] + h // 向前伸出
-                    ],
-                    color,
-                    size: 0.15,
-                    speed: Math.random()
-                });
-            }
-        }
-
         // 1. 底部大雪球 (身体)
         addSphere([0, 0, 0], 2.5, 400, '#ffffff', 0.25);
 

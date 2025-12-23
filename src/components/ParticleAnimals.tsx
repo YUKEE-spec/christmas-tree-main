@@ -54,7 +54,6 @@ const Animal: React.FC<AnimalProps> = ({ type, startAngle, radius, speed, yOffse
 
         // 尾巴
         for (let i = 0; i < count * 0.1; i++) {
-            const r = Math.random() * bodySize * 0.8;
             p.push({
                 x: -bodySize - Math.random() * 0.5,
                 y: bodySize * 0.5 + Math.random() * 0.5,
