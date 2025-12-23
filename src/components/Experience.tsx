@@ -122,22 +122,22 @@ const SPIRAL_CONFIG = {
 const getSpiralPosition = (index: number, total: number) => {
   const h = CONFIG.tree.height;
   const rBase = CONFIG.tree.radius;
-  
+
   const t = index / total;
   const y = t * h - (h / 2);
   const normalizedY = t;
-  
+
   const coneRadius = rBase * (1 - normalizedY * 0.95);
   const spiralAngle = t * SPIRAL_CONFIG.turns * Math.PI * 2;
-  
+
   const angleOffset = (Math.random() - 0.5) * 0.3;
   const theta = spiralAngle + angleOffset;
-  
+
   const radiusFactor = 0.9 + Math.random() * 0.1;
   const r = coneRadius * radiusFactor;
-  
+
   const noise = (Math.random() - 0.5) * 0.2;
-  
+
   return new THREE.Vector3(
     r * Math.cos(theta) + noise,
     y + (Math.random() - 0.5) * 0.5,
@@ -152,7 +152,7 @@ const getTreePosition = (shape: string = 'spiral') => {
   const t = Math.random();
   const y = t * h - (h / 2);
   const normalizedY = t;
-  
+
   if (shape === 'cone') {
     const coneRadius = rBase * (1 - normalizedY * 0.95);
     const theta = Math.random() * Math.PI * 2;
@@ -164,12 +164,12 @@ const getTreePosition = (shape: string = 'spiral') => {
       r * Math.sin(theta)
     ];
   }
-  
+
   // 默认：螺旋形
   const coneRadius = rBase * (1 - normalizedY * 0.95);
   const spiralAngle = t * SPIRAL_CONFIG.turns * Math.PI * 2;
   const isOnSpiral = Math.random() < 0.7;
-  
+
   if (isOnSpiral) {
     const angleOffset = (Math.random() - 0.5) * 0.8;
     const theta = spiralAngle + angleOffset;
@@ -195,29 +195,29 @@ const getTreePosition = (shape: string = 'spiral') => {
 };
 
 // Component: Foliage
-const Foliage = ({ state, treeColor, particleCount, treeShape }: { 
-  state: 'CHAOS' | 'FORMED', 
-  treeColor: string, 
-  particleCount?: number, 
-  treeShape?: string 
+const Foliage = ({ state, treeColor, particleCount, treeShape }: {
+  state: 'CHAOS' | 'FORMED',
+  treeColor: string,
+  particleCount?: number,
+  treeShape?: string
 }) => {
   const materialRef = useRef<any>(null);
   const count = particleCount || CONFIG.counts.foliage;
   const shape = treeShape || 'spiral';
-  
+
   const { positions, targetPositions, randoms } = useMemo(() => {
-    const positions = new Float32Array(count * 3); 
-    const targetPositions = new Float32Array(count * 3); 
+    const positions = new Float32Array(count * 3);
+    const targetPositions = new Float32Array(count * 3);
     const randoms = new Float32Array(count);
     const spherePoints = random.inSphere(new Float32Array(count * 3), { radius: 30 }) as Float32Array;
     for (let i = 0; i < count; i++) {
-      positions[i*3] = spherePoints[i*3]; 
-      positions[i*3+1] = spherePoints[i*3+1]; 
-      positions[i*3+2] = spherePoints[i*3+2];
+      positions[i * 3] = spherePoints[i * 3];
+      positions[i * 3 + 1] = spherePoints[i * 3 + 1];
+      positions[i * 3 + 2] = spherePoints[i * 3 + 2];
       const [tx, ty, tz] = getTreePosition(shape);
-      targetPositions[i*3] = tx; 
-      targetPositions[i*3+1] = ty; 
-      targetPositions[i*3+2] = tz;
+      targetPositions[i * 3] = tx;
+      targetPositions[i * 3 + 1] = ty;
+      targetPositions[i * 3 + 2] = tz;
       randoms[i] = Math.random();
     }
     return { positions, targetPositions, randoms };
@@ -236,7 +236,7 @@ const Foliage = ({ state, treeColor, particleCount, treeShape }: {
       materialRef.current.uProgress = MathUtils.damp(materialRef.current.uProgress, targetProgress, 1.5, delta);
     }
   });
-  
+
   return (
     <points>
       <bufferGeometry>
@@ -245,10 +245,10 @@ const Foliage = ({ state, treeColor, particleCount, treeShape }: {
         <bufferAttribute attach="attributes-aRandom" args={[randoms, 1]} />
       </bufferGeometry>
       {/* @ts-ignore */}
-      <foliageMaterial 
-        ref={materialRef} 
-        transparent 
-        depthWrite={false} 
+      <foliageMaterial
+        ref={materialRef}
+        transparent
+        depthWrite={false}
         blending={THREE.AdditiveBlending}
         uColor={new THREE.Color(treeColor)}
         uTime={0}
@@ -260,8 +260,8 @@ const Foliage = ({ state, treeColor, particleCount, treeShape }: {
 
 
 // Component: Photo Ornaments (Double-Sided Polaroid)
-const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: { 
-  state: 'CHAOS' | 'FORMED'; 
+const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
+  state: 'CHAOS' | 'FORMED';
   textureArray: THREE.Texture[];
   onPhotoClick?: (textureIndex: number) => void;
 }) => {
@@ -300,9 +300,9 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
       const isBig = seededRandom(seed + 3) < 0.25;
       const baseScale = isBig ? 2.5 : 1.2 + seededRandom(seed + 4) * 0.8;
       const weight = 0.8 + seededRandom(seed + 5) * 1.2;
-      
+
       const borderColors = [
-        '#FFD700', '#C0C0C0', '#CD7F32', '#FFFAF0', 
+        '#FFD700', '#C0C0C0', '#CD7F32', '#FFFAF0',
         '#F5F5DC', '#DDA0DD', '#FFB6C1', '#98FB98',
       ];
       const borderColor = borderColors[Math.floor(seededRandom(seed + 6) * borderColors.length)];
@@ -349,18 +349,18 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
       group.position.copy(objData.currentPos);
 
       if (isFormed) {
-         const targetLookPos = new THREE.Vector3(group.position.x * 1.5, group.position.y + 0.3, group.position.z * 1.5);
-         group.lookAt(targetLookPos);
+        const targetLookPos = new THREE.Vector3(group.position.x * 1.5, group.position.y + 0.3, group.position.z * 1.5);
+        group.lookAt(targetLookPos);
 
-         const wobbleX = Math.sin(time * objData.wobbleSpeed + objData.wobbleOffset) * 0.03;
-         const wobbleZ = Math.cos(time * objData.wobbleSpeed * 0.8 + objData.wobbleOffset) * 0.03;
-         group.rotation.x += wobbleX;
-         group.rotation.z += wobbleZ;
+        const wobbleX = Math.sin(time * objData.wobbleSpeed + objData.wobbleOffset) * 0.03;
+        const wobbleZ = Math.cos(time * objData.wobbleSpeed * 0.8 + objData.wobbleOffset) * 0.03;
+        group.rotation.x += wobbleX;
+        group.rotation.z += wobbleZ;
 
       } else {
-         group.rotation.x += delta * objData.rotationSpeed.x;
-         group.rotation.y += delta * objData.rotationSpeed.y;
-         group.rotation.z += delta * objData.rotationSpeed.z;
+        group.rotation.x += delta * objData.rotationSpeed.x;
+        group.rotation.y += delta * objData.rotationSpeed.y;
+        group.rotation.z += delta * objData.rotationSpeed.z;
       }
     });
   });
@@ -370,98 +370,98 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
       {data.map((obj, i) => {
         const texIdx = getTextureIndex(i);
         return (
-        <group key={i} scale={[obj.scale, obj.scale, obj.scale]} rotation={state === 'CHAOS' ? obj.chaosRotation : [0,0,0]}>
-          {/* 正面 */}
-          <group position={[0, 0, 0.02]}>
-            <mesh 
-              geometry={photoGeometry}
-              onDoubleClick={(e) => {
-                e.stopPropagation();
-                onPhotoClick?.(texIdx);
-              }}
-            >
-              <meshStandardMaterial
-                map={textureArray[texIdx]}
-                roughness={0.2} 
-                metalness={0.1}
-                emissive={CONFIG.colors.white} 
-                emissiveMap={textureArray[texIdx]} 
-                emissiveIntensity={1.2}
-                side={THREE.FrontSide}
-              />
-            </mesh>
-            {obj.frameType === 'ornate' ? (
-              <>
-                <mesh geometry={borderGeometry} position={[0, -0.15, -0.01]}>
-                  <meshStandardMaterial 
-                    color={obj.borderColor} 
-                    roughness={0.2} 
-                    metalness={0.8}
-                    emissive={obj.borderColor}
-                    emissiveIntensity={0.4}
-                    side={THREE.FrontSide} 
-                  />
-                </mesh>
-                <mesh geometry={new THREE.PlaneGeometry(1.2, 1.5)} position={[0, -0.15, -0.005]}>
-                  <meshStandardMaterial 
-                    color={obj.borderColor === '#FFD700' ? '#FFF8DC' : '#FFFFFF'} 
-                    roughness={0.8} 
-                    metalness={0.1}
-                    side={THREE.FrontSide} 
-                  />
-                </mesh>
-              </>
-            ) : (
-              <mesh geometry={borderGeometry} position={[0, -0.15, -0.01]}>
-                <meshStandardMaterial 
-                  color={obj.borderColor} 
-                  roughness={0.5} 
-                  metalness={0.5}
-                  emissive={obj.borderColor}
-                  emissiveIntensity={0.3}
-                  side={THREE.FrontSide} 
+          <group key={i} scale={[obj.scale, obj.scale, obj.scale]} rotation={state === 'CHAOS' ? obj.chaosRotation : [0, 0, 0]}>
+            {/* 正面 */}
+            <group position={[0, 0, 0.02]}>
+              <mesh
+                geometry={photoGeometry}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  onPhotoClick?.(texIdx);
+                }}
+              >
+                <meshStandardMaterial
+                  map={textureArray[texIdx]}
+                  roughness={0.2}
+                  metalness={0.1}
+                  emissive={CONFIG.colors.white}
+                  emissiveMap={textureArray[texIdx]}
+                  emissiveIntensity={1.2}
+                  side={THREE.FrontSide}
                 />
               </mesh>
-            )}
-          </group>
-          {/* 背面 */}
-          <group position={[0, 0, -0.02]} rotation={[0, Math.PI, 0]}>
-            <mesh 
-              geometry={photoGeometry}
-              onDoubleClick={(e) => {
-                e.stopPropagation();
-                onPhotoClick?.(texIdx);
-              }}
-            >
-              <meshStandardMaterial
-                map={textureArray[texIdx]}
-                roughness={0.3} 
-                metalness={0.1}
-                emissive={CONFIG.colors.white} 
-                emissiveMap={textureArray[texIdx]} 
-                emissiveIntensity={0.8}
-                side={THREE.FrontSide}
+              {obj.frameType === 'ornate' ? (
+                <>
+                  <mesh geometry={borderGeometry} position={[0, -0.15, -0.01]}>
+                    <meshStandardMaterial
+                      color={obj.borderColor}
+                      roughness={0.2}
+                      metalness={0.8}
+                      emissive={obj.borderColor}
+                      emissiveIntensity={0.4}
+                      side={THREE.FrontSide}
+                    />
+                  </mesh>
+                  <mesh geometry={new THREE.PlaneGeometry(1.2, 1.5)} position={[0, -0.15, -0.005]}>
+                    <meshStandardMaterial
+                      color={obj.borderColor === '#FFD700' ? '#FFF8DC' : '#FFFFFF'}
+                      roughness={0.8}
+                      metalness={0.1}
+                      side={THREE.FrontSide}
+                    />
+                  </mesh>
+                </>
+              ) : (
+                <mesh geometry={borderGeometry} position={[0, -0.15, -0.01]}>
+                  <meshStandardMaterial
+                    color={obj.borderColor}
+                    roughness={0.5}
+                    metalness={0.5}
+                    emissive={obj.borderColor}
+                    emissiveIntensity={0.3}
+                    side={THREE.FrontSide}
+                  />
+                </mesh>
+              )}
+            </group>
+            {/* 背面 */}
+            <group position={[0, 0, -0.02]} rotation={[0, Math.PI, 0]}>
+              <mesh
+                geometry={photoGeometry}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  onPhotoClick?.(texIdx);
+                }}
+              >
+                <meshStandardMaterial
+                  map={textureArray[texIdx]}
+                  roughness={0.3}
+                  metalness={0.1}
+                  emissive={CONFIG.colors.white}
+                  emissiveMap={textureArray[texIdx]}
+                  emissiveIntensity={0.8}
+                  side={THREE.FrontSide}
+                />
+              </mesh>
+              <mesh geometry={borderGeometry} position={[0, -0.15, -0.01]}>
+                <meshStandardMaterial
+                  color={obj.borderColor}
+                  roughness={0.6}
+                  metalness={0.4}
+                  side={THREE.FrontSide}
+                />
+              </mesh>
+            </group>
+            <mesh geometry={new THREE.PlaneGeometry(1.4, 1.7)} position={[0, -0.15, 0]}>
+              <meshBasicMaterial
+                color={obj.borderColor}
+                transparent
+                opacity={0.05}
+                blending={THREE.AdditiveBlending}
+                side={THREE.DoubleSide}
               />
             </mesh>
-            <mesh geometry={borderGeometry} position={[0, -0.15, -0.01]}>
-              <meshStandardMaterial 
-                color={obj.borderColor} 
-                roughness={0.6} 
-                metalness={0.4}
-                side={THREE.FrontSide} 
-              />
-            </mesh>
           </group>
-          <mesh geometry={new THREE.PlaneGeometry(1.4, 1.7)} position={[0, -0.15, 0]}>
-            <meshBasicMaterial 
-              color={obj.borderColor}
-              transparent
-              opacity={0.05}
-              blending={THREE.AdditiveBlending}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-        </group>
         );
       })}
     </group>
@@ -484,13 +484,13 @@ const PhotoOrnamentsCustom = ({ state, customPhotos, onPhotoClick }: { state: 'C
     // 检查照片是否真的变化了
     const photosChanged = customPhotos.length !== prevPhotosRef.current.length ||
       customPhotos.some((url, i) => url !== prevPhotosRef.current[i]);
-    
+
     if (!photosChanged && textures.length > 0) {
       return;
     }
-    
+
     prevPhotosRef.current = [...customPhotos];
-    
+
     const loader = new THREE.TextureLoader();
     let mounted = true;
     setIsLoading(true);
@@ -545,14 +545,14 @@ const PhotoOrnamentsCustom = ({ state, customPhotos, onPhotoClick }: { state: 'C
   if (isLoading || textures.length === 0) {
     return <group />;
   }
-  
+
   return <PhotoOrnamentsInner state={state} textureArray={textures} onPhotoClick={onPhotoClick} />;
 };
 
 const PhotoOrnaments = ({ state, customPhotos, onPhotoClick }: { state: 'CHAOS' | 'FORMED'; customPhotos?: string[]; onPhotoClick?: (index: number) => void }) => {
   // 明确判断：有自定义照片就只用自定义的，不混用
   const hasCustomPhotos = customPhotos && customPhotos.length > 0;
-  
+
   if (hasCustomPhotos) {
     return <PhotoOrnamentsCustom state={state} customPhotos={customPhotos} onPhotoClick={onPhotoClick} />;
   }
@@ -565,14 +565,31 @@ const FairyLights = ({ state, lightColors }: { state: 'CHAOS' | 'FORMED'; lightC
   const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
   const count = isMobile ? 80 : CONFIG.counts.lights;
   const groupRef = useRef<THREE.Group>(null);
-  const lightColorsLengthRef = useRef(lightColors.length);
+
+  // 安全的颜色列表，防止除以0导致的 NaN
+  const safeColors = useMemo(() => {
+    return (lightColors && lightColors.length > 0) ? lightColors : ['#FFD700', '#FFFFFF', '#FF0000', '#00FF00'];
+  }, [lightColors]);
+
+  const lightColorsLengthRef = useRef(safeColors.length);
+  // 当颜色列表长度变化时更新 ref，避免重生成数据但计算越界
+  useEffect(() => {
+    lightColorsLengthRef.current = safeColors.length;
+  }, [safeColors.length]);
+
+  // 预创建几何体，避免在循环中重复创建造成内存泄漏和性能崩溃
+  const starGeo = useMemo(() => new THREE.CylinderGeometry(0, 1.2, 0.8, 5), []);
+  const sphereGeo = useMemo(() => new THREE.SphereGeometry(1.2, 16, 16), []);
+  const haloGeo = useMemo(() => new THREE.SphereGeometry(2.2, 8, 8), []);
+  const glowGeo = useMemo(() => new THREE.SphereGeometry(1.6, 6, 6), []);
 
   // 只在数量变化时重新生成数据，颜色变化不影响位置
   const data = useMemo(() => {
     return new Array(count).fill(0).map((_, i) => {
-      const chaosPos = new THREE.Vector3((Math.random()-0.5)*60, (Math.random()-0.5)*60, (Math.random()-0.5)*60);
+      const chaosPos = new THREE.Vector3((Math.random() - 0.5) * 60, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 60);
       const targetPos = getSpiralPosition(i, count);
-      const colorIndex = i % lightColorsLengthRef.current;
+      // 使用 ref 避免闭包依赖
+      const colorIndex = i;
       const speed = 1 + Math.random() * 1.5;
       const phase = Math.random() * Math.PI * 2;
       const size = 0.15 + Math.random() * 0.2;
@@ -585,50 +602,52 @@ const FairyLights = ({ state, lightColors }: { state: 'CHAOS' | 'FORMED'; lightC
     if (!groupRef.current) return;
     const isFormed = state === 'FORMED';
     const time = stateObj.clock.elapsedTime;
-    
+    const colors = safeColors; // 捕获当前 render 的颜色
+    const numColors = colors.length;
+
     groupRef.current.children.forEach((child, i) => {
       const group = child as THREE.Group;
       const objData = data[i];
       const target = isFormed ? objData.targetPos : objData.chaosPos;
       objData.currentPos.lerp(target, delta * 2.0);
       group.position.copy(objData.currentPos);
-      
+
       const wave1 = Math.sin(time * objData.speed + objData.phase);
       const wave2 = Math.sin(time * objData.speed * 0.6 + objData.phase * 1.2);
       const pulse = (wave1 * 0.7 + wave2 * 0.3 + 2) / 4;
-      
+
       const mesh = group.children[0] as THREE.Mesh;
       const halo = group.children[1] as THREE.Mesh;
-      
+
+      // 动态获取颜色
+      const colorIndex = objData.colorIndex % numColors;
+      const currentColor = colors[colorIndex];
+
       if (mesh && mesh.material) {
         const mat = mesh.material as THREE.MeshStandardMaterial;
         mat.emissiveIntensity = isFormed ? 2 + pulse * 4 : 0;
-        // 动态更新颜色
-        const currentColor = lightColors[objData.colorIndex % lightColors.length];
+
         mat.color.set(currentColor);
         mat.emissive.set(currentColor);
-        
+
         const breathe = 1 + pulse * 0.25;
         group.scale.setScalar(objData.size * breathe);
-        
+
         if (objData.lightType === 'star') {
           group.rotation.z = time * 0.3 + objData.phase;
         }
       }
-      
+
       if (halo && halo.material) {
         const haloMat = halo.material as THREE.MeshBasicMaterial;
         haloMat.opacity = isFormed ? 0.2 + pulse * 0.3 : 0;
-        // 动态更新光晕颜色
-        const currentColor = lightColors[objData.colorIndex % lightColors.length];
         haloMat.color.set(currentColor);
       }
-      
+
       // 更新第三个光晕
       const halo2 = group.children[2] as THREE.Mesh;
       if (halo2 && halo2.material) {
         const halo2Mat = halo2.material as THREE.MeshBasicMaterial;
-        const currentColor = lightColors[objData.colorIndex % lightColors.length];
         halo2Mat.color.set(currentColor);
       }
     });
@@ -636,57 +655,48 @@ const FairyLights = ({ state, lightColors }: { state: 'CHAOS' | 'FORMED'; lightC
 
   return (
     <group ref={groupRef}>
-      {data.map((obj, i) => (
-        <group key={i}>
-          {obj.lightType === 'star' ? (
-            <mesh>
-              <cylinderGeometry args={[0, 1.2, 0.8, 5]} />
-              <meshStandardMaterial 
-                color={lightColors[obj.colorIndex % lightColors.length]} 
-                emissive={lightColors[obj.colorIndex % lightColors.length]} 
-                emissiveIntensity={0} 
+      {data.map((obj, i) => {
+        // Render 时的颜色 (初始值)，动画循环会覆盖它
+        const initialColor = safeColors[obj.colorIndex % safeColors.length];
+
+        return (
+          <group key={i}>
+            {/* 主体光源 */}
+            <mesh geometry={obj.lightType === 'star' ? starGeo : sphereGeo}>
+              <meshStandardMaterial
+                color={initialColor}
+                emissive={initialColor}
+                emissiveIntensity={0}
                 toneMapped={false}
                 transparent
                 opacity={1.0}
-                roughness={0.05}
-                metalness={0.8}
+                roughness={obj.lightType === 'star' ? 0.05 : 0.02}
+                metalness={obj.lightType === 'star' ? 0.8 : 0.9}
               />
             </mesh>
-          ) : (
-            <mesh>
-              <sphereGeometry args={[1.2, 16, 16]} />
-              <meshStandardMaterial 
-                color={lightColors[obj.colorIndex % lightColors.length]} 
-                emissive={lightColors[obj.colorIndex % lightColors.length]} 
-                emissiveIntensity={0} 
-                toneMapped={false}
+
+            {/* 外层大光晕 */}
+            <mesh geometry={haloGeo}>
+              <meshBasicMaterial
+                color={initialColor}
                 transparent
-                opacity={1.0}
-                roughness={0.02}
-                metalness={0.9}
+                opacity={0}
+                blending={THREE.AdditiveBlending}
               />
             </mesh>
-          )}
-          <mesh>
-            <sphereGeometry args={[2.2, 8, 8]} />
-            <meshBasicMaterial 
-              color={lightColors[obj.colorIndex % lightColors.length]}
-              transparent
-              opacity={0}
-              blending={THREE.AdditiveBlending}
-            />
-          </mesh>
-          <mesh>
-            <sphereGeometry args={[1.6, 6, 6]} />
-            <meshBasicMaterial 
-              color={lightColors[obj.colorIndex % lightColors.length]}
-              transparent
-              opacity={0.15}
-              blending={THREE.AdditiveBlending}
-            />
-          </mesh>
-        </group>
-      ))}
+
+            {/* 内层强光晕 */}
+            <mesh geometry={glowGeo}>
+              <meshBasicMaterial
+                color={initialColor}
+                transparent
+                opacity={0.15}
+                blending={THREE.AdditiveBlending}
+              />
+            </mesh>
+          </group>
+        )
+      })}
     </group>
   );
 };
@@ -1057,7 +1067,7 @@ const GiftPile = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
         (Math.random() - 0.5) * 60,
         (Math.random() - 0.5) * 60
       );
-      
+
       const angle = Math.random() * Math.PI * 2;
       const distance = 8 + Math.random() * 8;
       const targetPos = new THREE.Vector3(
@@ -1116,16 +1126,16 @@ const GoldenNebula = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
     canvas.height = 64;
     const ctx = canvas.getContext('2d')!;
     const cx = 32, cy = 32;
-    
+
     // 创建径向渐变
     const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 32);
     gradient.addColorStop(0, 'rgba(255, 215, 0, 1)');
     gradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.5)');
     gradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
-    
+
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 64, 64);
-    
+
     return new THREE.CanvasTexture(canvas);
   }, []);
 
@@ -1142,13 +1152,13 @@ const GoldenNebula = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
       const angle = Math.random() * Math.PI * 2;
       const height = (Math.random() - 0.5) * 80;
       const distance = 35 + Math.random() * 60;
-      
+
       const wave = Math.sin(angle * 2 + height * 0.05) * 8;
-      
+
       targetPositions[i * 3] = Math.cos(angle) * (distance + wave);
       targetPositions[i * 3 + 1] = height;
       targetPositions[i * 3 + 2] = Math.sin(angle) * (distance + wave);
-      
+
       sizes[i] = 2 + Math.random() * 4;
     }
 
@@ -1166,19 +1176,19 @@ const GoldenNebula = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
       const currentX = posAttr.getX(i);
       const currentY = posAttr.getY(i);
       const currentZ = posAttr.getZ(i);
-      
+
       const targetX = targetAttr.getX(i);
       const targetY = targetAttr.getY(i);
       const targetZ = targetAttr.getZ(i);
-      
+
       const lerpFactor = isFormed ? 0.5 * delta : 0.2 * delta;
-      
+
       const newX = THREE.MathUtils.lerp(currentX, targetX, lerpFactor);
       const newY = THREE.MathUtils.lerp(currentY, targetY, lerpFactor);
       const newZ = THREE.MathUtils.lerp(currentZ, targetZ, lerpFactor);
-      
+
       const drift = Math.sin(time * 0.2 + i * 0.1) * 0.5;
-      
+
       posAttr.setXYZ(i, newX + drift, newY, newZ + drift * 0.5);
     }
     posAttr.needsUpdate = true;
@@ -1191,7 +1201,7 @@ const GoldenNebula = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
         <bufferAttribute attach="attributes-aTargetPos" args={[targetPositions, 3]} />
         <bufferAttribute attach="attributes-size" args={[sizes, 1]} />
       </bufferGeometry>
-      <pointsMaterial 
+      <pointsMaterial
         color="#FFD700"
         size={3}
         transparent
@@ -1232,14 +1242,14 @@ const Snowfall = () => {
     canvas.height = 128;
     const ctx = canvas.getContext('2d')!;
     const cx = 64, cy = 64;
-    
+
     ctx.fillStyle = 'rgba(0,0,0,0)';
     ctx.fillRect(0, 0, 128, 128);
-    
+
     ctx.strokeStyle = 'rgba(255,255,255,0.9)';
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
-    
+
     for (let i = 0; i < 6; i++) {
       const angle = (i * Math.PI) / 3;
       ctx.beginPath();
@@ -1248,13 +1258,13 @@ const Snowfall = () => {
       const endY = cy + Math.sin(angle) * 50;
       ctx.lineTo(endX, endY);
       ctx.stroke();
-      
+
       for (let j = 1; j <= 2; j++) {
         const branchDist = j * 18;
         const branchX = cx + Math.cos(angle) * branchDist;
         const branchY = cy + Math.sin(angle) * branchDist;
         const branchLen = 12 - j * 3;
-        
+
         ctx.beginPath();
         ctx.moveTo(branchX, branchY);
         ctx.lineTo(
@@ -1262,7 +1272,7 @@ const Snowfall = () => {
           branchY + Math.sin(angle + Math.PI / 4) * branchLen
         );
         ctx.stroke();
-        
+
         ctx.beginPath();
         ctx.moveTo(branchX, branchY);
         ctx.lineTo(
@@ -1272,12 +1282,12 @@ const Snowfall = () => {
         ctx.stroke();
       }
     }
-    
+
     ctx.beginPath();
     ctx.arc(cx, cy, 4, 0, Math.PI * 2);
     ctx.fillStyle = 'rgba(255,255,255,1)';
     ctx.fill();
-    
+
     return new THREE.CanvasTexture(canvas);
   }, []);
 
@@ -1288,16 +1298,16 @@ const Snowfall = () => {
 
     for (let i = 0; i < count; i++) {
       let y = posAttr.getY(i) - velocities[i] * delta;
-      
+
       if (y < -50) {
         y = 90;
         posAttr.setX(i, (Math.random() - 0.5) * 180);
         posAttr.setZ(i, (Math.random() - 0.5) * 180);
       }
-      
+
       const x = posAttr.getX(i) + Math.sin(time * 0.5 + i * 0.1) * delta * 3;
       const z = posAttr.getZ(i) + Math.cos(time * 0.4 + i * 0.1) * delta * 2;
-      
+
       posAttr.setXYZ(i, x, y, z);
     }
     posAttr.needsUpdate = true;
@@ -1308,7 +1318,7 @@ const Snowfall = () => {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial 
+      <pointsMaterial
         color="#FFFFFF"
         size={8}
         transparent
@@ -1337,31 +1347,31 @@ interface ExperienceProps {
   particleTextColor?: string;
 }
 
-export const Experience: React.FC<ExperienceProps> = ({ 
-  sceneState, 
-  rotationSpeed, 
-  treeColor, 
-  decorations, 
-  customPhotos, 
-  onPhotoClick, 
-  particleCount, 
-  treeShape, 
-  lightColors, 
+export const Experience: React.FC<ExperienceProps> = ({
+  sceneState,
+  rotationSpeed,
+  treeColor,
+  decorations,
+  customPhotos,
+  onPhotoClick,
+  particleCount,
+  treeShape,
+  lightColors,
   giftConfig,
   particleText = '',
   particleTextColor
 }) => {
   const controlsRef = useRef<any>(null);
-  
+
   // 检测移动端
   const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
-  
+
   // 移动端相机更近，FOV更大
   const cameraPosition: [number, number, number] = isMobile ? [0, 8, 55] : [0, 10, 75];
   const cameraFov = isMobile ? 60 : 50;
   const minDistance = isMobile ? 30 : 40;
   const maxDistance = isMobile ? 100 : 150;
-  
+
   useFrame(() => {
     if (controlsRef.current) {
       controlsRef.current.setAzimuthalAngle(controlsRef.current.getAzimuthalAngle() + rotationSpeed);
@@ -1372,14 +1382,14 @@ export const Experience: React.FC<ExperienceProps> = ({
   return (
     <>
       <PerspectiveCamera makeDefault position={cameraPosition} fov={cameraFov} />
-      <OrbitControls 
-        ref={controlsRef} 
-        enablePan={false} 
-        enableZoom={true} 
-        minDistance={minDistance} 
-        maxDistance={maxDistance} 
-        autoRotate={rotationSpeed === 0 && sceneState === 'FORMED'} 
-        autoRotateSpeed={0.3} 
+      <OrbitControls
+        ref={controlsRef}
+        enablePan={false}
+        enableZoom={true}
+        minDistance={minDistance}
+        maxDistance={maxDistance}
+        autoRotate={rotationSpeed === 0 && sceneState === 'FORMED'}
+        autoRotateSpeed={0.3}
         maxPolarAngle={Math.PI / 1.7}
         touches={{ ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN }}
       />
@@ -1400,9 +1410,9 @@ export const Experience: React.FC<ExperienceProps> = ({
 
       {/* 粒子文字 */}
       {particleText && (
-        <ParticleText 
-          text={particleText} 
-          color={particleTextColor || treeColor} 
+        <ParticleText
+          text={particleText}
+          color={particleTextColor || treeColor}
           state={sceneState}
           position={[0, 20, -35]}
           size={12}
@@ -1413,11 +1423,11 @@ export const Experience: React.FC<ExperienceProps> = ({
       <group position={[0, -6, 0]}>
         <Foliage state={sceneState} treeColor={treeColor} particleCount={particleCount} treeShape={treeShape} />
         <Suspense fallback={null}>
-           {decorations.showPhotos && <PhotoOrnaments state={sceneState} customPhotos={customPhotos} onPhotoClick={onPhotoClick} />}
-           {decorations.showGifts && <EnhancedGifts state={sceneState} config={giftConfig} />}
-           {decorations.showGifts && <GiftPile state={sceneState} />}
-           {decorations.showLights && <FairyLights state={sceneState} lightColors={lightColors} />}
-           {decorations.showLights && <TopStar state={sceneState} color={lightColors[0]} />}
+          {decorations.showPhotos && <PhotoOrnaments state={sceneState} customPhotos={customPhotos} onPhotoClick={onPhotoClick} />}
+          {decorations.showGifts && <EnhancedGifts state={sceneState} config={giftConfig} />}
+          {decorations.showGifts && <GiftPile state={sceneState} />}
+          {decorations.showLights && <FairyLights state={sceneState} lightColors={lightColors} />}
+          {decorations.showLights && <TopStar state={sceneState} color={lightColors[0]} />}
         </Suspense>
         {decorations.showSparkles && !isMobile && <Sparkles count={40} scale={50} size={4} speed={0.3} opacity={0.5} color={CONFIG.colors.gold} />}
         {decorations.showSparkles && isMobile && <Sparkles count={15} scale={40} size={3} speed={0.2} opacity={0.4} color={CONFIG.colors.gold} />}
