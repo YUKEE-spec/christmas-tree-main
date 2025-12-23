@@ -301,19 +301,12 @@ export default function GrandTreeApp() {
 
         {/* 3. 挂礼物 */}
         <button
+          className={`tech-btn ${giftConfig.enabled ? 'active' : ''}`}
           onClick={() => setShowGiftConfig(!showGiftConfig)}
           style={{
             padding: '10px 16px',
-            backgroundColor: giftConfig.enabled ? 'rgba(211,47,47,0.15)' : 'rgba(0,0,0,0.6)',
-            border: `1px solid ${giftConfig.enabled ? '#D32F2F' : '#444'}`,
-            color: giftConfig.enabled ? '#D32F2F' : '#666',
-            fontFamily: 'sans-serif',
             fontSize: '11px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            backdropFilter: 'blur(4px)',
             borderRadius: '6px',
-            transition: 'all 0.2s ease',
             letterSpacing: '1px'
           }}
         >
@@ -334,19 +327,12 @@ export default function GrandTreeApp() {
 
         {/* 5. 下雪 */}
         <button
+          className={`tech-btn ${decorations.showSnow ? 'active' : ''}`}
           onClick={() => toggleDecoration('showSnow')}
           style={{
             padding: '10px 16px',
-            backgroundColor: decorations.showSnow ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.6)',
-            border: `1px solid ${decorations.showSnow ? '#FFFFFF' : '#444'}`,
-            color: decorations.showSnow ? '#FFFFFF' : '#666',
-            fontFamily: 'sans-serif',
             fontSize: '11px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            backdropFilter: 'blur(4px)',
             borderRadius: '6px',
-            transition: 'all 0.2s ease',
             letterSpacing: '1px'
           }}
         >
@@ -355,19 +341,12 @@ export default function GrandTreeApp() {
 
         {/* 6. 闪耀 */}
         <button
+          className={`tech-btn ${decorations.showShine ? 'active' : ''}`}
           onClick={() => toggleDecoration('showShine')}
           style={{
             padding: '10px 16px',
-            backgroundColor: decorations.showShine ? 'rgba(255,215,0,0.15)' : 'rgba(0,0,0,0.6)',
-            border: `1px solid ${decorations.showShine ? '#FFD700' : '#444'}`,
-            color: decorations.showShine ? '#FFD700' : '#666',
-            fontFamily: 'sans-serif',
             fontSize: '11px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            backdropFilter: 'blur(4px)',
             borderRadius: '6px',
-            transition: 'all 0.2s ease',
             letterSpacing: '1px'
           }}
         >

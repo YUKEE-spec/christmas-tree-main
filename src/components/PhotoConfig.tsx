@@ -88,7 +88,7 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
       <div style={{
         position: 'fixed',
         top: isMobile ? 'auto' : '50%',
-        bottom: isMobile ? '0' : 'auto',
+        bottom: isMobile ? '90px' : 'auto',
         left: isMobile ? '0' : '50%',
         right: isMobile ? '0' : 'auto',
         transform: isMobile ? 'none' : 'translate(-50%, -50%)',
