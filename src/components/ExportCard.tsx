@@ -347,7 +347,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
       }} onClick={e => e.stopPropagation()}>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h3 style={{ color: '#89CFF0', margin: 0, fontFamily: 'Orbitron', fontSize: 16, letterSpacing: 1 }}>MIDNIGHT CARD</h3>
+          <h3 style={{ color: '#89CFF0', margin: 0, fontFamily: 'Orbitron', fontSize: 16, letterSpacing: 1 }}>5114 card</h3>
           <span onClick={() => !isExporting && setIsOpen(false)} style={{ cursor: 'pointer' }}><TechIcon name="close" size={20} color="#89CFF0" /></span>
         </div>
 
