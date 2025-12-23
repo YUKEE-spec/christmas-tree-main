@@ -188,13 +188,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
           ctx.fillText(line, w / 2, textYStart + index * lineHeight);
         });
 
-        // 7. 粒子祝福水印
-        if (particleText) {
-          const ptY = textYStart + lines.length * lineHeight + (25 * scale);
-          ctx.font = `500 ${18 * scale}px "Inter", sans-serif`; // 稍微细一点
-          ctx.fillStyle = 'rgba(100, 200, 255, 0.7)'; // 降低干扰
-          ctx.fillText(`✨ ${particleText} ✨`, w / 2, ptY);
-        }
+
 
         // 8. 底部署名 (Apple Style: 极简、全大写、宽字间距)
         if (fromName) {
