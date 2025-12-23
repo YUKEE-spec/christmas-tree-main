@@ -3,16 +3,16 @@ import { TechIcon } from './icons/TechIcons';
 
 // 树形状配置
 export const TREE_SHAPE_OPTIONS = [
-  { name: 'CONE', value: 'cone' },
-  { name: 'SPIRAL', value: 'spiral' },
+  { name: '经典锥形', value: 'cone' },
+  { name: '螺旋塔', value: 'spiral' },
 ];
 
 // 粒子数量配置
 export const PARTICLE_OPTIONS = [
-  { name: 'LITE', value: 5000 },
-  { name: 'STD', value: 10000 },
-  { name: 'HIGH', value: 18000 },
-  { name: 'ULTRA', value: 30000 },
+  { name: '节能', value: 5000 },
+  { name: '标准', value: 10000 },
+  { name: '高配', value: 18000 },
+  { name: '极致', value: 30000 },
 ];
 
 // 设置配置接口
@@ -48,7 +48,7 @@ export const SettingsConfigPanel: React.FC<SettingsConfigPanelProps> = ({
   onChange,
   isOpen,
   onToggle,
-  buttonLabel = 'SYSTEM'
+  buttonLabel = '系统设置'
 }) => {
   const isMobile = detectMobile();
   const updateConfig = (updates: Partial<SettingsConfig>) => {
@@ -78,7 +78,7 @@ export const SettingsConfigPanel: React.FC<SettingsConfigPanelProps> = ({
         }}>
           {/* 树形状选择 */}
           <div style={{ marginBottom: '15px' }}>
-            <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>GEOMETRY</p>
+            <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>几何形状</p>
             <div style={{ display: 'flex', gap: '8px' }}>
               {TREE_SHAPE_OPTIONS.map((shape) => (
                 <button
@@ -95,7 +95,7 @@ export const SettingsConfigPanel: React.FC<SettingsConfigPanelProps> = ({
 
           {/* 粒子数量选择 */}
           <div>
-            <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>PARTICLE COUNT</p>
+            <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>粒子总量</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               {PARTICLE_OPTIONS.map((option) => (
                 <button

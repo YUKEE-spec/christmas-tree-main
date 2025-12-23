@@ -344,7 +344,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
         style={{ padding: '8px 12px', fontSize: '12px' }}
       >
         <TechIcon name="download" size={16} />
-        {!isMobile && " EXPORT"}
+        {!isMobile && " 导出贺卡"}
       </button>
 
       {isOpen && (
@@ -363,7 +363,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
               color: 'var(--tech-gold)', margin: '0 0 20px 0', textAlign: 'center',
               fontFamily: 'Orbitron, sans-serif', letterSpacing: '2px'
             }}>
-              DATA EXPORT
+              贺卡导出终端
             </h3>
 
             {/* 预览区域 */}
@@ -371,18 +371,18 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
               <div style={{ textAlign: 'center' }}>
                 {exportDone ? (
                   <>
-                    <p style={{ color: '#4CAF50', marginBottom: 10 }}>generated successfully</p>
+                    <p style={{ color: '#4CAF50', marginBottom: 10 }}>生成成功</p>
                     <img src={mobileImageUrl!} style={{ width: '100%', border: '1px solid var(--tech-gold)', marginBottom: 20 }} />
-                    <p style={{ fontSize: 12, color: '#888' }}>Long press image to save</p>
-                    <button className="tech-btn" onClick={() => { setIsOpen(false); setExportDone(false); setShowPreview(false); }} style={{ width: '100%' }}>CLOSE</button>
+                    <p style={{ fontSize: 12, color: '#888' }}>长按图片保存到相册</p>
+                    <button className="tech-btn" onClick={() => { setIsOpen(false); setExportDone(false); setShowPreview(false); }} style={{ width: '100%' }}>关闭</button>
                   </>
                 ) : (
                   <>
                     <img src={previewUrl} style={{ width: '100%', border: '1px solid var(--tech-gold)', marginBottom: 20 }} />
                     <div style={{ display: 'flex', gap: 10 }}>
-                      <button className="tech-btn" onClick={() => setShowPreview(false)} disabled={isExporting}>BACK</button>
+                      <button className="tech-btn" onClick={() => setShowPreview(false)} disabled={isExporting}>返回</button>
                       <button className="tech-btn gold" onClick={confirmExport} disabled={isExporting}>
-                        {isExporting ? 'SAVING...' : 'SAVE CARD'}
+                        {isExporting ? '保存中...' : '保存贺卡'}
                       </button>
                     </div>
                   </>
@@ -392,7 +392,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
               <>
                 {/* 表单区域 */}
                 <div style={{ marginBottom: 20 }}>
-                  <label style={{ display: 'block', color: 'var(--tech-cyan)', fontSize: 10, marginBottom: 5 }}>BLESSING (MULTILINE)</label>
+                  <label style={{ display: 'block', color: 'var(--tech-cyan)', fontSize: 10, marginBottom: 5 }}>祝福语 (支持多行)</label>
                   <textarea
                     value={greeting}
                     onChange={(e) => setGreeting(e.target.value)}
@@ -405,7 +405,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
                 </div>
 
                 <div style={{ marginBottom: 20 }}>
-                  <label style={{ display: 'block', color: 'var(--tech-cyan)', fontSize: 10, marginBottom: 5 }}>FROM</label>
+                  <label style={{ display: 'block', color: 'var(--tech-cyan)', fontSize: 10, marginBottom: 5 }}>署名</label>
                   <input
                     type="text"
                     value={fromName}
@@ -418,21 +418,21 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
                 </div>
 
                 <div style={{ marginBottom: 20 }}>
-                  <label style={{ display: 'block', color: 'var(--tech-cyan)', fontSize: 10, marginBottom: 5 }}>FORMAT</label>
+                  <label style={{ display: 'block', color: 'var(--tech-cyan)', fontSize: 10, marginBottom: 5 }}>导出格式</label>
                   <div style={{ display: 'flex', gap: 10 }}>
                     <button
                       className={`tech-btn ${exportType === 'image' ? 'active' : ''}`}
                       style={{ flex: 1 }}
                       onClick={() => setExportType('image')}
                     >
-                      PNG IMAGE
+                      高清图片
                     </button>
                     <button
                       className={`tech-btn ${exportType === 'gif' ? 'active' : ''}`}
                       style={{ flex: 1 }}
                       onClick={() => setExportType('gif')}
                     >
-                      GIF ANIMATION
+                      动态 GIF
                     </button>
                   </div>
                 </div>
@@ -443,7 +443,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
                   onClick={handlePreview}
                   disabled={isExporting}
                 >
-                  {isExporting ? `PROCESSING ${exportProgress}%` : 'PREVIEW CARD'}
+                  {isExporting ? `处理中 ${exportProgress}%` : '生成预览'}
                 </button>
               </>
             )}

@@ -1,31 +1,30 @@
 import React from 'react';
 
-
 // 树颜色配置 - 使用更亮更鲜艳的颜色
 export const TREE_COLOR_OPTIONS = [
-  { name: 'SAUDI', value: '#00CC66' }, // 沙特绿
-  { name: 'GOLD', value: '#FFD700' }, // 北满金
-  { name: 'NEON RED', value: '#FF4466' }, // 新加坡红
-  { name: 'CYBER', value: '#AA66FF' }, // 冠军紫
-  { name: 'SILVER', value: '#E8E8E8' }, // 银河银
-  { name: 'ORANGE', value: '#FF9933' }, // LV橙
-  { name: 'AZURE', value: '#44AAFF' }, // 瑞士蓝
-  { name: 'PURE', value: '#FFFFFF' }, // 小豆包白
-  { name: 'CUSTOM', value: 'custom' },
+  { name: '沙特绿', value: '#00CC66' }, // 沙特绿
+  { name: '北满金', value: '#FFD700' }, // 北满金
+  { name: '新加坡红', value: '#FF4466' }, // 新加坡红
+  { name: '冠军紫', value: '#AA66FF' }, // 冠军紫
+  { name: '银河银', value: '#E8E8E8' }, // 银河银
+  { name: 'LV橙', value: '#FF9933' }, // LV橙
+  { name: '瑞士蓝', value: '#44AAFF' }, // 瑞士蓝
+  { name: '小豆包白', value: '#FFFFFF' }, // 小豆包白
+  { name: '自定义', value: 'custom' },
 ];
 
 // 树形状配置
 export const TREE_SHAPE_OPTIONS = [
-  { name: 'CONE', value: 'cone' },
-  { name: 'SPIRAL', value: 'spiral' },
+  { name: '经典锥形', value: 'cone' },
+  { name: '螺旋塔', value: 'spiral' },
 ];
 
 // 粒子数量配置
 export const PARTICLE_OPTIONS = [
-  { name: 'ECO', value: 5000 },
-  { name: 'STD', value: 15000 },
-  { name: 'PRO', value: 30000 },
-  { name: 'ULTRA', value: 50000 },
+  { name: '节能', value: 5000 },
+  { name: '标准', value: 15000 },
+  { name: '高配', value: 30000 },
+  { name: '极致', value: 50000 },
 ];
 
 // 树配置接口
@@ -70,7 +69,7 @@ export const TreeConfigPanel: React.FC<TreeConfigPanelProps> = ({
     return config.color === 'custom' ? config.customColor : config.color;
   };
 
-  const currentColorName = TREE_COLOR_OPTIONS.find(c => c.value === config.color)?.name || 'CUSTOM';
+  const currentColorName = TREE_COLOR_OPTIONS.find(c => c.value === config.color)?.name || '自定义';
 
   return (
     <div style={{
@@ -112,7 +111,7 @@ export const TreeConfigPanel: React.FC<TreeConfigPanelProps> = ({
         }}>
           {/* 颜色选择 */}
           <div style={{ marginBottom: '20px' }}>
-            <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>COLOR SPECTRUM</p>
+            <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>树影光谱</p>
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(2, 1fr)',
@@ -149,7 +148,7 @@ export const TreeConfigPanel: React.FC<TreeConfigPanelProps> = ({
 
             {config.color === 'custom' && (
               <div>
-                <p style={{ color: '#888', fontSize: '10px', margin: '0 0 8px 0' }}>PICK COLOR</p>
+                <p style={{ color: '#888', fontSize: '10px', margin: '0 0 8px 0' }}>选取颜色</p>
                 <input
                   type="color"
                   value={config.customColor}
@@ -169,7 +168,7 @@ export const TreeConfigPanel: React.FC<TreeConfigPanelProps> = ({
 
           {/* 形状选择 */}
           <div style={{ marginBottom: '20px' }}>
-            <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>STRUCTURE</p>
+            <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>树形结构</p>
             <div style={{ display: 'flex', gap: '8px' }}>
               {TREE_SHAPE_OPTIONS.map((shape) => (
                 <button
@@ -186,7 +185,7 @@ export const TreeConfigPanel: React.FC<TreeConfigPanelProps> = ({
 
           {/* 粒子数量 */}
           <div>
-            <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>DENSITY</p>
+            <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>粒子密度</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               {PARTICLE_OPTIONS.map((option) => (
                 <button

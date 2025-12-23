@@ -414,7 +414,7 @@ export default function GrandTreeApp() {
             WebkitTapHighlightColor: 'transparent'
           }}
         >
-          {sceneState === 'CHAOS' ? '🎄点我' : '🎄消失'}
+          {sceneState === 'CHAOS' ? '点我聚成树' : '散开成星河'}
         </button>
 
         {/* 3. 进阶魔法 */}
@@ -447,7 +447,7 @@ export default function GrandTreeApp() {
             WebkitTapHighlightColor: 'transparent'
           }}
         >
-          {isMobile ? '📷魔法' : '进阶魔法'} {gestureEnabled ? '🪄' : ''}
+          {isMobile ? '魔法' : '进阶魔法'} {gestureEnabled ? '🪄' : ''}
         </button>
 
         {/* 4. 写祝福 */}
@@ -473,7 +473,7 @@ export default function GrandTreeApp() {
 
         {/* 5. 导出贺卡 */}
         <ExportCard
-          canvasRef={{ current: null }}
+          canvasRef={canvasRef}
           treeColor={actualTreeColor}
           particleText={particleText}
         />
@@ -528,7 +528,7 @@ export default function GrandTreeApp() {
           minWidth: isMobile ? 'auto' : '300px'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-            <p style={{ fontSize: '12px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: 0 }}>ENCRYPT A MESSAGE</p>
+            <p style={{ fontSize: '12px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: 0 }}>写入祝福</p>
             <span onClick={() => setShowTextInput(false)} style={{ cursor: 'pointer', opacity: 0.8 }}>
               <TechIcon name="close" size={16} />
             </span>
@@ -538,7 +538,7 @@ export default function GrandTreeApp() {
             type="text"
             value={particleText}
             onChange={(e) => setParticleText(e.target.value)}
-            placeholder="ENTER BLESSINGS..."
+            placeholder="输入祝福语..."
             maxLength={20}
             style={{
               width: '100%',
@@ -561,17 +561,17 @@ export default function GrandTreeApp() {
               onClick={() => setParticleText('')}
               style={{ flex: 1, fontSize: '12px', padding: '8px' }}
             >
-              CLEAR
+              清除
             </button>
             <button
               className="tech-btn purple"
               onClick={() => setShowTextInput(false)}
               style={{ flex: 1, fontSize: '12px', padding: '8px' }}
             >
-              CONFIRM
+              确认发送
             </button>
           </div>
-          <p style={{ fontSize: '9px', color: 'gray', margin: '10px 0 0 0', textAlign: 'center', fontFamily: 'monospace' }}>MAX 20 CHARS // MULTI-LANGUAGE SUPPORTED</p>
+          <p style={{ fontSize: '9px', color: 'gray', margin: '10px 0 0 0', textAlign: 'center', fontFamily: 'monospace' }}>最多20字 // 支持多语言</p>
         </div>
       )}
 

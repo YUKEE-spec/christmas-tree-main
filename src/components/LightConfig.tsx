@@ -4,31 +4,31 @@ import { TechIcon } from './icons/TechIcons';
 // 彩灯颜色预设
 export const LIGHT_COLOR_PRESETS = [
   {
-    name: 'CLASSIC',
+    name: '经典',
     colors: ['#FFD700', '#FFF8DC', '#C0C0C0', '#E6E6FA', '#F5F5DC', '#DCDCDC', '#FFFACD', '#D3D3D3']
   },
   {
-    name: 'WARM GOLD',
+    name: '暖金',
     colors: ['#FFD700', '#FFA500', '#FF8C00', '#DAA520', '#B8860B', '#CD853F', '#DEB887', '#F4A460']
   },
   {
-    name: 'COLD SILVER',
+    name: '冷银',
     colors: ['#C0C0C0', '#A9A9A9', '#808080', '#D3D3D3', '#DCDCDC', '#E6E6FA', '#F0F8FF', '#F5F5F5']
   },
   {
-    name: 'RAINBOW',
+    name: '彩虹',
     colors: ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#FFFFFF']
   },
   {
-    name: 'COZY',
+    name: '温馨',
     colors: ['#FF6B6B', '#FFE66D', '#FF8E53', '#FF6B9D', '#C44569', '#F8B500', '#FF7675', '#FDCB6E']
   },
   {
-    name: 'FROST',
+    name: '冰雪',
     colors: ['#FFFFFF', '#E3F2FD', '#BBDEFB', '#90CAF9', '#64B5F6', '#42A5F5', '#2196F3', '#1E88E5']
   },
   {
-    name: 'CUSTOM',
+    name: '自定义',
     colors: []
   }
 ];
@@ -76,7 +76,7 @@ export const LightConfigPanel: React.FC<LightConfigPanelProps> = ({
         style={{ padding: '8px 12px', fontSize: '12px' }}
       >
         <TechIcon name="light" size={16} />
-        {!isMobile && " LIGHTS"}
+        {!isMobile && " 灯光"}
       </button>
 
       {config.enabled && (
@@ -86,7 +86,7 @@ export const LightConfigPanel: React.FC<LightConfigPanelProps> = ({
           style={{ padding: '8px 12px', fontSize: '12px' }}
         >
           <TechIcon name="settings" size={14} />
-          {!isMobile && " CONFIG"}
+          {!isMobile && " 配色"}
         </button>
       )}
 
@@ -100,7 +100,7 @@ export const LightConfigPanel: React.FC<LightConfigPanelProps> = ({
           borderRadius: '12px',
           zIndex: 20
         }}>
-          <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>LIGHT SCHEMES</p>
+          <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>灯光方案</p>
           {LIGHT_COLOR_PRESETS.map((preset, index) => (
             <button
               key={index}
@@ -140,7 +140,7 @@ export const LightConfigPanel: React.FC<LightConfigPanelProps> = ({
 
           {config.presetIndex === LIGHT_COLOR_PRESETS.length - 1 && (
             <div style={{ marginTop: '10px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px' }}>
-              <p style={{ color: '#888', fontSize: '10px', margin: '0 0 6px 0' }}>CUSTOM PALETTE (MAX 8)</p>
+              <p style={{ color: '#888', fontSize: '10px', margin: '0 0 6px 0' }}>自定义配色 (最多8个)</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}>
                 {config.customColors.map((color, index) => (
                   <div key={index} style={{ position: 'relative' }}>

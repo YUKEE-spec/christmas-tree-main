@@ -30,7 +30,7 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
   onChange,
   isOpen,
   onToggle,
-  buttonLabel = 'PHOTOS'
+  buttonLabel = '照片墙'
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
@@ -106,7 +106,7 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
             <span style={{ color: 'var(--tech-cyan)', fontSize: '10px', letterSpacing: '2px' }}>
-              MEMORY MODULE
+              记忆模块
             </span>
             <button
               className={`tech-btn ${config.enabled ? 'active' : ''}`}
@@ -140,11 +140,11 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
               borderStyle: 'dashed'
             }}
           >
-            <TechIcon name="plus" size={12} /> UPLOAD
+            <TechIcon name="plus" size={12} /> 上传照片
           </button>
 
           <p style={{ color: '#555', fontSize: '9px', margin: '0 0 10px 0', textAlign: 'center' }}>
-            {config.customPhotos.length} / 50 SLOTS USED
+            {config.customPhotos.length} / 50 已用空间
           </p>
 
           {/* 照片预览 */}
@@ -209,7 +209,7 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
                 color: '#ff4444'
               }}
             >
-              CLEAR ALL
+              清空所有
             </button>
           )}
         </div>
