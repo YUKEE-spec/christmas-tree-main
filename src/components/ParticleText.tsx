@@ -9,17 +9,13 @@ interface ParticleTextProps {
   position?: [number, number, number];
   size?: number;
   particleSize?: number;
+  fontFamily?: string;
 }
 
 // 从 Canvas 获取文字像素点
-const getTextPixels = (text: string, fontSize: number = 120): { x: number; y: number }[] => {
+const getTextPixels = (text: string, fontSize: number = 120, fontFamily: string = 'serif'): { x: number; y: number }[] => {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d')!;
-
-  // 使用更高级的字体组合
-  // 优先使用装饰性字体，回退到系统字体
-  // 优先使用花体/手写字体，回退到系统字体
-  const fontFamily = '"Great Vibes", "Dancing Script", "Ma Shan Zheng", "Zhi Mang Xing", "Long Cang", "Playfair Display", "Georgia", "Times New Roman", "Noto Serif SC", "Source Han Serif CN", "SimSun", cursive, serif';
 
   // 设置字体
   ctx.font = `bold ${fontSize}px ${fontFamily}`;
@@ -71,7 +67,8 @@ export const ParticleText: React.FC<ParticleTextProps> = ({
   state,
   position = [0, 25, -30],
   size = 15,
-  particleSize = 0.25
+  particleSize = 0.25,
+  fontFamily = '"Ma Shan Zheng", cursive'
 }) => {
   const pointsRef = useRef<THREE.Points>(null);
   const materialRef = useRef<THREE.PointsMaterial>(null);
@@ -90,7 +87,7 @@ export const ParticleText: React.FC<ParticleTextProps> = ({
     // 只有当字体准备好（或首次渲染）时才计算
     // 实际上我们希望字体加载变化时重新计算，所以添加 fontsReady 到依赖
 
-    const pixels = getTextPixels(text);
+    const pixels = getTextPixels(text, 120, fontFamily);
     const count = pixels.length;
 
     const positions = new Float32Array(count * 3);
@@ -112,7 +109,7 @@ export const ParticleText: React.FC<ParticleTextProps> = ({
     }
 
     return { positions, targetPositions, randoms, count };
-  }, [text, size, fontsReady]); // 添加 fontsReady 依赖
+  }, [text, size, fontsReady, fontFamily]); // 添加 fontFamily 依赖
 
   // 更新颜色
   useEffect(() => {

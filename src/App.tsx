@@ -220,6 +220,7 @@ export default function GrandTreeApp() {
             giftConfig={giftConfig}
             particleText={particleText}
             particleTextColor={actualTreeColor}
+            particleFont={particleFont}
           />
         </Canvas>
       </div>
@@ -528,13 +529,40 @@ export default function GrandTreeApp() {
               borderRadius: '4px',
               color: '#fff',
               fontSize: '16px',
-              fontFamily: 'monospace',
+              fontFamily: particleFont, // Preview font in input
               outline: 'none',
               boxSizing: 'border-box',
               marginBottom: '10px',
               textAlign: 'center'
             }}
           />
+
+          {/* 字体选择 */}
+          <div style={{ marginBottom: '15px' }}>
+            <p style={{ fontSize: '10px', color: '#888', marginBottom: '8px' }}>字体风格</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              {[
+                { name: '志莽行书', value: '"Zhi Mang Xing", cursive' },
+                { name: '龙苍草书', value: '"Long Cang", cursive' },
+                { name: '优雅手写', value: '"Great Vibes", cursive' },
+                { name: '浪漫花体', value: '"Dancing Script", cursive' },
+              ].map((font) => (
+                <button
+                  key={font.name}
+                  className={`tech-btn ${particleFont === font.value ? 'active' : ''}`}
+                  onClick={() => setParticleFont(font.value)}
+                  style={{
+                    fontSize: '11px',
+                    padding: '6px',
+                    fontFamily: font.value
+                  }}
+                >
+                  {font.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
             <button
               className="tech-btn"
