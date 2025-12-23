@@ -470,7 +470,14 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
 
 const PhotoOrnamentsDefault = ({ state, onPhotoClick }: { state: 'CHAOS' | 'FORMED'; onPhotoClick?: (index: number) => void }) => {
   const textures = useTexture(CONFIG.photos.body);
-  const textureArray = Array.isArray(textures) ? textures : [textures];
+  const textureArray = useMemo(() => {
+    const arr = Array.isArray(textures) ? textures : [textures];
+    arr.forEach(t => {
+      t.colorSpace = THREE.SRGBColorSpace;
+      t.anisotropy = 16;
+    });
+    return arr;
+  }, [textures]);
   return <PhotoOrnamentsInner state={state} textureArray={textureArray} onPhotoClick={onPhotoClick} />;
 };
 
@@ -511,6 +518,12 @@ const PhotoOrnamentsCustom = ({ state, customPhotos, onPhotoClick }: { state: 'C
               url,
               (texture) => {
                 texture.colorSpace = THREE.SRGBColorSpace;
+                // 开启各向异性过滤，防止倾斜变糊
+                const maxAnisotropy = 16;
+                texture.anisotropy = maxAnisotropy;
+                texture.minFilter = THREE.LinearMipmapLinearFilter;
+                texture.magFilter = THREE.LinearFilter;
+                texture.generateMipmaps = true;
                 resolve(texture);
               },
               undefined,
