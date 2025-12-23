@@ -107,36 +107,33 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
         canvas.width = w;
         canvas.height = h;
 
-        // 1. 背景：午夜蓝深邃渐变
-        // 顶部黑色过渡到底部深蓝
+        // 1. 背景：午夜蓝深邃渐变 (Apple Style: 更平滑的过渡)
         const bgGradient = ctx.createLinearGradient(0, 0, 0, h);
-        bgGradient.addColorStop(0, '#020b1c'); // Deep Dark Blue/Black
-        bgGradient.addColorStop(1, '#0c2e4e'); // Midnight Blue
+        bgGradient.addColorStop(0, '#050A14'); // 近乎黑色的蓝
+        bgGradient.addColorStop(1, '#0F2035'); // 深邃的午夜蓝
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, w, h);
 
-        // 2. 绘制模糊的蓝色光晕（模拟图二顶部的光）
-        const glowGradient = ctx.createRadialGradient(w / 2, h * 0.3, 0, w / 2, h * 0.3, w * 0.6);
-        glowGradient.addColorStop(0, 'rgba(66, 170, 255, 0.15)'); // Swiss Blue
+        // 2. 绘制模糊的蓝色光晕（更柔和、更扩散）
+        const glowGradient = ctx.createRadialGradient(w / 2, h * 0.25, 0, w / 2, h * 0.25, w * 0.8);
+        glowGradient.addColorStop(0, 'rgba(100, 180, 255, 0.12)'); // 降低不透明度
         glowGradient.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = glowGradient;
         ctx.fillRect(0, 0, w, h);
 
-        // 3. 装饰雪花
-        // 随机种子在很多次重绘时不便，这里固定绘制几个位置作为装饰
-        drawSnowflake(ctx, w * 0.1, h * 0.1, 40 * scale, 0.4);
-        drawSnowflake(ctx, w * 0.9, h * 0.15, 30 * scale, 0.3);
-        drawSnowflake(ctx, w * 0.85, h * 0.05, 20 * scale, 0.2);
-        drawSnowflake(ctx, w * 0.05, h * 0.2, 15 * scale, 0.3);
+        // 3. 装饰雪花 (增加透明度层次)
+        drawSnowflake(ctx, w * 0.1, h * 0.1, 40 * scale, 0.3); // 降低透明度
+        drawSnowflake(ctx, w * 0.9, h * 0.15, 30 * scale, 0.25);
+        drawSnowflake(ctx, w * 0.85, h * 0.05, 20 * scale, 0.15);
+        drawSnowflake(ctx, w * 0.05, h * 0.2, 15 * scale, 0.2);
 
-        drawSnowflake(ctx, w * 0.9, h * 0.8, 35 * scale, 0.2);
-        drawSnowflake(ctx, w * 0.1, h * 0.9, 25 * scale, 0.3);
+        drawSnowflake(ctx, w * 0.9, h * 0.8, 35 * scale, 0.15);
+        drawSnowflake(ctx, w * 0.1, h * 0.9, 25 * scale, 0.2);
 
-        // 4. 圣诞树区域 - 放大主角！
+        // 4. 圣诞树区域 - 留白是高级感的关键
         const imgAspect = frameCanvas.width / frameCanvas.height;
-        // 增加宽度占比到 95% (原 85%)，高度占比到 65% (原 55%)
-        const maxTreeW = w * 0.95;
-        const maxTreeH = h * 0.65;
+        const maxTreeW = w * 0.88; // 微微收敛，留出呼吸感
+        const maxTreeH = h * 0.60;
 
         let targetW = maxTreeW;
         let targetH = targetW / imgAspect;
@@ -147,48 +144,44 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
         }
 
         const drawX = (w - targetW) / 2;
-        // 向下移动一点，给顶部大字留空间
         const drawY = h * 0.28 + (maxTreeH - targetH) / 2;
 
-        // 树底部添加一点发光托底
+        // 树底部发光 (更克制)
         ctx.save();
-        ctx.shadowColor = '#44AAFF';
-        ctx.shadowBlur = 50;
+        ctx.shadowColor = 'rgba(68, 170, 255, 0.6)';
+        ctx.shadowBlur = 60;
         ctx.drawImage(frameCanvas, 0, 0, frameCanvas.width, frameCanvas.height, drawX, drawY, targetW, targetH);
         ctx.restore();
 
-        // 5. 大标题 "Merry Christmas" (花体烫金风格)
-        // 使用 Dancing Script 或 Great Vibes
+        // 5. 大标题 "Merry Christmas" (香槟金风格)
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         const titleY = h * 0.15;
 
         ctx.save();
-        ctx.font = `700 ${96 * scale}px "Great Vibes", cursive`; // 更大，更华丽
+        ctx.font = `700 ${92 * scale}px "Great Vibes", cursive`; // 稍微调小一点点
 
-        // 创建烫金渐变
+        // 香槟金渐变 (Champagne Gold) - 更低饱和度，更优雅
         const goldGradient = ctx.createLinearGradient(w / 2 - 200, titleY - 50, w / 2 + 200, titleY + 50);
-        goldGradient.addColorStop(0, '#BF953F'); // Dark Gold
-        goldGradient.addColorStop(0.25, '#FCF6BA'); // Light Gold
-        goldGradient.addColorStop(0.5, '#B38728'); // Medium Gold
-        goldGradient.addColorStop(0.75, '#FBF5B7'); // Light Gold
-        goldGradient.addColorStop(1, '#AA771C'); // Dark Gold
+        goldGradient.addColorStop(0, '#D4AF37'); // Classic Gold
+        goldGradient.addColorStop(0.3, '#F5E6AA'); // Champagne Highlight
+        goldGradient.addColorStop(0.6, '#C5A028'); // Deep Gold
+        goldGradient.addColorStop(1, '#E6C975'); // Soft Gold
         ctx.fillStyle = goldGradient;
 
-        // 发光效果
-        ctx.shadowColor = 'rgba(255, 215, 0, 0.5)';
-        ctx.shadowBlur = 15;
+        // 发光效果 (Very subtle)
+        ctx.shadowColor = 'rgba(245, 230, 170, 0.4)';
+        ctx.shadowBlur = 20;
 
         ctx.fillText('Merry Christmas', w / 2, titleY);
         ctx.restore();
 
         // 6. 用户祝福语 Greeting
-        const textYStart = drawY + targetH + (30 * scale);
+        const textYStart = drawY + targetH + (35 * scale);
         const fontSize = 32 * scale;
         ctx.font = `400 ${fontSize}px ${selectedFont.family}`;
         ctx.fillStyle = greetingColor;
 
-        // 处理文字换行
         const lines = greeting.split('\n');
         const lineHeight = fontSize * 1.5;
         lines.forEach((line, index) => {
@@ -197,26 +190,32 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
 
         // 7. 粒子祝福水印
         if (particleText) {
-          const ptY = textYStart + lines.length * lineHeight + (20 * scale);
-          ctx.font = `600 ${20 * scale}px "Inter", sans-serif`;
-          ctx.fillStyle = 'rgba(68, 170, 255, 0.8)';
+          const ptY = textYStart + lines.length * lineHeight + (25 * scale);
+          ctx.font = `500 ${18 * scale}px "Inter", sans-serif`; // 稍微细一点
+          ctx.fillStyle = 'rgba(100, 200, 255, 0.7)'; // 降低干扰
           ctx.fillText(`✨ ${particleText} ✨`, w / 2, ptY);
         }
 
-        // 8. 底部署名
+        // 8. 底部署名 (Apple Style: 极简、全大写、宽字间距)
         if (fromName) {
-          const bottomY = h - (40 * scale);
-          // 底部细线装饰
-          ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+          const bottomY = h - (45 * scale);
+
+          // 极细分割线
+          ctx.strokeStyle = 'rgba(255,255,255,0.15)';
           ctx.lineWidth = 1;
           ctx.beginPath();
-          ctx.moveTo(w * 0.3, bottomY - (30 * scale));
-          ctx.lineTo(w * 0.7, bottomY - (30 * scale));
+          ctx.moveTo(w * 0.4, bottomY - (35 * scale)); // 线短一点
+          ctx.lineTo(w * 0.6, bottomY - (35 * scale));
           ctx.stroke();
 
-          ctx.font = `400 ${18 * scale}px "Inter", sans-serif`;
-          ctx.fillStyle = 'rgba(255,255,255,0.6)';
-          ctx.fillText(`Created by ${fromName}`, w / 2, bottomY);
+          // 设计感署名
+          ctx.font = `500 ${14 * scale}px "Inter", sans-serif`;
+          ctx.letterSpacing = `${4 * scale}px`; // 宽字间距
+          ctx.fillStyle = 'rgba(255,255,255,0.5)'; // 灰色文字
+          // Canvas不支持直接的 letterSpacing 属性 (部分浏览器)，手动模拟或接受默认
+          // "CREATED BY " + name.toUpperCase()
+          const text = `CREATED BY ${fromName.toUpperCase()}`;
+          ctx.fillText(text, w / 2, bottomY);
         }
 
         resolve(canvas);
