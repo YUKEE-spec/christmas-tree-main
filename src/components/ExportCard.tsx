@@ -17,12 +17,12 @@ interface FontOption {
 
 // 字体配置
 const FONT_OPTIONS: FontOption[] = [
-  { name: 'bodoni-moda', family: '"Bodoni Moda", serif', label: 'Bodoni (时尚)' },
+  { name: 'inter', family: '"Inter", sans-serif', label: '现代黑体 (Inter)' },
+  { name: 'bodoni-moda', family: '"Bodoni Moda", serif', label: '时尚宋体' },
+  { name: 'dancing-script', family: '"Dancing Script", cursive', label: '舞蹈手写' },
   { name: 'ma-shan-zheng', family: '"Ma Shan Zheng", cursive', label: '马善政' },
   { name: 'zhi-mang-xing', family: '"Zhi Mang Xing", cursive', label: '志莽行书' },
   { name: 'long-cang', family: '"Long Cang", cursive', label: '龙苍' },
-  { name: 'great-vibes', family: '"Great Vibes", cursive', label: 'Great Vibes' },
-  { name: 'parisienne', family: '"Parisienne", cursive', label: 'Parisienne' },
 ];
 
 export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, particleText }) => {
@@ -30,26 +30,22 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [exportType, setExportType] = useState<'image' | 'gif'>('image');
-  const [greeting, setGreeting] = useState('Merry Christmas\n& Happy New Year');
+  const [greeting, setGreeting] = useState('Merry Christmas');
   const [fromName, setFromName] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [greetingColor, setGreetingColor] = useState('#FFFFFF');
 
   // 字体选择状态
   const [selectedFont, setSelectedFont] = useState<FontOption>(FONT_OPTIONS[0]);
 
   const recordingRef = useRef(false);
-
-  // 检测移动端
   const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
 
   // 获取 canvas 元素
   const getCanvas = useCallback((): HTMLCanvasElement | null => {
-    // 优先使用传入的 ref
     if (canvasRef && canvasRef.current) return canvasRef.current;
-    // 降级: 查询 DOM
-    const canvas = document.querySelector('canvas');
-    return canvas;
+    return document.querySelector('canvas');
   }, [canvasRef]);
 
   // 截取当前画面
@@ -59,16 +55,12 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
       console.error("Canvas not found");
       return null;
     }
-
     try {
-      // 创建一个新的 canvas 来复制当前帧
       const frameCanvas = document.createElement('canvas');
       frameCanvas.width = canvas.width;
       frameCanvas.height = canvas.height;
       const ctx = frameCanvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(canvas, 0, 0);
-      }
+      if (ctx) ctx.drawImage(canvas, 0, 0);
       return frameCanvas;
     } catch (e) {
       console.error("Capture frame failed", e);
@@ -76,125 +68,158 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
     }
   }, [getCanvas]);
 
-  // 创建贺卡 Canvas（冠军红黑版）
+  // 绘制装饰性雪花
+  const drawSnowflake = (ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, alpha: number) => {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = '#89CFF0'; // Baby Blue
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+
+    // 简单的六角雪花
+    for (let i = 0; i < 6; i++) {
+      ctx.rotate(Math.PI / 3);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(0, radius);
+      ctx.moveTo(0, radius * 0.5);
+      ctx.lineTo(radius * 0.3, radius * 0.7);
+      ctx.moveTo(0, radius * 0.5);
+      ctx.lineTo(-radius * 0.3, radius * 0.7);
+      ctx.stroke();
+    }
+    ctx.restore();
+  };
+
+  // 创建贺卡 Canvas（午夜蓝梦幻版）
   const createCardCanvas = useCallback((frameCanvas: HTMLCanvasElement, forGif: boolean = false): Promise<HTMLCanvasElement> => {
     return new Promise((resolve) => {
-      // 动态加载字体确保渲染正确
       document.fonts.ready.then(() => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d')!;
 
-        // GIF 用较小尺寸，图片用高分辨率
+        // 统一尺寸比例 3:4 (竖向明信片)
         const scale = forGif ? 1 : 2;
-        const w = forGif ? 600 : 1080;
-        const h = forGif ? 750 : 1350;
-        canvas.width = w * scale;
-        canvas.height = h * scale;
-        ctx.scale(scale, scale);
+        const w = 900 * scale;
+        const h = 1200 * scale;
 
-        // 1. 背景：极致深黑
-        ctx.fillStyle = '#050608';
+        canvas.width = w;
+        canvas.height = h;
+
+        // 1. 背景：午夜蓝深邃渐变
+        // 顶部黑色过渡到底部深蓝
+        const bgGradient = ctx.createLinearGradient(0, 0, 0, h);
+        bgGradient.addColorStop(0, '#020b1c'); // Deep Dark Blue/Black
+        bgGradient.addColorStop(1, '#0c2e4e'); // Midnight Blue
+        ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, w, h);
 
-        // 2. 边框：锐利红框 (不发光，强调线条感)
-        const borderWidth = forGif ? 15 : 25;
+        // 2. 绘制模糊的蓝色光晕（模拟图二顶部的光）
+        const glowGradient = ctx.createRadialGradient(w / 2, h * 0.3, 0, w / 2, h * 0.3, w * 0.6);
+        glowGradient.addColorStop(0, 'rgba(66, 170, 255, 0.15)'); // Swiss Blue
+        glowGradient.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = glowGradient;
+        ctx.fillRect(0, 0, w, h);
 
-        ctx.strokeStyle = '#D31120'; // Champion Red
-        ctx.lineWidth = 2;
-        ctx.strokeRect(borderWidth, borderWidth, w - borderWidth * 2, h - borderWidth * 2);
+        // 3. 装饰雪花
+        // 随机种子在很多次重绘时不便，这里固定绘制几个位置作为装饰
+        drawSnowflake(ctx, w * 0.1, h * 0.1, 40 * scale, 0.4);
+        drawSnowflake(ctx, w * 0.9, h * 0.15, 30 * scale, 0.3);
+        drawSnowflake(ctx, w * 0.85, h * 0.05, 20 * scale, 0.2);
+        drawSnowflake(ctx, w * 0.05, h * 0.2, 15 * scale, 0.3);
 
-        // 3. 顶部大标题 (MAGAZINE STYLE)
-        const titleY = forGif ? 100 : 160;
-        ctx.textAlign = 'center';
+        drawSnowflake(ctx, w * 0.9, h * 0.8, 35 * scale, 0.2);
+        drawSnowflake(ctx, w * 0.1, h * 0.9, 25 * scale, 0.3);
 
-        // 标题字体: Bodoni Moda, 巨大, 高对比度
-        ctx.font = `700 ${forGif ? 56 : 96}px "Bodoni Moda", serif`;
-        ctx.fillStyle = '#D31120'; // Red Title
-
-        // 稍微错位一点做重影效果增加时尚感
-        ctx.globalAlpha = 0.3;
-        ctx.fillText('MOMENT', w / 2 + 3, titleY + 3);
-        ctx.globalAlpha = 1.0;
-        ctx.fillText('MOMENT', w / 2, titleY);
-
-        // 副标题
-        ctx.font = `500 ${forGif ? 12 : 18}px "Inter", sans-serif`;
-        ctx.fillStyle = '#F0E68C'; // Champagne Gold
-        ctx.letterSpacing = '4px';
-        ctx.fillText('CHRISTMAS EDITION', w / 2, titleY - (forGif ? 50 : 80));
-        ctx.letterSpacing = '0px'; // Reset
-
-
-        // 4. 圣诞树区域 (方形裁切，像杂志内页插图)
-        const treeY = forGif ? 130 : 220;
-        const treeH = forGif ? 380 : 650;
-        const treeW = w;
-
+        // 4. 圣诞树区域 
+        // 保持树的原始比例显示在中央略偏下
         const imgAspect = frameCanvas.width / frameCanvas.height;
-        // 目标区域
-        const targetW = treeW;
-        const targetH = treeW / imgAspect;
+        const maxTreeW = w * 0.85;
+        const maxTreeH = h * 0.55;
 
-        // 居中绘制
+        let targetW = maxTreeW;
+        let targetH = targetW / imgAspect;
+
+        if (targetH > maxTreeH) {
+          targetH = maxTreeH;
+          targetW = targetH * imgAspect;
+        }
+
         const drawX = (w - targetW) / 2;
-        const drawY = treeY + (treeH - targetH) / 2;
+        const drawY = h * 0.25 + (maxTreeH - targetH) / 2;
 
+        // 树底部添加一点发光托底
+        ctx.save();
+        ctx.shadowColor = '#44AAFF';
+        ctx.shadowBlur = 40;
         ctx.drawImage(frameCanvas, 0, 0, frameCanvas.width, frameCanvas.height, drawX, drawY, targetW, targetH);
+        ctx.restore();
+
+        // 5. 大标题 "Merry Christmas" (图二风格)
+        // 使用 Inter 或 Clean Sans-serif, 白色
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        const titleY = h * 0.2;
+        ctx.font = `600 ${64 * scale}px "Inter", sans-serif`;
+        ctx.fillStyle = '#FFFFFF';
+        // 稍微加一点发光
+        ctx.shadowColor = 'rgba(255,255,255,0.5)';
+        ctx.shadowBlur = 10;
+        ctx.fillText('Merry Christmas', w / 2, titleY);
+
+        // 重置阴影
+        ctx.shadowBlur = 0;
 
 
-        // 5. 祝福语 (覆盖在图上或下方，视设计而定，这里放在下方，大字报风格)
-        const textYStart = drawY + targetH + (forGif ? 40 : 60);
-
-        // 使用选中的字体
-        const fontSize = forGif ? 32 : 56;
+        // 6. 用户祝福语 Greeting
+        const textYStart = drawY + targetH + (40 * scale);
+        const fontSize = 32 * scale;
         ctx.font = `400 ${fontSize}px ${selectedFont.family}`;
+        ctx.fillStyle = greetingColor;
 
-        // 文字样式：亮金/白
-        ctx.fillStyle = '#ffffff';
-
+        // 处理文字换行
         const lines = greeting.split('\n');
-        const lineHeight = fontSize * 1.4;
-
+        const lineHeight = fontSize * 1.5;
         lines.forEach((line, index) => {
           ctx.fillText(line, w / 2, textYStart + index * lineHeight);
         });
 
-
-        // 6. 粒子文字 (水印风格)
+        // 7. 粒子祝福水印
         if (particleText) {
-          const ptY = textYStart + lines.length * lineHeight + (forGif ? 20 : 30);
-          ctx.font = `700 ${forGif ? 24 : 40}px "Bodoni Moda", serif`;
-          ctx.fillStyle = '#D31120'; // Red
-          ctx.fillText(`${particleText.toUpperCase()}`, w / 2, ptY);
+          const ptY = textYStart + lines.length * lineHeight + (20 * scale);
+          ctx.font = `600 ${20 * scale}px "Inter", sans-serif`;
+          ctx.fillStyle = 'rgba(68, 170, 255, 0.8)';
+          ctx.fillText(`✨ ${particleText} ✨`, w / 2, ptY);
         }
 
-        // 7. 署名 & 底部装饰
-        const bottomY = h - (forGif ? 30 : 50);
-
-        // 底部红线
-        ctx.beginPath();
-        ctx.moveTo(w / 2 - 50, bottomY - 30);
-        ctx.lineTo(w / 2 + 50, bottomY - 30);
-        ctx.strokeStyle = '#D31120';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-
+        // 8. 底部署名
         if (fromName) {
-          ctx.font = `500 ${forGif ? 14 : 24}px "Inter", sans-serif`;
-          ctx.fillStyle = '#888';
-          ctx.fillText(`CAPTURED BY ${fromName.toUpperCase()}`, w / 2, bottomY);
+          const bottomY = h - (40 * scale);
+          // 底部细线装饰
+          ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(w * 0.3, bottomY - (30 * scale));
+          ctx.lineTo(w * 0.7, bottomY - (30 * scale));
+          ctx.stroke();
+
+          ctx.font = `400 ${18 * scale}px "Inter", sans-serif`;
+          ctx.fillStyle = 'rgba(255,255,255,0.6)';
+          ctx.fillText(`Created by ${fromName}`, w / 2, bottomY);
         }
 
         resolve(canvas);
       });
     });
-  }, [greeting, fromName, particleText, treeColor, selectedFont]); // 依赖 selectedFont
+  }, [greeting, fromName, particleText, treeColor, selectedFont, greetingColor]);
 
   // 生成预览
   const handlePreview = useCallback(async () => {
     setIsExporting(true);
     setExportProgress(10);
-
+    // 强制关闭弹窗背景点击
     setTimeout(async () => {
       const frameCanvas = captureFrame();
       if (!frameCanvas) {
@@ -202,64 +227,41 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
         alert('获取画面失败，请确保页面加载完成');
         return;
       }
-
       setExportProgress(50);
-      const cardCanvas = await createCardCanvas(frameCanvas, true); // 预览用低清
-
+      const cardCanvas = await createCardCanvas(frameCanvas, true);
       setExportProgress(100);
-      const url = cardCanvas.toDataURL('image/png', 0.8);
+      const url = cardCanvas.toDataURL('image/png', 0.9);
       setPreviewUrl(url);
       setShowPreview(true);
       setIsExporting(false);
     }, 100);
   }, [captureFrame, createCardCanvas]);
 
-  // 导出 GIF
+  // 导出 GIF (简化版，复用逻辑)
   const exportGif = useCallback(async () => {
     setIsExporting(true);
     setExportProgress(0);
     recordingRef.current = true;
-
     const frames: HTMLCanvasElement[] = [];
     const frameCount = isMobile ? 15 : 20;
-    const frameDelay = 100;
 
     for (let i = 0; i < frameCount; i++) {
       if (!recordingRef.current) break;
-
       const frameCanvas = captureFrame();
       if (frameCanvas) {
         const cardCanvas = await createCardCanvas(frameCanvas, true);
         frames.push(cardCanvas);
       }
-
       setExportProgress(Math.round((i / frameCount) * 50));
-      await new Promise(resolve => setTimeout(resolve, frameDelay));
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
-
     recordingRef.current = false;
 
-    if (frames.length === 0) {
-      setIsExporting(false);
-      return;
-    }
+    if (frames.length === 0) { setIsExporting(false); return; }
 
-    const gif = new GIF({
-      workers: 2,
-      quality: 10,
-      width: frames[0].width,
-      height: frames[0].height,
-      workerScript: '/gif.worker.js'
-    });
-
-    frames.forEach((frame) => {
-      gif.addFrame(frame, { delay: frameDelay, copy: true });
-    });
-
-    gif.on('progress', (p: number) => {
-      setExportProgress(50 + Math.round(p * 50));
-    });
-
+    const gif = new GIF({ workers: 2, quality: 10, width: frames[0].width, height: frames[0].height, workerScript: '/gif.worker.js' });
+    frames.forEach(frame => gif.addFrame(frame, { delay: 100, copy: true }));
+    gif.on('progress', (p: number) => setExportProgress(50 + Math.round(p * 50)));
     gif.on('finished', (blob: Blob) => {
       const url = URL.createObjectURL(blob);
       if (isMobile) {
@@ -268,14 +270,13 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
         setExportDone(true);
       } else {
         const link = document.createElement('a');
-        link.download = `champion-moment-${Date.now()}.gif`;
+        link.download = `midnight-christmas-${Date.now()}.gif`;
         link.href = url;
         link.click();
         setIsExporting(false);
         setIsOpen(false);
       }
     });
-
     gif.render();
   }, [captureFrame, createCardCanvas, isMobile]);
 
@@ -287,15 +288,14 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
       setIsExporting(true);
       const frameCanvas = captureFrame();
       if (frameCanvas) {
-        const cardCanvas = await createCardCanvas(frameCanvas, false); // 高清
+        const cardCanvas = await createCardCanvas(frameCanvas, false); // High Res
         const dataUrl = cardCanvas.toDataURL('image/png', 1.0);
-
         if (isMobile) {
           setMobileImageUrl(dataUrl);
           setExportDone(true);
         } else {
           const link = document.createElement('a');
-          link.download = `champion-moment-${Date.now()}.png`;
+          link.download = `midnight-christmas-${Date.now()}.png`;
           link.href = dataUrl;
           link.click();
           setIsOpen(false);
@@ -307,152 +307,126 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
     }
   }, [captureFrame, createCardCanvas, exportType, exportGif, isMobile]);
 
-  return (
-    <>
-      <button
-        className={`tech-btn ${isOpen ? 'active' : ''}`}
-        onClick={() => setIsOpen(true)}
-        style={{ padding: '8px 12px', fontSize: '12px' }}
-      >
-        <TechIcon name="download" size={16} />
-        {!isMobile && " 导出贺卡"}
-      </button>
+  // 移动端/桌面端统一弹窗布局
+  const renderModal = () => (
+    <div style={{
+      position: 'fixed',
+      top: isMobile ? 'auto' : '50%',
+      bottom: isMobile ? '0' : 'auto',
+      left: isMobile ? '0' : '50%',
+      right: isMobile ? '0' : 'auto',
+      transform: isMobile ? 'none' : 'translate(-50%, -50%)',
+      width: isMobile ? '100vw' : 'auto',
+      height: isMobile ? 'auto' : 'auto',
+      zIndex: 2000,
+      display: 'flex',
+      alignItems: isMobile ? 'flex-end' : 'center',
+      justifyContent: 'center',
+      pointerEvents: 'none'
+    }}>
+      {!isMobile && <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: -1, pointerEvents: 'auto' }} onClick={() => !isExporting && setIsOpen(false)} />}
 
-      {isOpen && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          backgroundColor: 'rgba(5, 6, 8, 0.98)', backdropFilter: 'blur(0px)', // High opacity background
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
-        }} onClick={() => !isExporting && setIsOpen(false)}>
+      <div className="tech-panel" style={{
+        width: isMobile ? '100vw' : '450px',
+        maxHeight: isMobile ? '80vh' : '85vh',
+        padding: isMobile ? '20px' : '30px',
+        borderRadius: isMobile ? '20px 20px 0 0' : '16px',
+        overflowY: 'auto',
+        pointerEvents: 'auto',
+        background: '#0a0a12', // Darker background
+        border: '1px solid #1a1a2e',
+        boxShadow: isMobile ? '0 -10px 40px rgba(0,0,0,0.8)' : undefined
+      }} onClick={e => e.stopPropagation()}>
 
-          <div className="tech-panel" style={{
-            padding: '24px', borderRadius: '4px', width: isMobile ? '90vw' : '400px', // Sharper radius
-            maxHeight: '90vh', overflowY: 'auto',
-            border: '1px solid var(--tech-cyan)', // Red border
-            background: '#0a0a0e'
-          }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
+          <h3 style={{ color: '#89CFF0', margin: 0, fontFamily: 'Orbitron', fontSize: 16, letterSpacing: 1 }}>MIDNIGHT CARD</h3>
+          <span onClick={() => !isExporting && setIsOpen(false)} style={{ cursor: 'pointer' }}><TechIcon name="close" size={20} color="#89CFF0" /></span>
+        </div>
 
-            <h3 style={{
-              color: 'var(--tech-cyan)', margin: '0 0 20px 0', textAlign: 'center',
-              fontFamily: 'Bodoni Moda, serif', letterSpacing: '1px', fontSize: '24px', fontWeight: '700'
-            }}>
-              CHAMPION MOMENT
-            </h3>
-
-            {/* 预览区域 */}
-            {showPreview && previewUrl ? (
-              <div style={{ textAlign: 'center' }}>
-                {exportDone ? (
-                  <>
-                    <p style={{ color: '#D31120', marginBottom: 10, fontWeight: '600' }}>生成成功</p>
-                    <img src={mobileImageUrl!} style={{ width: '100%', border: '4px solid #fff', marginBottom: 20 }} />
-                    <p style={{ fontSize: 12, color: '#888' }}>长按图片保存到相册</p>
-                    <button className="tech-btn" onClick={() => { setIsOpen(false); setExportDone(false); setShowPreview(false); }} style={{ width: '100%' }}>关闭</button>
-                  </>
-                ) : (
-                  <>
-                    <img src={previewUrl} style={{ width: '100%', border: '4px solid #fff', marginBottom: 20 }} />
-                    <div style={{ display: 'flex', gap: 10 }}>
-                      <button className="tech-btn" onClick={() => setShowPreview(false)} disabled={isExporting}>返回</button>
-                      <button className="tech-btn" style={{ borderColor: '#fff', color: '#fff' }} onClick={confirmExport} disabled={isExporting}>
-                        {isExporting ? '保存中...' : '保存贺卡'}
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
+        {showPreview && previewUrl ? (
+          <div style={{ textAlign: 'center' }}>
+            {exportDone ? (
+              <>
+                <p style={{ color: '#4caf50', marginBottom: 10 }}>🎉 生成成功</p>
+                <img src={mobileImageUrl!} style={{ width: '80%', border: '2px solid #333', borderRadius: 4, marginBottom: 10 }} />
+                <p style={{ fontSize: 12, color: '#666' }}>长按上方图片保存到相册</p>
+                <button className="tech-btn" onClick={() => { setIsOpen(false); setExportDone(false); setShowPreview(false); }} style={{ width: '100%', marginTop: 10 }}>关闭</button>
+              </>
             ) : (
               <>
-                {/* 表单区域 */}
-                <div style={{ marginBottom: 15 }}>
-                  <label style={{ display: 'block', color: 'var(--tech-cyan)', fontSize: 10, marginBottom: 5 }}>字体选择</label>
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: '6px'
-                  }}>
-                    {FONT_OPTIONS.map((font) => (
-                      <button
-                        key={font.name}
-                        onClick={() => setSelectedFont(font)}
-                        className={`tech-btn ${selectedFont.name === font.name ? 'active' : ''}`}
-                        style={{
-                          fontSize: '10px',
-                          padding: '6px 2px',
-                          fontFamily: font.family,
-                          background: selectedFont.name === font.name ? '#D31120' : 'transparent',
-                          color: selectedFont.name === font.name ? '#fff' : '#D31120',
-                          border: '1px solid #D31120'
-                        }}
-                      >
-                        {font.label}
-                      </button>
-                    ))}
-                  </div>
+                <img src={previewUrl} style={{ width: '80%', border: '2px solid #333', borderRadius: 4, marginBottom: 15 }} />
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button className="tech-btn" onClick={() => setShowPreview(false)} disabled={isExporting}>调整</button>
+                  <button className="tech-btn purple" style={{ flex: 1 }} onClick={confirmExport} disabled={isExporting}>{isExporting ? '保存中...' : '保存到相册'}</button>
                 </div>
-
-                <div style={{ marginBottom: 15 }}>
-                  <label style={{ display: 'block', color: 'var(--tech-cyan)', fontSize: 10, marginBottom: 5 }}>祝福语 (支持多行)</label>
-                  <textarea
-                    value={greeting}
-                    onChange={(e) => setGreeting(e.target.value)}
-                    style={{
-                      width: '100%', height: 70, background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid #333', color: 'white', padding: 10,
-                      fontFamily: selectedFont.family, // 实时预览字体
-                      fontSize: '16px',
-                      borderRadius: '0px'
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: 15 }}>
-                  <label style={{ display: 'block', color: 'var(--tech-cyan)', fontSize: 10, marginBottom: 5 }}>署名</label>
-                  <input
-                    type="text"
-                    value={fromName}
-                    onChange={(e) => setFromName(e.target.value)}
-                    style={{
-                      width: '100%', background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid #333', color: 'white', padding: 10,
-                      borderRadius: '0px'
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: 20 }}>
-                  <label style={{ display: 'block', color: 'var(--tech-cyan)', fontSize: 10, marginBottom: 5 }}>导出格式</label>
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <button
-                      className={`tech-btn ${exportType === 'image' ? 'active' : ''}`}
-                      style={{ flex: 1 }}
-                      onClick={() => setExportType('image')}
-                    >
-                      高清图片
-                    </button>
-                    <button
-                      className={`tech-btn ${exportType === 'gif' ? 'active' : ''}`}
-                      style={{ flex: 1 }}
-                      onClick={() => setExportType('gif')}
-                    >
-                      动态 GIF
-                    </button>
-                  </div>
-                </div>
-
-                <button
-                  className="tech-btn"
-                  style={{ width: '100%', padding: 15, background: '#D31120', color: '#fff', border: 'none' }}
-                  onClick={handlePreview}
-                  disabled={isExporting}
-                >
-                  {isExporting ? `处理中 ${exportProgress}%` : '生成预览'}
-                </button>
               </>
             )}
           </div>
-        </div>
-      )}
+        ) : (
+          <>
+            {/* 编辑表单 */}
+            <div style={{ marginBottom: 15 }}>
+              <label style={{ display: 'block', color: '#666', fontSize: 10, marginBottom: 5 }}>字体风格</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 5 }}>
+                {FONT_OPTIONS.map(f => (
+                  <button key={f.name} onClick={() => setSelectedFont(f)}
+                    className={`tech-btn ${selectedFont.name === f.name ? 'active' : ''}`}
+                    style={{
+                      fontSize: 10, padding: '6px 2px', fontFamily: f.family,
+                      color: selectedFont.name === f.name ? '#fff' : '#888',
+                      borderColor: selectedFont.name === f.name ? '#44AAFF' : '#333',
+                      background: selectedFont.name === f.name ? 'rgba(68,170,255,0.2)' : 'transparent'
+                    }}>
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 15 }}>
+              <label style={{ display: 'block', color: '#666', fontSize: 10, marginBottom: 5 }}>祝福语</label>
+              <textarea value={greeting} onChange={e => setGreeting(e.target.value)}
+                style={{ width: '100%', height: 60, background: '#111', border: '1px solid #333', color: '#fff', padding: 10, fontFamily: selectedFont.family }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: 10, marginBottom: 15 }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', color: '#666', fontSize: 10, marginBottom: 5 }}>署名</label>
+                <input type="text" value={fromName} onChange={e => setFromName(e.target.value)}
+                  style={{ width: '100%', background: '#111', border: '1px solid #333', color: '#fff', padding: '8px' }}
+                />
+              </div>
+              <div style={{ width: 60 }}>
+                <label style={{ display: 'block', color: '#666', fontSize: 10, marginBottom: 5 }}>文字颜色</label>
+                <input type="color" value={greetingColor} onChange={e => setGreetingColor(e.target.value)} style={{ width: '100%', height: 34, border: 'none', background: 'transparent' }} />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ display: 'flex', gap: 0, background: '#111', borderRadius: 4, padding: 2 }}>
+                <button className={`tech-btn`} style={{ flex: 1, background: exportType === 'image' ? '#222' : 'transparent', border: 'none', color: exportType === 'image' ? '#fff' : '#666' }} onClick={() => setExportType('image')}>图片 (高清)</button>
+                <button className={`tech-btn`} style={{ flex: 1, background: exportType === 'gif' ? '#222' : 'transparent', border: 'none', color: exportType === 'gif' ? '#fff' : '#666' }} onClick={() => setExportType('gif')}>GIF (动态)</button>
+              </div>
+            </div>
+
+            <button className="tech-btn" style={{ width: '100%', padding: 12, background: 'linear-gradient(90deg, #1E88E5, #42A5F5)', border: 'none', color: '#fff', fontSize: 14 }}
+              onClick={handlePreview} disabled={isExporting}>
+              {isExporting ? `正在生成 ${exportProgress}%` : '生成贺卡预览'}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      <button className={`tech-btn ${isOpen ? 'active' : ''}`} onClick={() => setIsOpen(true)} style={{ padding: '8px 12px', fontSize: '12px' }}>
+        <TechIcon name="download" size={16} />
+        {!isMobile && " 导出贺卡"}
+      </button>
+      {isOpen && renderModal()}
     </>
   );
 };

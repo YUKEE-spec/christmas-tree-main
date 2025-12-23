@@ -55,30 +55,49 @@ export const SettingsConfigPanel: React.FC<SettingsConfigPanelProps> = ({
     onChange({ ...config, ...updates });
   };
 
-  return (
-    <>
-      <button
-        className={`tech-btn ${isOpen ? 'active' : ''}`}
-        onClick={onToggle}
-        style={{ padding: '8px 12px', fontSize: '12px' }}
-      >
-        <TechIcon name="settings" size={16} />
-        {!isMobile && ` ${buttonLabel}`}
-      </button>
+  const renderModal = () => {
+    if (!isOpen) return null;
 
-      {isOpen && (
+    return (
+      <div style={{
+        position: 'fixed',
+        top: isMobile ? 'auto' : '50%',
+        bottom: isMobile ? '0' : 'auto',
+        left: isMobile ? '0' : '50%',
+        right: isMobile ? '0' : 'auto',
+        transform: isMobile ? 'none' : 'translate(-50%, -50%)',
+        width: isMobile ? '100vw' : 'auto',
+        zIndex: 2000,
+        display: 'flex',
+        justifyContent: 'center',
+        pointerEvents: 'none'
+      }}>
+        {/* 遮罩背景 */}
+        {!isMobile && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)', zIndex: -1, pointerEvents: 'auto'
+          }} onClick={onToggle}></div>
+        )}
+
         <div className="tech-panel" style={{
-          position: 'absolute',
-          top: isMobile ? '40px' : '0',
-          left: isMobile ? '-150px' : '110%',
-          width: '200px',
-          padding: '15px',
-          borderRadius: '12px',
-          zIndex: 20
+          width: isMobile ? '100vw' : '220px',
+          padding: isMobile ? '20px' : '20px',
+          borderRadius: isMobile ? '20px 20px 0 0' : '16px',
+          maxHeight: isMobile ? '60vh' : 'auto',
+          overflowY: 'auto',
+          pointerEvents: 'auto',
+          boxShadow: isMobile ? '0 -10px 40px rgba(0,0,0,0.8)' : undefined
         }}>
+          {/* 标题栏 */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
+            <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: 0 }}>系统设置</p>
+            <span onClick={onToggle} style={{ cursor: 'pointer', opacity: 0.8 }}>×</span>
+          </div>
+
           {/* 树形状选择 */}
           <div style={{ marginBottom: '15px' }}>
-            <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>几何形状</p>
+            <p style={{ fontSize: '10px', letterSpacing: '2px', color: '#888', margin: '0 0 10px 0' }}>几何形状</p>
             <div style={{ display: 'flex', gap: '8px' }}>
               {TREE_SHAPE_OPTIONS.map((shape) => (
                 <button
@@ -95,7 +114,7 @@ export const SettingsConfigPanel: React.FC<SettingsConfigPanelProps> = ({
 
           {/* 粒子数量选择 */}
           <div>
-            <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>粒子总量</p>
+            <p style={{ fontSize: '10px', letterSpacing: '2px', color: '#888', margin: '0 0 10px 0' }}>粒子总量</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               {PARTICLE_OPTIONS.map((option) => (
                 <button
@@ -110,7 +129,21 @@ export const SettingsConfigPanel: React.FC<SettingsConfigPanelProps> = ({
             </div>
           </div>
         </div>
-      )}
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <button
+        className={`tech-btn ${isOpen ? 'active' : ''}`}
+        onClick={onToggle}
+        style={{ padding: '8px 12px', fontSize: '12px' }}
+      >
+        <TechIcon name="settings" size={16} />
+        {!isMobile && ` ${buttonLabel}`}
+      </button>
+      {renderModal()}
     </>
   );
 };

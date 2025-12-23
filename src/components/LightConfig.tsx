@@ -68,39 +68,47 @@ export const LightConfigPanel: React.FC<LightConfigPanelProps> = ({
     onChange({ ...config, ...updates });
   };
 
-  return (
-    <>
-      <button
-        className={`tech-btn ${config.enabled ? 'active' : ''}`}
-        onClick={() => updateConfig({ enabled: !config.enabled })}
-        style={{ padding: '8px 12px', fontSize: '12px' }}
-      >
-        <TechIcon name="light" size={16} />
-        {!isMobile && " 灯光"}
-      </button>
+  // 统一移动端/桌面端弹窗逻辑
+  const renderModal = () => {
+    if (!isOpen) return null;
 
-      {config.enabled && (
-        <button
-          className="tech-btn"
-          onClick={onToggle}
-          style={{ padding: '8px 12px', fontSize: '12px' }}
-        >
-          <TechIcon name="settings" size={14} />
-          {!isMobile && " 配色"}
-        </button>
-      )}
+    return (
+      <div style={{
+        position: 'fixed',
+        top: isMobile ? 'auto' : '50%',
+        bottom: isMobile ? '0' : 'auto',
+        left: isMobile ? '0' : '50%',
+        right: isMobile ? '0' : 'auto',
+        transform: isMobile ? 'none' : 'translate(-50%, -50%)',
+        width: isMobile ? '100vw' : 'auto',
+        zIndex: 2000,
+        display: 'flex',
+        justifyContent: 'center',
+        pointerEvents: 'none'
+      }}>
+        {/* 遮罩背景 */}
+        {!isMobile && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)', zIndex: -1, pointerEvents: 'auto'
+          }} onClick={onToggle}></div>
+        )}
 
-      {isOpen && (
         <div className="tech-panel" style={{
-          position: 'absolute',
-          top: isMobile ? '40px' : '0',
-          left: isMobile ? '-100px' : '110%',
-          width: isMobile ? '200px' : '200px',
-          padding: '15px',
-          borderRadius: '12px',
-          zIndex: 20
+          width: isMobile ? '100vw' : '220px',
+          padding: isMobile ? '20px' : '20px',
+          borderRadius: isMobile ? '20px 20px 0 0' : '16px',
+          maxHeight: isMobile ? '60vh' : 'auto',
+          overflowY: 'auto',
+          pointerEvents: 'auto',
+          boxShadow: isMobile ? '0 -10px 40px rgba(0,0,0,0.8)' : undefined
         }}>
-          <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>灯光方案</p>
+          {/* 标题栏 */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
+            <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: 0 }}>灯光方案</p>
+            <span onClick={onToggle} style={{ cursor: 'pointer', opacity: 0.8 }}>×</span>
+          </div>
+
           {LIGHT_COLOR_PRESETS.map((preset, index) => (
             <button
               key={index}
@@ -108,7 +116,7 @@ export const LightConfigPanel: React.FC<LightConfigPanelProps> = ({
               onClick={() => {
                 updateConfig({ presetIndex: index });
                 if (index !== LIGHT_COLOR_PRESETS.length - 1) {
-                  onToggle();
+                  // onToggle(); // 保持打开以便预览
                 }
               }}
               style={{
@@ -116,10 +124,10 @@ export const LightConfigPanel: React.FC<LightConfigPanelProps> = ({
                 marginBottom: '4px',
                 fontSize: '10px',
                 justifyContent: 'flex-start',
-                padding: '6px'
+                padding: '8px'
               }}
             >
-              <div style={{ display: 'flex', gap: '2px', marginRight: '5px' }}>
+              <div style={{ display: 'flex', gap: '2px', marginRight: '8px' }}>
                 {preset.colors.slice(0, 4).map((color, i) => (
                   <span
                     key={i}
@@ -153,8 +161,8 @@ export const LightConfigPanel: React.FC<LightConfigPanelProps> = ({
                         updateConfig({ customColors: newColors });
                       }}
                       style={{
-                        width: '20px',
-                        height: '20px',
+                        width: '24px',
+                        height: '24px',
                         border: '1px solid #555',
                         borderRadius: '50%',
                         cursor: 'pointer',
@@ -172,12 +180,12 @@ export const LightConfigPanel: React.FC<LightConfigPanelProps> = ({
                         position: 'absolute',
                         top: '-4px',
                         right: '-4px',
-                        width: '10px',
-                        height: '10px',
+                        width: '12px',
+                        height: '12px',
                         backgroundColor: '#333',
                         borderRadius: '50%',
                         color: '#fff',
-                        fontSize: '8px',
+                        fontSize: '10px',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
@@ -196,8 +204,8 @@ export const LightConfigPanel: React.FC<LightConfigPanelProps> = ({
                       customColors: [...config.customColors, '#FFD700']
                     })}
                     style={{
-                      width: '20px',
-                      height: '20px',
+                      width: '24px',
+                      height: '24px',
                       padding: 0,
                       borderRadius: '50%',
                       justifyContent: 'center'
@@ -210,7 +218,33 @@ export const LightConfigPanel: React.FC<LightConfigPanelProps> = ({
             </div>
           )}
         </div>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <button
+        className={`tech-btn ${config.enabled ? 'active' : ''}`}
+        onClick={() => updateConfig({ enabled: !config.enabled })}
+        style={{ padding: '8px 12px', fontSize: '12px' }}
+      >
+        <TechIcon name="light" size={16} />
+        {!isMobile && " 灯光"}
+      </button>
+
+      {config.enabled && (
+        <button
+          className="tech-btn"
+          onClick={onToggle}
+          style={{ padding: '8px 12px', fontSize: '12px' }}
+        >
+          <TechIcon name="settings" size={14} />
+          {!isMobile && " 配色"}
+        </button>
       )}
+
+      {renderModal()}
     </>
   );
 };
