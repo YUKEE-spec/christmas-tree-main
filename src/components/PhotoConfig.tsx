@@ -78,27 +78,13 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
     updateConfig({ customPhotos: [] });
   };
 
-  return (
-    <>
-      <button
-        className={`tech-btn ${isOpen ? 'active' : ''}`}
-        onClick={onToggle}
-        style={{ padding: '8px 12px', fontSize: '12px' }}
-      >
-        <TechIcon name="photo" size={16} />
-        {!isMobile && (
-          <>
-            {" " + buttonLabel}
-            {config.customPhotos.length > 0 && <span style={{ opacity: 0.7, marginLeft: '4px' }}>({config.customPhotos.length})</span>}
-          </>
-        )}
-      </button>
+
 
   // 统一移动端/桌面端弹窗逻辑
   const renderModal = () => {
     if (!isOpen) return null;
 
-      return (
+    return (
       <div style={{
         position: 'fixed',
         top: isMobile ? 'auto' : '50%',
@@ -242,25 +228,25 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
           )}
         </div>
       </div>
-      );
+    );
   };
 
-      return (
-      <>
-        <button
-          className={`tech-btn ${isOpen ? 'active' : ''}`}
-          onClick={onToggle}
-          style={{ padding: '8px 12px', fontSize: '12px' }}
-        >
-          <TechIcon name="photo" size={16} />
-          {!isMobile && (
-            <>
-              {" " + buttonLabel}
-              {config.customPhotos.length > 0 && <span style={{ opacity: 0.7, marginLeft: '4px' }}>({config.customPhotos.length})</span>}
-            </>
-          )}
-        </button>
-        {renderModal()}
-      </>
-      );
+  return (
+    <>
+      <button
+        className={`tech-btn ${isOpen ? 'active' : ''}`}
+        onClick={onToggle}
+        style={{ padding: '8px 12px', fontSize: '12px' }}
+      >
+        <TechIcon name="photo" size={16} />
+        {!isMobile && (
+          <>
+            {" " + buttonLabel}
+            {config.customPhotos.length > 0 && <span style={{ opacity: 0.7, marginLeft: '4px' }}>({config.customPhotos.length})</span>}
+          </>
+        )}
+      </button>
+      {renderModal()}
+    </>
+  );
 };
