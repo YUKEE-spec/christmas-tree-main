@@ -1358,6 +1358,7 @@ interface ExperienceProps {
   giftConfig: GiftConfig;
   particleText?: string;
   particleTextColor?: string;
+  particleFont?: string;
 }
 
 export const Experience: React.FC<ExperienceProps> = ({
@@ -1372,7 +1373,8 @@ export const Experience: React.FC<ExperienceProps> = ({
   lightColors,
   giftConfig,
   particleText = '',
-  particleTextColor
+  particleTextColor,
+  particleFont = '"Ma Shan Zheng", cursive',
 }) => {
   const controlsRef = useRef<any>(null);
 
