@@ -12,7 +12,8 @@ export const GoldenNebula: React.FC<GoldenNebulaProps> = ({ state }) => {
 
     useFrame((rootState) => {
         if (groupRef.current) {
-            groupRef.current.rotation.y = rootState.clock.elapsedTime * 0.05;
+            const speed = state === 'CHAOS' ? 0.2 : 0.05;
+            groupRef.current.rotation.y = rootState.clock.elapsedTime * speed;
         }
     });
 

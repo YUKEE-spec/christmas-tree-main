@@ -18,7 +18,7 @@ export const Snowfall: React.FC = () => {
 
     const speed = useMemo(() => new Float32Array(count).map(() => Math.random() * 0.2 + 0.1), []);
 
-    useFrame((state) => {
+    useFrame(() => {
         if (!mesh.current) return;
         const positions = mesh.current.geometry.attributes.position.array as Float32Array;
 
