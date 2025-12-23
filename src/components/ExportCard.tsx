@@ -300,7 +300,25 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
         const dataUrl = cardCanvas.toDataURL('image/png', 1.0);
         if (isMobile) {
           setMobileImageUrl(dataUrl);
+          setMobileImageUrl(dataUrl);
           setExportDone(true);
+
+          // 尝试调用系统分享
+          if (navigator.share) {
+            try {
+              // 需要将 DataURL 转为 Blob 才能分享图片
+              const res = await fetch(dataUrl);
+              const blob = await res.blob();
+              const file = new File([blob], "christmas-card.png", { type: "image/png" });
+              await navigator.share({
+                title: '送你一棵圣诞树',
+                text: greeting,
+                files: [file]
+              });
+            } catch (err) {
+              console.log('Share failed', err);
+            }
+          }
         } else {
           const link = document.createElement('a');
           link.download = `midnight-christmas-${Date.now()}.png`;
@@ -355,9 +373,9 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
           <div style={{ textAlign: 'center' }}>
             {exportDone ? (
               <>
-                <p style={{ color: '#4caf50', marginBottom: 10 }}>🎉 生成成功</p>
+                <p style={{ color: '#4caf50', marginBottom: 10 }}>生成成功</p>
                 <img src={mobileImageUrl!} style={{ width: '80%', border: '2px solid #333', borderRadius: 4, marginBottom: 10 }} />
-                <p style={{ fontSize: 12, color: '#666' }}>长按上方图片保存到相册</p>
+                <p style={{ fontSize: 12, color: '#666' }}>分享给你的TA吧</p>
                 <button className="tech-btn" onClick={() => { setIsOpen(false); setExportDone(false); setShowPreview(false); }} style={{ width: '100%', marginTop: 10 }}>关闭</button>
               </>
             ) : (
@@ -365,7 +383,9 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
                 <img src={previewUrl} style={{ width: '80%', border: '2px solid #333', borderRadius: 4, marginBottom: 15 }} />
                 <div style={{ display: 'flex', gap: 10 }}>
                   <button className="tech-btn" onClick={() => setShowPreview(false)} disabled={isExporting}>调整</button>
-                  <button className="tech-btn purple" style={{ flex: 1 }} onClick={confirmExport} disabled={isExporting}>{isExporting ? '保存中...' : '保存到相册'}</button>
+                  <button className="tech-btn purple" style={{ flex: 1 }} onClick={confirmExport} disabled={isExporting}>
+                    {isExporting ? '生成中...' : (isMobile ? '生成祝福卡片' : '保存到相册')}
+                  </button>
                 </div>
               </>
             )}
