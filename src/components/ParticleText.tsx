@@ -104,6 +104,8 @@ export const ParticleText: React.FC<ParticleTextProps> = ({
   const { positions, targetPositions, randoms, count } = useMemo(() => {
     // 只有当字体准备好（或首次渲染）时才计算
     if (!fontsReady) return { positions: new Float32Array(0), targetPositions: new Float32Array(0), randoms: new Float32Array(0), count: 0 };
+
+    const pixels = getTextPixels(text, 120, fontFamily);
     const count = pixels.length;
 
     const positions = new Float32Array(count * 3);

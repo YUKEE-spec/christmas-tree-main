@@ -15,8 +15,6 @@ import { MathUtils } from 'three';
 import * as random from 'maath/random';
 import { EnhancedGifts } from './EnhancedGifts';
 import type { GiftConfig } from './GiftConfig';
-import { GoldenNebula } from './GoldenNebula';
-import { Snowfall } from './Snowfall';
 import { SnowGround } from './SnowGround';
 import { ParticleOlaf } from './ParticleOlaf';
 import { ParticleAnimals } from './ParticleAnimals';
