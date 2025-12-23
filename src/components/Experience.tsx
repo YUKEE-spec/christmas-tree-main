@@ -1427,11 +1427,18 @@ export const Experience: React.FC<ExperienceProps> = ({
         <>
           <Snowfall />
           <SnowGround />
-          {/* 多个雪宝围绕圣诞树 */}
-          <ParticleOlaf position={[20, -12, 8]} scale={1.0} />
-          <ParticleOlaf position={[-18, -12, 12]} scale={0.9} />
-          <ParticleOlaf position={[5, -12, 22]} scale={0.85} />
-          <ParticleOlaf position={[-12, -12, -15]} scale={0.95} />
+          {/* 雪宝自然分布在雪地各处 - 雪谷、雪坡、平地 */}
+          {/* 雪谷中的雪宝 - 在凹陷处 */}
+          <ParticleOlaf position={[28, -15, -18]} scale={0.95} />
+          {/* 雪坡上的雪宝 - 在隆起处 */}
+          <ParticleOlaf position={[-38, -10, 28]} scale={1.1} />
+          {/* 平地上散步的雪宝们 */}
+          <ParticleOlaf position={[15, -12, 25]} scale={0.85} />
+          <ParticleOlaf position={[-25, -13, -8]} scale={0.9} />
+          {/* 远处小山丘上的雪宝 */}
+          <ParticleOlaf position={[45, -11, -35]} scale={0.75} />
+          {/* 靠近文字区域的雪宝 */}
+          <ParticleOlaf position={[-20, -13, 45]} scale={0.8} />
         </>
       )}
 
