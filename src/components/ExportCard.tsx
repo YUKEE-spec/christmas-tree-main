@@ -8,6 +8,23 @@ interface ExportCardProps {
   particleText: string;
 }
 
+// 字体选项接口
+interface FontOption {
+  name: string;
+  family: string;
+  label: string; // 显示在按钮上的名字
+}
+
+// 字体配置
+const FONT_OPTIONS: FontOption[] = [
+  { name: 'ma-shan-zheng', family: '"Ma Shan Zheng", cursive', label: '马善政' },
+  { name: 'zhi-mang-xing', family: '"Zhi Mang Xing", cursive', label: '志莽行书' },
+  { name: 'long-cang', family: '"Long Cang", cursive', label: '龙苍' },
+  { name: 'great-vibes', family: '"Great Vibes", cursive', label: 'Great Vibes' },
+  { name: 'dancing-script', family: '"Dancing Script", cursive', label: 'Dancing' },
+  { name: 'parisienne', family: '"Parisienne", cursive', label: 'Parisienne' },
+];
+
 export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, particleText }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -17,6 +34,10 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
   const [fromName, setFromName] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+
+  // 字体选择状态
+  const [selectedFont, setSelectedFont] = useState<FontOption>(FONT_OPTIONS[0]);
+
   const recordingRef = useRef(false);
 
   // 检测移动端
@@ -55,7 +76,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
     }
   }, [getCanvas]);
 
-  // 创建贺卡 Canvas（用于 GIF 帧）- 白色烫金效果版
+  // 创建贺卡 Canvas（赛博夜色版）
   const createCardCanvas = useCallback((frameCanvas: HTMLCanvasElement, forGif: boolean = false): Promise<HTMLCanvasElement> => {
     return new Promise((resolve) => {
       // 动态加载字体确保渲染正确
@@ -71,122 +92,110 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
         canvas.height = h * scale;
         ctx.scale(scale, scale);
 
-        // 1. 背景：纯白 + 纸纹质感（模拟）
-        ctx.fillStyle = '#FFFAF0'; // FloralWhite
+        // 1. 背景：深空渐变
+        const bgGradient = ctx.createLinearGradient(0, 0, 0, h);
+        bgGradient.addColorStop(0, '#020205'); // 极深蓝黑
+        bgGradient.addColorStop(0.5, '#050510'); // 深科技蓝
+        bgGradient.addColorStop(1, '#0a0a1a'); // 底部微亮
+        ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, w, h);
 
-        // 添加噪点纹理
-        // ... (简略)
+        // 添加星空噪点 (简化版)
+        for (let i = 0; i < 100; i++) {
+          ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.5})`;
+          const x = Math.random() * w;
+          const y = Math.random() * h;
+          const r = Math.random() * 1.5;
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
 
-        // 2. 边框：烫金效果
-        // 使用渐变模拟金色
-        const goldGradient = ctx.createLinearGradient(0, 0, w, h);
-        goldGradient.addColorStop(0, '#B8860B'); // DarkGoldenRod
-        goldGradient.addColorStop(0.2, '#FFD700'); // Gold
-        goldGradient.addColorStop(0.4, '#FFFFE0'); // LightYellow
-        goldGradient.addColorStop(0.6, '#DAA520'); // GoldenRod
-        goldGradient.addColorStop(0.8, '#FFD700');
-        goldGradient.addColorStop(1, '#B8860B');
-
+        // 2. 边框：赛博霓虹
         const borderWidth = forGif ? 10 : 20;
-        const innerMargin = forGif ? 15 : 30;
+        const innerMargin = forGif ? 10 : 20;
 
-        // 外框
+        // 边框发光
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = 'rgba(0, 243, 255, 0.4)';
+
+        ctx.strokeStyle = 'rgba(0, 243, 255, 0.8)'; // Tech Cyan
         ctx.lineWidth = 2;
-        ctx.strokeStyle = goldGradient;
-        ctx.strokeRect(borderWidth, borderWidth, w - borderWidth * 2, h - borderWidth * 2);
 
-        // 内装饰框 (花纹角)
-        ctx.lineWidth = 1;
-        const cornerSize = 50;
+        // 绘制内框
+        ctx.strokeRect(borderWidth + innerMargin, borderWidth + innerMargin, w - (borderWidth + innerMargin) * 2, h - (borderWidth + innerMargin) * 2);
 
-        // 左上
+        ctx.shadowBlur = 0; // 重置阴影
+
+        // 装饰角落
+        const cornerSize = 40;
+        ctx.strokeStyle = '#bc13fe'; // Tech Purple
+        ctx.lineWidth = 4;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = 'rgba(188, 19, 254, 0.6)';
+
+        // 左上角 L
         ctx.beginPath();
-        ctx.moveTo(borderWidth + innerMargin, borderWidth + innerMargin + cornerSize);
-        ctx.lineTo(borderWidth + innerMargin, borderWidth + innerMargin);
-        ctx.lineTo(borderWidth + innerMargin + cornerSize, borderWidth + innerMargin);
+        ctx.moveTo(borderWidth, borderWidth + cornerSize);
+        ctx.lineTo(borderWidth, borderWidth);
+        ctx.lineTo(borderWidth + cornerSize, borderWidth);
         ctx.stroke();
 
-        // 右上
+        // 右下角 
         ctx.beginPath();
-        ctx.moveTo(w - borderWidth - innerMargin - cornerSize, borderWidth + innerMargin);
-        ctx.lineTo(w - borderWidth - innerMargin, borderWidth + innerMargin);
-        ctx.lineTo(w - borderWidth - innerMargin, borderWidth + innerMargin + cornerSize);
+        ctx.moveTo(w - borderWidth, h - borderWidth - cornerSize);
+        ctx.lineTo(w - borderWidth, h - borderWidth);
+        ctx.lineTo(w - borderWidth - cornerSize, h - borderWidth);
         ctx.stroke();
 
-        // 左下
-        ctx.beginPath();
-        ctx.moveTo(borderWidth + innerMargin, h - borderWidth - innerMargin - cornerSize);
-        ctx.lineTo(borderWidth + innerMargin, h - borderWidth - innerMargin);
-        ctx.lineTo(borderWidth + innerMargin + cornerSize, h - borderWidth - innerMargin);
-        ctx.stroke();
+        ctx.shadowBlur = 0;
 
-        // 右下
-        ctx.beginPath();
-        ctx.moveTo(w - borderWidth - innerMargin - cornerSize, h - borderWidth - innerMargin);
-        ctx.lineTo(w - borderWidth - innerMargin, h - borderWidth - innerMargin);
-        ctx.lineTo(w - borderWidth - innerMargin, h - borderWidth - innerMargin - cornerSize);
-        ctx.stroke();
-
-        // 3. 顶部文字 (Logo/Title) - 烫金
-        ctx.fillStyle = goldGradient;
-        ctx.font = `400 ${forGif ? 24 : 40}px "Great Vibes", cursive`;
+        // 3. 顶部文字 (Title) - 霓虹发光文字
+        const titleY = forGif ? 60 : 100;
         ctx.textAlign = 'center';
-        ctx.fillText('Magic Christmas', w / 2, forGif ? 60 : 100);
 
-        // 4. 圣诞树区域 (圆形遮罩或柔和边缘)
+        // 标题字体
+        ctx.font = `400 ${forGif ? 28 : 48}px "Orbitron", sans-serif`;
+
+        // 外发光
+        ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = '#FFD700'; // 金色
+        ctx.fillText('MAGIC CHRISTMAS', w / 2, titleY);
+
+        ctx.shadowBlur = 0;
+
+        // 4. 圣诞树区域 (无裁剪，直接融合)
         const treeY = forGif ? 80 : 140;
         const treeH = forGif ? 400 : 700;
-        const treeW = w - (borderWidth + innerMargin) * 2;
-
-        // 保存状态进行裁剪
-        ctx.save();
-        // 这里我们简单居中放置，可以是矩形
-        // 为了融合白色背景，我们在树图周围加一个白色光晕
-        // 计算绘制位置
+        const treeW = w;
 
         const imgAspect = frameCanvas.width / frameCanvas.height;
         // 目标区域
-        const targetW = treeW;
-        const targetH = treeW / imgAspect; // 保持比例
+        const targetW = treeW; // 全宽
+        const targetH = treeW / imgAspect;
 
+        // 居中绘制
         const drawX = (w - targetW) / 2;
         const drawY = treeY + (treeH - targetH) / 2;
 
-        // 绘制黑色背景以衬托树的粒子 (因为树是在黑背景下渲染的)
-        // 或者使用 destination-over 技巧，但这里是在白纸上画
-        // 最好的效果是保留树的黑底，然后做一个圆角矩形
-
-        const radius = 20;
-        ctx.beginPath();
-        ctx.roundRect(drawX, drawY, targetW, targetH, radius);
-        ctx.clip();
-
-        // 绘制树
+        // 设置混合模式为 lighten 或 screen 可以去除纯黑背景，但为了保持树的颜色，直接绘制通常最好
+        // 我们的背景已经是深色，所以直接绘制即可，树的黑底会融入背景
+        // 稍微做一点边缘羽化效果很难在 canvas 原生 API 做，但因为背景相近，直接画就行
         ctx.drawImage(frameCanvas, 0, 0, frameCanvas.width, frameCanvas.height, drawX, drawY, targetW, targetH);
-        ctx.restore();
 
-        // 给树加一个金边框
-        ctx.beginPath();
-        ctx.roundRect(drawX, drawY, targetW, targetH, radius);
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = goldGradient;
-        ctx.stroke();
 
         // 5. 祝福语 (多行支持)
-        const textYStart = drawY + targetH + (forGif ? 40 : 60);
+        const textYStart = drawY + targetH + (forGif ? 30 : 50);
 
-        ctx.fillStyle = goldGradient; // 烫金字
-        // 稍微加深一点阴影增加可读性
-        ctx.shadowColor = "rgba(0,0,0,0.1)";
-        ctx.shadowBlur = 2;
-
-        // 使用花体/手写体
-        // 检测是否有中文字符
-        const hasChinese = /[\u4e00-\u9fa5]/.test(greeting);
-        const fontName = hasChinese ? '"Ma Shan Zheng", cursive' : '"Great Vibes", cursive';
+        // 使用选中的字体
         const fontSize = forGif ? 30 : 50;
-        ctx.font = `400 ${fontSize}px ${fontName}`;
+        ctx.font = `400 ${fontSize}px ${selectedFont.family}`;
+
+        // 文字样式：发光白/浅金
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+        ctx.shadowBlur = 10;
 
         const lines = greeting.split('\n');
         const lineHeight = fontSize * 1.5;
@@ -199,31 +208,33 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
 
         // 6. 粒子文字 (如果有)
         if (particleText) {
-          const ptY = textYStart + lines.length * lineHeight + (forGif ? 5 : 10);
+          const ptY = textYStart + lines.length * lineHeight + (forGif ? 10 : 15);
           ctx.font = `400 ${forGif ? 16 : 24}px monospace`;
-          ctx.fillStyle = '#555';
-          ctx.fillText(`— ${particleText} —`, w / 2, ptY);
+          ctx.fillStyle = '#00f3ff'; // Cyan
+          ctx.shadowColor = 'rgba(0, 243, 255, 0.6)';
+          ctx.shadowBlur = 5;
+          ctx.fillText(`[ ${particleText} ]`, w / 2, ptY);
+          ctx.shadowBlur = 0;
         }
 
         // 7. 署名
         if (fromName) {
-          const fromY = h - (forGif ? 40 : 70);
+          const fromY = h - (forGif ? 30 : 50);
           ctx.font = `400 ${forGif ? 18 : 32}px "Great Vibes", cursive`;
-          ctx.fillStyle = '#B8860B';
+          ctx.fillStyle = '#B8860B'; // 暗金色
           ctx.fillText(`By ${fromName}`, w / 2, fromY);
         }
 
         resolve(canvas);
       });
     });
-  }, [greeting, fromName, particleText, treeColor]);
+  }, [greeting, fromName, particleText, treeColor, selectedFont]); // 依赖 selectedFont
 
   // 生成预览
   const handlePreview = useCallback(async () => {
     setIsExporting(true);
     setExportProgress(10);
 
-    // 延时一小会确保 UI 渲染完成（防止菜单遮挡等，虽然是截取 canvas 这里其实不用担心 DOM）
     setTimeout(async () => {
       const frameCanvas = captureFrame();
       if (!frameCanvas) {
@@ -243,7 +254,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
     }, 100);
   }, [captureFrame, createCardCanvas]);
 
-  // 导出 GIF (逻辑保持大致不变，更新样式)
+  // 导出 GIF
   const exportGif = useCallback(async () => {
     setIsExporting(true);
     setExportProgress(0);
@@ -297,7 +308,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
         setExportDone(true);
       } else {
         const link = document.createElement('a');
-        link.download = `white-gold-christmas-${Date.now()}.gif`;
+        link.download = `cyber-christmas-${Date.now()}.gif`;
         link.href = url;
         link.click();
         setIsExporting(false);
@@ -324,7 +335,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
           setExportDone(true);
         } else {
           const link = document.createElement('a');
-          link.download = `white-gold-christmas-${Date.now()}.png`;
+          link.download = `cyber-christmas-${Date.now()}.png`;
           link.href = dataUrl;
           link.click();
           setIsOpen(false);
@@ -350,12 +361,12 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
       {isOpen && (
         <div style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          backgroundColor: 'rgba(5, 5, 10, 0.9)', backdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(5, 5, 10, 0.95)', backdropFilter: 'blur(10px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
         }} onClick={() => !isExporting && setIsOpen(false)}>
 
           <div className="tech-panel" style={{
-            padding: '30px', borderRadius: '12px', width: isMobile ? '85vw' : '400px',
+            padding: '24px', borderRadius: '12px', width: isMobile ? '90vw' : '400px',
             maxHeight: '90vh', overflowY: 'auto'
           }} onClick={e => e.stopPropagation()}>
 
@@ -372,13 +383,13 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
                 {exportDone ? (
                   <>
                     <p style={{ color: '#4CAF50', marginBottom: 10 }}>生成成功</p>
-                    <img src={mobileImageUrl!} style={{ width: '100%', border: '1px solid var(--tech-gold)', marginBottom: 20 }} />
+                    <img src={mobileImageUrl!} style={{ width: '100%', border: '1px solid var(--tech-cyan)', marginBottom: 20, borderRadius: '8px' }} />
                     <p style={{ fontSize: 12, color: '#888' }}>长按图片保存到相册</p>
                     <button className="tech-btn" onClick={() => { setIsOpen(false); setExportDone(false); setShowPreview(false); }} style={{ width: '100%' }}>关闭</button>
                   </>
                 ) : (
                   <>
-                    <img src={previewUrl} style={{ width: '100%', border: '1px solid var(--tech-gold)', marginBottom: 20 }} />
+                    <img src={previewUrl} style={{ width: '100%', border: '1px solid var(--tech-cyan)', marginBottom: 20, borderRadius: '8px' }} />
                     <div style={{ display: 'flex', gap: 10 }}>
                       <button className="tech-btn" onClick={() => setShowPreview(false)} disabled={isExporting}>返回</button>
                       <button className="tech-btn gold" onClick={confirmExport} disabled={isExporting}>
@@ -391,20 +402,46 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
             ) : (
               <>
                 {/* 表单区域 */}
-                <div style={{ marginBottom: 20 }}>
+                <div style={{ marginBottom: 15 }}>
+                  <label style={{ display: 'block', color: 'var(--tech-cyan)', fontSize: 10, marginBottom: 5 }}>祝福语字体</label>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: '6px'
+                  }}>
+                    {FONT_OPTIONS.map((font) => (
+                      <button
+                        key={font.name}
+                        onClick={() => setSelectedFont(font)}
+                        className={`tech-btn ${selectedFont.name === font.name ? 'active' : ''}`}
+                        style={{
+                          fontSize: '10px',
+                          padding: '6px 2px',
+                          fontFamily: font.family
+                        }}
+                      >
+                        {font.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: 15 }}>
                   <label style={{ display: 'block', color: 'var(--tech-cyan)', fontSize: 10, marginBottom: 5 }}>祝福语 (支持多行)</label>
                   <textarea
                     value={greeting}
                     onChange={(e) => setGreeting(e.target.value)}
                     style={{
-                      width: '100%', height: 80, background: 'rgba(255,255,255,0.05)',
+                      width: '100%', height: 70, background: 'rgba(255,255,255,0.05)',
                       border: '1px solid var(--tech-cyan)', color: 'white', padding: 10,
-                      fontFamily: 'Ma Shan Zheng, cursive'
+                      fontFamily: selectedFont.family, // 实时预览字体
+                      fontSize: '16px',
+                      borderRadius: '4px'
                     }}
                   />
                 </div>
 
-                <div style={{ marginBottom: 20 }}>
+                <div style={{ marginBottom: 15 }}>
                   <label style={{ display: 'block', color: 'var(--tech-cyan)', fontSize: 10, marginBottom: 5 }}>署名</label>
                   <input
                     type="text"
@@ -412,7 +449,8 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
                     onChange={(e) => setFromName(e.target.value)}
                     style={{
                       width: '100%', background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid var(--tech-cyan)', color: 'white', padding: 10
+                      border: '1px solid var(--tech-cyan)', color: 'white', padding: 10,
+                      borderRadius: '4px'
                     }}
                   />
                 </div>
