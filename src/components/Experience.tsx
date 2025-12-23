@@ -17,7 +17,6 @@ import { EnhancedGifts } from './EnhancedGifts';
 import type { GiftConfig } from './GiftConfig';
 import { SnowGround } from './SnowGround';
 import { ParticleOlaf } from './ParticleOlaf';
-import { ParticleAnimals } from './ParticleAnimals';
 import { ParticleText } from './ParticleText';
 
 // 装饰配置类型
@@ -1428,8 +1427,11 @@ export const Experience: React.FC<ExperienceProps> = ({
         <>
           <Snowfall />
           <SnowGround />
-          <ParticleOlaf position={[18, -12, 10]} scale={1.2} />
-          <ParticleAnimals />
+          {/* 多个雪宝围绕圣诞树 */}
+          <ParticleOlaf position={[20, -12, 8]} scale={1.0} />
+          <ParticleOlaf position={[-18, -12, 12]} scale={0.9} />
+          <ParticleOlaf position={[5, -12, 22]} scale={0.85} />
+          <ParticleOlaf position={[-12, -12, -15]} scale={0.95} />
         </>
       )}
 
