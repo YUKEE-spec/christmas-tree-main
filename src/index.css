@@ -13,7 +13,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Theme Variables: Champion Moment */
+  /* Theme Variables: Champion Moment Refined */
   --tech-cyan: #D31120;
   /* China Red */
   --tech-purple: #F0E68C;
@@ -22,9 +22,7 @@
   /* Pure White (Text) */
   --tech-bg-dark: rgba(5, 6, 8, 0.95);
   --tech-border-glow: 0 0 0px rgba(0, 0, 0, 0);
-  /* Remove soft glow, keep sharp */
   --tech-text-shadow: none;
-  /* Clean text */
 }
 
 /* 引入字体 */
@@ -36,36 +34,40 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-color: var(--tech-bg-dark);
+  background-color: #000;
+  /* 纯黑底色，防止背景透出杂色 */
   overflow: hidden;
 }
 
 /* 滚动条样式 */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
+  /* 更细的滚动条 */
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--tech-cyan);
-  border-radius: 3px;
+  background: #333;
+  border-radius: 2px;
 }
 
-/* 通用科技风按钮 -> 冠军风格按钮 */
+/* 通用科技风按钮 -> 冠军风格按钮 (优化版) */
 .tech-btn {
-  background: rgba(211, 17, 32, 0.1);
-  /* Red tint */
-  border: 1px solid var(--tech-cyan);
-  /* Sharp Red Border */
-  color: #fff;
+  /* 使用渐变黑色背景，而非红色混合，提升高级感 */
+  background: linear-gradient(180deg, rgba(30, 30, 35, 0.8) 0%, rgba(10, 10, 15, 0.9) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  /* 默认只有淡白边框 */
+  border-left: 2px solid #333;
+  /* 左侧加粗装饰 */
+  color: #ccc;
   font-family: 'Inter', 'Ma Shan Zheng', sans-serif;
-  border-radius: 0px;
-  /* 锐利直角 */
-  backdrop-filter: blur(4px);
-  transition: all 0.2s ease;
+  border-radius: 2px;
+  /* 微圆角 */
+  backdrop-filter: blur(8px);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -76,60 +78,82 @@ body {
   letter-spacing: 1px;
   font-weight: 500;
   cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .tech-btn:hover {
-  background: rgba(211, 17, 32, 0.8);
-  /* Solid Red */
+  background: linear-gradient(180deg, rgba(40, 40, 45, 0.9) 0%, rgba(20, 20, 25, 0.95) 100%);
+  border-color: rgba(255, 255, 255, 0.3);
   color: #fff;
   transform: translateY(-1px);
 }
 
 .tech-btn:active {
   transform: translateY(1px);
+  box-shadow: none;
 }
 
+/* 激活状态：低调的红 */
 .tech-btn.active {
-  background: #D31120;
+  /* 不再使用大面积亮红，改为深红渐变 */
+  background: linear-gradient(135deg, #8B0000 0%, #300000 100%);
   border-color: #D31120;
+  border-left: 3px solid #D31120;
+  /* 强调左边框 */
   color: #fff;
+  box-shadow: 0 0 10px rgba(211, 17, 32, 0.2);
 }
 
 /* 紫色变体 -> 金色变体 (用于次要操作) */
 .tech-btn.purple {
+  /* 金色点缀 */
   border-color: #F0E68C;
   color: #F0E68C;
   background: rgba(240, 230, 140, 0.05);
 }
 
-.tech-btn.purple:hover,
-.tech-btn.purple.active {
+.tech-btn.purple:hover {
   background: #F0E68C;
   color: #000;
   border-color: #F0E68C;
 }
 
-/* 金色变体 -> 白色变体 (用于强调) */
+.tech-btn.purple.active {
+  background: linear-gradient(135deg, #B8860B 0%, #333 100%);
+  border-color: #DAA520;
+  border-left: 3px solid #DAA520;
+  color: #fff;
+}
+
+/* 金色变体 -> 白色/灰色变体 (用于强调) */
 .tech-btn.gold {
   border-color: #fff;
   color: #fff;
   background: rgba(255, 255, 255, 0.1);
 }
 
-.tech-btn.gold:hover,
-.tech-btn.gold.active {
+.tech-btn.gold:hover {
   background: #fff;
   color: #000;
   border-color: #fff;
 }
 
-/* 粒子装饰角落（用于面板） -> 极简红框面板 */
+.tech-btn.gold.active {
+  background: #333;
+  border-color: #fff;
+  color: #fff;
+}
+
+/* 面板样式优化：去除粗糙红框，改为细腻质感 */
 .tech-panel {
-  background: rgba(5, 6, 8, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(10, 10, 12, 0.9);
+  /* 几乎不透明的深灰黑 */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  /* 顶部高光 */
   position: relative;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
 }
 
 /* 移除之前的发光角落装饰，改为极简风格 */

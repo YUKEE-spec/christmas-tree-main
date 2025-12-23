@@ -17,7 +17,7 @@ export interface GiftType {
 export const GIFT_PRESETS: GiftType[] = [
   {
     id: 'christmas-red-box',
-    name: 'RED BOX',
+    name: '红色礼盒',
     shape: 'box',
     color: '#DC143C',
     size: 0.9,
@@ -27,7 +27,7 @@ export const GIFT_PRESETS: GiftType[] = [
   },
   {
     id: 'golden-gift-box',
-    name: 'GOLD BOX',
+    name: '金色礼盒',
     shape: 'box',
     color: '#FFD700',
     size: 0.8,
@@ -37,7 +37,7 @@ export const GIFT_PRESETS: GiftType[] = [
   },
   {
     id: 'orange-gift-box',
-    name: 'ORANGE BOX',
+    name: '橙色礼盒',
     shape: 'box',
     color: '#FF8C00',
     size: 0.85,
@@ -47,7 +47,7 @@ export const GIFT_PRESETS: GiftType[] = [
   },
   {
     id: 'christmas-hat',
-    name: 'HAT',
+    name: '圣诞帽',
     shape: 'cylinder',
     color: '#DC143C',
     size: 0.7,
@@ -57,7 +57,7 @@ export const GIFT_PRESETS: GiftType[] = [
   },
   {
     id: 'christmas-sock',
-    name: 'SOCK',
+    name: '圣诞袜',
     shape: 'cylinder',
     color: '#228B22',
     size: 0.6,
@@ -67,7 +67,7 @@ export const GIFT_PRESETS: GiftType[] = [
   },
   {
     id: 'gingerbread-man',
-    name: 'COOKIE',
+    name: '姜饼人',
     shape: 'star',
     color: '#D2691E',
     size: 0.75,
@@ -77,7 +77,7 @@ export const GIFT_PRESETS: GiftType[] = [
   },
   {
     id: 'christmas-bell',
-    name: 'BELL',
+    name: '铃铛',
     shape: 'sphere',
     color: '#FFD700',
     size: 0.6,
@@ -87,7 +87,7 @@ export const GIFT_PRESETS: GiftType[] = [
   },
   {
     id: 'candy-cane',
-    name: 'CANE',
+    name: '拐杖糖',
     shape: 'cylinder',
     color: '#FF0000',
     size: 0.8,
@@ -99,18 +99,18 @@ export const GIFT_PRESETS: GiftType[] = [
 
 // 礼物数量选项
 export const GIFT_COUNT_OPTIONS = [
-  { name: 'MIN', value: 30 },
-  { name: 'MED', value: 60 },
-  { name: 'HIGH', value: 100 },
-  { name: 'MAX', value: 150 }
+  { name: '极简', value: 30 },
+  { name: '适中', value: 60 },
+  { name: '丰富', value: 100 },
+  { name: '堆满', value: 150 }
 ];
 
 // 礼物分布模式
 export const GIFT_DISTRIBUTION_OPTIONS = [
-  { name: 'SPIRAL', value: 'spiral' },
-  { name: 'RANDOM', value: 'random' },
-  { name: 'LAYER', value: 'layered' },
-  { name: 'CLUSTER', value: 'clustered' }
+  { name: '螺旋', value: 'spiral' },
+  { name: '随机', value: 'random' },
+  { name: '分层', value: 'layered' },
+  { name: '聚簇', value: 'clustered' }
 ];
 
 // 礼物配置接口
@@ -169,7 +169,7 @@ export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChan
   const addCustomGift = () => {
     const newGift: GiftType = {
       id: `custom-${Date.now()}`,
-      name: 'CUSTOM',
+      name: '自定义礼物',
       shape: 'box',
       color: '#FF0000',
       size: 0.8,
@@ -200,30 +200,44 @@ export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChan
   return (
     <div style={{
       position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: '100vw',
-      height: '100vh',
-      zIndex: 1000,
-      backgroundColor: 'rgba(0,0,0,0.8)',
-      backdropFilter: 'blur(5px)',
+      // 移动端：靠底部显示，留出操作空间
+      // 桌面端：居中显示
+      top: isMobile ? 'auto' : '50%',
+      bottom: isMobile ? '0' : 'auto',
+      left: isMobile ? '0' : '50%',
+      right: isMobile ? '0' : 'auto',
+      transform: isMobile ? 'none' : 'translate(-50%, -50%)',
+      width: isMobile ? '100vw' : 'auto',
+      height: isMobile ? 'auto' : 'auto',
+      zIndex: 2000, // 确保在最上层
       display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }} onClick={onClose}>
+      alignItems: isMobile ? 'flex-end' : 'center',
+      justifyContent: 'center',
+      pointerEvents: 'none' // 让遮罩层不直接阻挡点击，内容层开启点击
+    }}>
+      {/* 遮罩背景 (仅桌面端需要，移动端不全屏遮挡) */}
+      {!isMobile && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)', zIndex: -1, pointerEvents: 'auto'
+        }} onClick={onClose}></div>
+      )}
+
       <div className="tech-panel" style={{
-        width: isMobile ? '90vw' : '500px',
-        maxHeight: isMobile ? '85vh' : '80vh',
+        width: isMobile ? '100vw' : '500px',
+        maxHeight: isMobile ? '70vh' : '80vh',
         padding: isMobile ? '20px' : '30px',
-        borderRadius: '16px',
-        overflowY: 'auto'
+        borderRadius: isMobile ? '20px 20px 0 0' : '16px',
+        overflowY: 'auto',
+        borderBottom: isMobile ? 'none' : undefined,
+        pointerEvents: 'auto', // 开启点击
+        boxShadow: isMobile ? '0 -10px 40px rgba(0,0,0,0.8)' : undefined
       }} onClick={e => e.stopPropagation()}>
 
         {/* 标题栏 */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-          <h3 style={{ color: 'var(--tech-cyan)', margin: 0, fontSize: '14px', letterSpacing: '2px', fontFamily: 'Orbitron' }}>GIFT CONFIGURATION</h3>
-          <span onClick={onClose} style={{ cursor: 'pointer' }}>
+          <h3 style={{ color: 'var(--tech-cyan)', margin: 0, fontSize: '14px', letterSpacing: '2px', fontFamily: 'Orbitron' }}>礼物配置 (GIFT CONFIG)</h3>
+          <span onClick={onClose} style={{ cursor: 'pointer', padding: '5px' }}>
             <TechIcon name="close" size={20} color="var(--tech-cyan)" />
           </span>
         </div>
@@ -236,13 +250,13 @@ export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChan
               onClick={() => updateConfig({ enabled: !config.enabled })}
               style={{ width: '100%', justifyContent: 'center' }}
             >
-              {config.enabled ? 'GIFTS ENABLED' : 'GIFTS DISABLED'}
+              {config.enabled ? '已启用礼物挂载' : '礼物挂载已暂停'}
             </button>
           </div>
 
           {/* 数量选择 */}
           <div style={{ marginBottom: '15px', opacity: config.enabled ? 1 : 0.5 }}>
-            <p style={{ color: 'var(--tech-cyan)', fontSize: '10px', margin: '0 0 8px 0', letterSpacing: '1px' }}>COUNT</p>
+            <p style={{ color: 'var(--tech-cyan)', fontSize: '10px', margin: '0 0 8px 0', letterSpacing: '1px' }}>数量</p>
             <div style={{ display: 'flex', gap: '8px' }}>
               {GIFT_COUNT_OPTIONS.map((option) => (
                 <button
@@ -259,7 +273,7 @@ export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChan
 
           {/* 分布模式 */}
           <div style={{ marginBottom: '15px', opacity: config.enabled ? 1 : 0.5 }}>
-            <p style={{ color: 'var(--tech-cyan)', fontSize: '10px', margin: '0 0 8px 0', letterSpacing: '1px' }}>Please choose DISTRIBUTION</p>
+            <p style={{ color: 'var(--tech-cyan)', fontSize: '10px', margin: '0 0 8px 0', letterSpacing: '1px' }}>分布模式</p>
             <div style={{ display: 'flex', gap: '8px' }}>
               {GIFT_DISTRIBUTION_OPTIONS.map((option) => (
                 <button
@@ -276,7 +290,7 @@ export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChan
 
           {/* 亮度调节 */}
           <div style={{ marginBottom: '15px', opacity: config.enabled ? 1 : 0.5 }}>
-            <p style={{ color: 'var(--tech-cyan)', fontSize: '10px', margin: '0 0 8px 0', letterSpacing: '1px' }}>INTENSITY: {config.brightness.toFixed(1)}</p>
+            <p style={{ color: 'var(--tech-cyan)', fontSize: '10px', margin: '0 0 8px 0', letterSpacing: '1px' }}>发光强度: {config.brightness.toFixed(1)}</p>
             <input
               type="range"
               min="0.5"
@@ -290,7 +304,8 @@ export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChan
                 background: 'var(--tech-cyan)',
                 borderRadius: '2px',
                 outline: 'none',
-                appearance: 'none'
+                appearance: 'none',
+                accentColor: 'var(--tech-cyan)'
               }}
             />
           </div>
@@ -298,7 +313,7 @@ export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChan
 
         {/* 礼物类型选择 */}
         <div style={{ marginBottom: '20px' }}>
-          <h4 style={{ color: 'var(--tech-cyan)', fontSize: '12px', margin: '0 0 10px 0', letterSpacing: '2px', fontFamily: 'Orbitron' }}>GIFT PROTOCOLS</h4>
+          <h4 style={{ color: 'var(--tech-cyan)', fontSize: '12px', margin: '0 0 10px 0', letterSpacing: '2px', fontFamily: 'Orbitron' }}>挂载类型</h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '10px' }}>
             {GIFT_PRESETS.map((gift) => (
               <button
@@ -326,14 +341,14 @@ export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChan
             onClick={addCustomGift}
             style={{ width: '100%', justifyContent: 'center' }}
           >
-            <TechIcon name="plus" size={12} /> ADD CUSTOM UNIT
+            <TechIcon name="plus" size={12} /> 添加自定义礼物
           </button>
         </div>
 
         {/* 自定义礼物编辑 */}
         {config.customTypes.length > 0 && (
           <div style={{ marginBottom: '20px' }}>
-            <h4 style={{ color: 'var(--tech-cyan)', fontSize: '12px', margin: '0 0 10px 0', letterSpacing: '2px' }}>CUSTOM UNITS</h4>
+            <h4 style={{ color: 'var(--tech-cyan)', fontSize: '12px', margin: '0 0 10px 0', letterSpacing: '2px' }}>自定义列表</h4>
             {config.customTypes.map((gift, index) => (
               <div key={gift.id} style={{
                 padding: '10px',
@@ -364,7 +379,7 @@ export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChan
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px', fontSize: '9px' }}>
                   <div>
-                    <label style={{ color: '#888', display: 'block', marginBottom: '2px' }}>SHAPE</label>
+                    <label style={{ color: '#888', display: 'block', marginBottom: '2px' }}>形状</label>
                     <select
                       value={gift.shape}
                       onChange={(e) => updateCustomGift(index, { shape: e.target.value as any })}
@@ -377,16 +392,16 @@ export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChan
                         padding: '2px'
                       }}
                     >
-                      <option value="box">BOX</option>
-                      <option value="sphere">SPHERE</option>
-                      <option value="cylinder">CYLINDER</option>
-                      <option value="star">STAR</option>
-                      <option value="heart">HEART</option>
+                      <option value="box">方块</option>
+                      <option value="sphere">圆球</option>
+                      <option value="cylinder">圆柱</option>
+                      <option value="star">星星</option>
+                      <option value="heart">爱心</option>
                     </select>
                   </div>
 
                   <div>
-                    <label style={{ color: '#888', display: 'block', marginBottom: '2px' }}>COLOR</label>
+                    <label style={{ color: '#888', display: 'block', marginBottom: '2px' }}>颜色</label>
                     <input
                       type="color"
                       value={gift.color}
@@ -408,21 +423,41 @@ export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChan
 
         {/* 动画设置 */}
         <div>
-          <h4 style={{ color: 'var(--tech-cyan)', fontSize: '12px', margin: '0 0 10px 0', letterSpacing: '2px' }}>ANIMATION MODES</h4>
+          <h4 style={{ color: 'var(--tech-cyan)', fontSize: '12px', margin: '0 0 10px 0', letterSpacing: '2px' }}>动态效果</h4>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            {Object.entries(config.animation).map(([key, value]) => (
-              <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#ccc', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={value}
-                  onChange={(e) => updateConfig({
-                    animation: { ...config.animation, [key]: e.target.checked }
-                  })}
-                  style={{ margin: 0, accentColor: 'var(--tech-cyan)' }}
-                />
-                {key.toUpperCase()}
-              </label>
-            ))}
+            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#ccc', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={config.animation.wobble}
+                onChange={(e) => updateConfig({
+                  animation: { ...config.animation, wobble: e.target.checked }
+                })}
+                style={{ margin: 0, accentColor: 'var(--tech-cyan)' }}
+              />
+              摇晃
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#ccc', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={config.animation.rotation}
+                onChange={(e) => updateConfig({
+                  animation: { ...config.animation, rotation: e.target.checked }
+                })}
+                style={{ margin: 0, accentColor: 'var(--tech-cyan)' }}
+              />
+              自转
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#ccc', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={config.animation.floating}
+                onChange={(e) => updateConfig({
+                  animation: { ...config.animation, floating: e.target.checked }
+                })}
+                style={{ margin: 0, accentColor: 'var(--tech-cyan)' }}
+              />
+              悬浮
+            </label>
           </div>
         </div>
       </div>
