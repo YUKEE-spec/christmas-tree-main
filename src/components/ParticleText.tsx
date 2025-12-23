@@ -76,8 +76,20 @@ export const ParticleText: React.FC<ParticleTextProps> = ({
   const pointsRef = useRef<THREE.Points>(null);
   const materialRef = useRef<THREE.PointsMaterial>(null);
 
-  // 生成粒子数据
+
+  // 强制等待字体加载完成后再计算位置
+  const [fontsReady, setFontsReady] = React.useState(false);
+
+  useEffect(() => {
+    document.fonts.ready.then(() => {
+      setFontsReady(true);
+    });
+  }, []);
+
   const { positions, targetPositions, randoms, count } = useMemo(() => {
+    // 只有当字体准备好（或首次渲染）时才计算
+    // 实际上我们希望字体加载变化时重新计算，所以添加 fontsReady 到依赖
+
     const pixels = getTextPixels(text);
     const count = pixels.length;
 
@@ -100,7 +112,7 @@ export const ParticleText: React.FC<ParticleTextProps> = ({
     }
 
     return { positions, targetPositions, randoms, count };
-  }, [text, size]);
+  }, [text, size, fontsReady]); // 添加 fontsReady 依赖
 
   // 更新颜色
   useEffect(() => {

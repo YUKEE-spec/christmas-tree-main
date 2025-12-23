@@ -95,7 +95,13 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
   // 创建贺卡 Canvas（午夜蓝梦幻版）
   const createCardCanvas = useCallback((frameCanvas: HTMLCanvasElement, forGif: boolean = false): Promise<HTMLCanvasElement> => {
     return new Promise((resolve) => {
-      document.fonts.ready.then(() => {
+      // 强制加载关键字体，防止 Canvas 绘制时回退默认字体
+      const fontLoaders = [
+        document.fonts.load(`700 ${92 * (forGif ? 1 : 2)}px "Great Vibes"`),
+        document.fonts.load(`400 ${32 * (forGif ? 1 : 2)}px ${selectedFont.family}`)
+      ];
+
+      Promise.all(fontLoaders).then(() => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d')!;
 
