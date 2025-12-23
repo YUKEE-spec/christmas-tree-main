@@ -94,31 +94,59 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
         )}
       </button>
 
-      {isOpen && (
+  // 统一移动端/桌面端弹窗逻辑
+  const renderModal = () => {
+    if (!isOpen) return null;
+
+      return (
+      <div style={{
+        position: 'fixed',
+        top: isMobile ? 'auto' : '50%',
+        bottom: isMobile ? '0' : 'auto',
+        left: isMobile ? '0' : '50%',
+        right: isMobile ? '0' : 'auto',
+        transform: isMobile ? 'none' : 'translate(-50%, -50%)',
+        width: isMobile ? '100vw' : 'auto',
+        zIndex: 2000,
+        display: 'flex',
+        justifyContent: 'center',
+        pointerEvents: 'none'
+      }}>
+        {/* 遮罩背景 */}
+        {!isMobile && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)', zIndex: -1, pointerEvents: 'auto'
+          }} onClick={onToggle}></div>
+        )}
+
         <div className="tech-panel" style={{
-          position: 'absolute',
-          top: isMobile ? '40px' : '0',
-          left: isMobile ? '-220px' : '110%',
-          width: '240px',
-          padding: '15px',
-          borderRadius: '12px',
-          zIndex: 20
+          width: isMobile ? '100vw' : '260px',
+          padding: isMobile ? '20px' : '20px',
+          borderRadius: isMobile ? '20px 20px 0 0' : '16px',
+          maxHeight: isMobile ? '60vh' : 'auto',
+          overflowY: 'auto',
+          pointerEvents: 'auto',
+          boxShadow: isMobile ? '0 -10px 40px rgba(0,0,0,0.8)' : undefined
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
             <span style={{ color: 'var(--tech-cyan)', fontSize: '10px', letterSpacing: '2px' }}>
               记忆模块
             </span>
-            <button
-              className={`tech-btn ${config.enabled ? 'active' : ''}`}
-              onClick={() => updateConfig({ enabled: !config.enabled })}
-              style={{
-                padding: '4px 8px',
-                fontSize: '9px',
-                height: 'auto'
-              }}
-            >
-              <TechIcon name={config.enabled ? "check" : "close"} size={10} />
-            </button>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <button
+                className={`tech-btn ${config.enabled ? 'active' : ''}`}
+                onClick={() => updateConfig({ enabled: !config.enabled })}
+                style={{
+                  padding: '4px 8px',
+                  fontSize: '9px',
+                  height: 'auto'
+                }}
+              >
+                <TechIcon name={config.enabled ? "check" : "close"} size={10} />
+              </button>
+              <span onClick={onToggle} style={{ cursor: 'pointer', opacity: 0.8, fontSize: 18 }}>×</span>
+            </div>
           </div>
 
           <input
@@ -213,7 +241,26 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
             </button>
           )}
         </div>
-      )}
-    </>
-  );
+      </div>
+      );
+  };
+
+      return (
+      <>
+        <button
+          className={`tech-btn ${isOpen ? 'active' : ''}`}
+          onClick={onToggle}
+          style={{ padding: '8px 12px', fontSize: '12px' }}
+        >
+          <TechIcon name="photo" size={16} />
+          {!isMobile && (
+            <>
+              {" " + buttonLabel}
+              {config.customPhotos.length > 0 && <span style={{ opacity: 0.7, marginLeft: '4px' }}>({config.customPhotos.length})</span>}
+            </>
+          )}
+        </button>
+        {renderModal()}
+      </>
+      );
 };

@@ -132,11 +132,11 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
         drawSnowflake(ctx, w * 0.9, h * 0.8, 35 * scale, 0.2);
         drawSnowflake(ctx, w * 0.1, h * 0.9, 25 * scale, 0.3);
 
-        // 4. 圣诞树区域 
-        // 保持树的原始比例显示在中央略偏下
+        // 4. 圣诞树区域 - 放大主角！
         const imgAspect = frameCanvas.width / frameCanvas.height;
-        const maxTreeW = w * 0.85;
-        const maxTreeH = h * 0.55;
+        // 增加宽度占比到 95% (原 85%)，高度占比到 65% (原 55%)
+        const maxTreeW = w * 0.95;
+        const maxTreeH = h * 0.65;
 
         let targetW = maxTreeW;
         let targetH = targetW / imgAspect;
@@ -147,34 +147,43 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
         }
 
         const drawX = (w - targetW) / 2;
-        const drawY = h * 0.25 + (maxTreeH - targetH) / 2;
+        // 向下移动一点，给顶部大字留空间
+        const drawY = h * 0.28 + (maxTreeH - targetH) / 2;
 
         // 树底部添加一点发光托底
         ctx.save();
         ctx.shadowColor = '#44AAFF';
-        ctx.shadowBlur = 40;
+        ctx.shadowBlur = 50;
         ctx.drawImage(frameCanvas, 0, 0, frameCanvas.width, frameCanvas.height, drawX, drawY, targetW, targetH);
         ctx.restore();
 
-        // 5. 大标题 "Merry Christmas" (图二风格)
-        // 使用 Inter 或 Clean Sans-serif, 白色
+        // 5. 大标题 "Merry Christmas" (花体烫金风格)
+        // 使用 Dancing Script 或 Great Vibes
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
+        const titleY = h * 0.15;
 
-        const titleY = h * 0.2;
-        ctx.font = `600 ${64 * scale}px "Inter", sans-serif`;
-        ctx.fillStyle = '#FFFFFF';
-        // 稍微加一点发光
-        ctx.shadowColor = 'rgba(255,255,255,0.5)';
-        ctx.shadowBlur = 10;
+        ctx.save();
+        ctx.font = `700 ${96 * scale}px "Great Vibes", cursive`; // 更大，更华丽
+
+        // 创建烫金渐变
+        const goldGradient = ctx.createLinearGradient(w / 2 - 200, titleY - 50, w / 2 + 200, titleY + 50);
+        goldGradient.addColorStop(0, '#BF953F'); // Dark Gold
+        goldGradient.addColorStop(0.25, '#FCF6BA'); // Light Gold
+        goldGradient.addColorStop(0.5, '#B38728'); // Medium Gold
+        goldGradient.addColorStop(0.75, '#FBF5B7'); // Light Gold
+        goldGradient.addColorStop(1, '#AA771C'); // Dark Gold
+        ctx.fillStyle = goldGradient;
+
+        // 发光效果
+        ctx.shadowColor = 'rgba(255, 215, 0, 0.5)';
+        ctx.shadowBlur = 15;
+
         ctx.fillText('Merry Christmas', w / 2, titleY);
-
-        // 重置阴影
-        ctx.shadowBlur = 0;
-
+        ctx.restore();
 
         // 6. 用户祝福语 Greeting
-        const textYStart = drawY + targetH + (40 * scale);
+        const textYStart = drawY + targetH + (30 * scale);
         const fontSize = 32 * scale;
         ctx.font = `400 ${fontSize}px ${selectedFont.family}`;
         ctx.fillStyle = greetingColor;
