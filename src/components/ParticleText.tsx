@@ -78,16 +78,32 @@ export const ParticleText: React.FC<ParticleTextProps> = ({
   const [fontsReady, setFontsReady] = React.useState(false);
 
   useEffect(() => {
-    document.fonts.ready.then(() => {
+    // 每次字体变化时，先重置准备状态
+    setFontsReady(false);
+
+    // 构建字体字符串，例如 "bold 120px "Ma Shan Zheng", cursive"
+    // 注意：fontFamily 已经包含引号和备选字体
+    const fontString = `bold 120px ${fontFamily}`;
+
+    // 显式加载特定字体
+    document.fonts.load(fontString).then(() => {
+      // 再次检查以确保万无一失
+      if (document.fonts.check(fontString)) {
+        setFontsReady(true);
+      } else {
+        // 如果 check 失败（罕见），延迟重试
+        setTimeout(() => setFontsReady(true), 500);
+      }
+    }).catch(err => {
+      console.error('Font loading failed:', err);
+      // 即使失败也渲染，使用回退字体
       setFontsReady(true);
     });
-  }, []);
+  }, [fontFamily]);
 
   const { positions, targetPositions, randoms, count } = useMemo(() => {
     // 只有当字体准备好（或首次渲染）时才计算
-    // 实际上我们希望字体加载变化时重新计算，所以添加 fontsReady 到依赖
-
-    const pixels = getTextPixels(text, 120, fontFamily);
+    if (!fontsReady) return { positions: new Float32Array(0), targetPositions: new Float32Array(0), randoms: new Float32Array(0), count: 0 };
     const count = pixels.length;
 
     const positions = new Float32Array(count * 3);
