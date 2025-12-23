@@ -1430,6 +1430,7 @@ export const Experience: React.FC<ExperienceProps> = ({
           position={[0, 20, -35]}
           size={12}
           particleSize={0.2}
+          fontFamily={particleFont}
         />
       )}
 

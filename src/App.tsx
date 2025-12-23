@@ -52,6 +52,7 @@ export default function GrandTreeApp() {
   const [debugMode, setDebugMode] = useState(false);
   const [gestureEnabled, setGestureEnabled] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
+  const [particleFont, setParticleFont] = useState('"Ma Shan Zheng", cursive');
   const [previewPhotoIndex, setPreviewPhotoIndex] = useState<number>(0);
   const [particleText, setParticleText] = useState('');
   const [showTextInput, setShowTextInput] = useState(false);
@@ -451,7 +452,7 @@ export default function GrandTreeApp() {
           写祝福 {particleText ? '💌' : ''}
         </button>
 
-        {/* 5. 导出贺卡 */}
+        {/* 5. 分享贺卡 */}
         <ExportCard
           canvasRef={canvasRef}
           treeColor={actualTreeColor}
