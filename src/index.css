@@ -1,28 +1,34 @@
 :root {
-  font-family: 'Great Vibes', 'Ma Shan Zheng', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', 'Ma Shan Zheng', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #050510;
+  color: rgba(255, 255, 255, 0.9);
+  background-color: #050608;
+  /* Midnight Black */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Tech Variables */
-  --tech-cyan: #00f3ff;
-  --tech-purple: #bc13fe;
-  --tech-gold: #ffd700;
-  --tech-bg-dark: rgba(5, 5, 16, 0.9);
-  --tech-border-glow: 0 0 10px rgba(0, 243, 255, 0.3);
-  --tech-text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
+  /* Theme Variables: Champion Moment */
+  --tech-cyan: #D31120;
+  /* China Red */
+  --tech-purple: #F0E68C;
+  /* Champagne Gold */
+  --tech-gold: #ffffff;
+  /* Pure White (Text) */
+  --tech-bg-dark: rgba(5, 6, 8, 0.95);
+  --tech-border-glow: 0 0 0px rgba(0, 0, 0, 0);
+  /* Remove soft glow, keep sharp */
+  --tech-text-shadow: none;
+  /* Clean text */
 }
 
 /* 引入字体 */
-@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Long+Cang&family=Ma+Shan+Zheng&family=Orbitron:wght@400;500;700&family=Parisienne&family=Zhi+Mang+Xing&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Inter:wght@400;500;600&family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Long+Cang&family=Ma+Shan+Zheng&family=Orbitron:wght@400;500;700&family=Parisienne&family=Zhi+Mang+Xing&display=swap');
 
 body {
   margin: 0;
@@ -48,16 +54,18 @@ body {
   border-radius: 3px;
 }
 
-/* 通用科技风按钮 */
+/* 通用科技风按钮 -> 冠军风格按钮 */
 .tech-btn {
-  background: rgba(0, 243, 255, 0.05);
-  border: 1px dashed rgba(0, 243, 255, 0.3);
-  color: var(--tech-cyan);
-  font-family: 'Orbitron', 'Ma Shan Zheng', sans-serif;
-  border-radius: 4px;
-  /* 更锐利的圆角 */
+  background: rgba(211, 17, 32, 0.1);
+  /* Red tint */
+  border: 1px solid var(--tech-cyan);
+  /* Sharp Red Border */
+  color: #fff;
+  font-family: 'Inter', 'Ma Shan Zheng', sans-serif;
+  border-radius: 0px;
+  /* 锐利直角 */
   backdrop-filter: blur(4px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -66,13 +74,13 @@ body {
   gap: 8px;
   text-transform: uppercase;
   letter-spacing: 1px;
+  font-weight: 500;
 }
 
 .tech-btn:hover {
-  background: rgba(0, 243, 255, 0.15);
-  border-color: var(--tech-cyan);
-  box-shadow: var(--tech-border-glow);
-  text-shadow: var(--tech-text-shadow);
+  background: rgba(211, 17, 32, 0.8);
+  /* Solid Red */
+  color: #fff;
   transform: translateY(-1px);
 }
 
@@ -81,72 +89,50 @@ body {
 }
 
 .tech-btn.active {
-  background: rgba(0, 243, 255, 0.2);
-  border-color: var(--tech-cyan);
-  box-shadow: var(--tech-border-glow), inset 0 0 10px rgba(0, 243, 255, 0.1);
+  background: #D31120;
+  border-color: #D31120;
   color: #fff;
 }
 
-/* 紫色变体 */
+/* 紫色变体 -> 金色变体 (用于次要操作) */
 .tech-btn.purple {
-  border-color: rgba(188, 19, 254, 0.3);
-  color: var(--tech-purple);
-  background: rgba(188, 19, 254, 0.05);
+  border-color: #F0E68C;
+  color: #F0E68C;
+  background: rgba(240, 230, 140, 0.05);
 }
 
 .tech-btn.purple:hover,
 .tech-btn.purple.active {
-  background: rgba(188, 19, 254, 0.15);
-  border-color: var(--tech-purple);
-  box-shadow: 0 0 10px rgba(188, 19, 254, 0.3);
+  background: #F0E68C;
+  color: #000;
+  border-color: #F0E68C;
 }
 
-/* 金色变体 */
+/* 金色变体 -> 白色变体 (用于强调) */
 .tech-btn.gold {
-  border-color: rgba(255, 215, 0, 0.3);
-  color: var(--tech-gold);
-  background: rgba(255, 215, 0, 0.05);
+  border-color: #fff;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .tech-btn.gold:hover,
 .tech-btn.gold.active {
-  background: rgba(255, 215, 0, 0.15);
-  border-color: var(--tech-gold);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  background: #fff;
+  color: #000;
+  border-color: #fff;
 }
 
-/* 粒子装饰角落（用于面板） */
+/* 粒子装饰角落（用于面板） -> 极简红框面板 */
 .tech-panel {
-  background: rgba(5, 5, 16, 0.85);
+  background: rgba(5, 6, 8, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
   backdrop-filter: blur(12px);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
 }
 
+/* 移除之前的发光角落装饰，改为极简风格 */
 .tech-panel::before,
 .tech-panel::after {
-  content: '';
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background: var(--tech-cyan);
-  box-shadow: 0 0 5px var(--tech-cyan);
-  transition: all 0.3s ease;
-}
-
-.tech-panel::before {
-  top: -2px;
-  left: -2px;
-}
-
-.tech-panel::after {
-  bottom: -2px;
-  right: -2px;
-}
-
-.tech-panel:hover::before,
-.tech-panel:hover::after {
-  background: var(--tech-purple);
-  box-shadow: 0 0 8px var(--tech-purple);
+  display: none;
 }
