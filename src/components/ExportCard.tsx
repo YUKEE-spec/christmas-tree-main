@@ -98,7 +98,6 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
 
         // 2. 边框：锐利红框 (不发光，强调线条感)
         const borderWidth = forGif ? 15 : 25;
-        const innerMargin = forGif ? 10 : 20;
 
         ctx.strokeStyle = '#D31120'; // Champion Red
         ctx.lineWidth = 2;
