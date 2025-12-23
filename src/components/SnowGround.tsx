@@ -39,9 +39,9 @@ const getTerrainHeight = (x: number, z: number): number => {
 const isPointOnText = (x: number, z: number): boolean => {
     const text = "5114, 2017-2025";
     
-    // 文字位置参数
+    // 文字位置参数 - 文字放在前方（负Z方向），面向相机
     const startX = -35;
-    const startZ = 55;
+    const startZ = -55;  // 改为负值，放在前方
     const charWidth = 4;
     const charHeight = 6;
     const spacing = 4.5;
@@ -140,7 +140,8 @@ const isPointOnText = (x: number, z: number): boolean => {
                 for (let col = 0; col < charData[row].length; col++) {
                     if (charData[row][col] === 1) {
                         const cellX = startX + offsetX + col * (charWidth / 5);
-                        const cellZ = startZ - row * (charHeight / 7);
+                        // Z方向：row增加时Z减小（文字从上到下）
+                        const cellZ = startZ + row * (charHeight / 7);
                         
                         // 检查点是否在这个笔画单元格内
                         if (Math.abs(x - cellX) < strokeWidth && Math.abs(z - cellZ) < strokeWidth) {
@@ -202,7 +203,7 @@ export const SnowGround: React.FC<SnowGroundProps> = ({ opacity = 0.5 }) => {
         const text = "5114, 2017-2025";
         
         const startX = -35;
-        const startZ = 55;
+        const startZ = -55;  // 改为负值，与isPointOnText一致
         const charWidth = 4;
         const charHeight = 6;
         const spacing = 4.5;
@@ -229,7 +230,7 @@ export const SnowGround: React.FC<SnowGroundProps> = ({ opacity = 0.5 }) => {
                             // 在凹槽底部生成深色粒子
                             for (let p = 0; p < 6; p++) {
                                 const px = startX + offsetX + col * (charWidth / 5) + (Math.random() - 0.5) * 0.7;
-                                const pz = startZ - row * (charHeight / 7) + (Math.random() - 0.5) * 0.7;
+                                const pz = startZ + row * (charHeight / 7) + (Math.random() - 0.5) * 0.7;
                                 const py = getTerrainHeight(px, pz) - 1.0 + Math.random() * 0.3;
                                 particles.push(px, py, pz);
                             }
