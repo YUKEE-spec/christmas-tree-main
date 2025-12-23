@@ -1,17 +1,18 @@
 import React from 'react';
+import { TechIcon } from './icons/TechIcons';
 
 // 树形状配置
 export const TREE_SHAPE_OPTIONS = [
-  { name: '经典锥形', value: 'cone' },
-  { name: '螺旋塔', value: 'spiral' },
+  { name: 'CONE', value: 'cone' },
+  { name: 'SPIRAL', value: 'spiral' },
 ];
 
 // 粒子数量配置
 export const PARTICLE_OPTIONS = [
-  { name: '轻量', value: 5000 },
-  { name: '标准', value: 10000 },
-  { name: '华丽', value: 18000 },
-  { name: '极致', value: 30000 },
+  { name: 'LITE', value: 5000 },
+  { name: 'STD', value: 10000 },
+  { name: 'HIGH', value: 18000 },
+  { name: 'ULTRA', value: 30000 },
 ];
 
 // 设置配置接口
@@ -42,13 +43,14 @@ interface SettingsConfigPanelProps {
 }
 
 // 设置配置面板组件
-export const SettingsConfigPanel: React.FC<SettingsConfigPanelProps> = ({ 
-  config, 
-  onChange, 
-  isOpen, 
+export const SettingsConfigPanel: React.FC<SettingsConfigPanelProps> = ({
+  config,
+  onChange,
+  isOpen,
   onToggle,
-  buttonLabel = '设置'
+  buttonLabel = 'SYSTEM'
 }) => {
+  const isMobile = detectMobile();
   const updateConfig = (updates: Partial<SettingsConfig>) => {
     onChange({ ...config, ...updates });
   };
@@ -56,75 +58,51 @@ export const SettingsConfigPanel: React.FC<SettingsConfigPanelProps> = ({
   return (
     <>
       <button
+        className={`tech-btn ${isOpen ? 'active' : ''}`}
         onClick={onToggle}
-        style={{
-          padding: '10px 16px',
-          backgroundColor: isOpen ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.6)',
-          border: `1px solid ${isOpen ? '#888' : '#444'}`,
-          color: isOpen ? '#fff' : '#666',
-          fontFamily: 'sans-serif',
-          fontSize: '11px',
-          fontWeight: '500',
-          cursor: 'pointer',
-          backdropFilter: 'blur(4px)',
-          borderRadius: '6px',
-          transition: 'all 0.2s ease',
-          letterSpacing: '1px'
-        }}
+        style={{ padding: '8px 12px', fontSize: '12px' }}
       >
-        {buttonLabel}
+        <TechIcon name="settings" size={16} />
+        {!isMobile && ` ${buttonLabel}`}
       </button>
 
       {isOpen && (
-        <div style={{
+        <div className="tech-panel" style={{
+          position: 'absolute',
+          top: isMobile ? '40px' : '0',
+          left: isMobile ? '-150px' : '110%',
+          width: '200px',
           padding: '15px',
-          backgroundColor: 'rgba(0,0,0,0.9)',
-          borderRadius: '8px',
-          backdropFilter: 'blur(8px)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          minWidth: '200px'
+          borderRadius: '12px',
+          zIndex: 20
         }}>
           {/* 树形状选择 */}
           <div style={{ marginBottom: '15px' }}>
-            <p style={{ fontSize: '9px', letterSpacing: '2px', color: '#555', margin: '0 0 10px 0' }}>树形状</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>GEOMETRY</p>
+            <div style={{ display: 'flex', gap: '8px' }}>
               {TREE_SHAPE_OPTIONS.map((shape) => (
                 <button
                   key={shape.value}
+                  className={`tech-btn ${config.treeShape === shape.value ? 'active' : ''}`}
                   onClick={() => updateConfig({ treeShape: shape.value })}
-                  style={{
-                    padding: '6px 10px',
-                    backgroundColor: config.treeShape === shape.value ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
-                    border: `1px solid ${config.treeShape === shape.value ? '#888' : '#333'}`,
-                    color: config.treeShape === shape.value ? '#fff' : '#666',
-                    fontSize: '10px',
-                    cursor: 'pointer',
-                    borderRadius: '4px'
-                  }}
+                  style={{ flex: 1, fontSize: '10px' }}
                 >
                   {shape.name}
                 </button>
               ))}
             </div>
           </div>
-          
+
           {/* 粒子数量选择 */}
           <div>
-            <p style={{ fontSize: '9px', letterSpacing: '2px', color: '#555', margin: '0 0 10px 0' }}>粒子数量</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            <p style={{ fontSize: '10px', letterSpacing: '2px', color: 'var(--tech-cyan)', margin: '0 0 10px 0' }}>PARTICLE COUNT</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               {PARTICLE_OPTIONS.map((option) => (
                 <button
                   key={option.value}
+                  className={`tech-btn ${config.particleCount === option.value ? 'active' : ''}`}
                   onClick={() => updateConfig({ particleCount: option.value })}
-                  style={{
-                    padding: '6px 10px',
-                    backgroundColor: config.particleCount === option.value ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
-                    border: `1px solid ${config.particleCount === option.value ? '#888' : '#333'}`,
-                    color: config.particleCount === option.value ? '#fff' : '#666',
-                    fontSize: '10px',
-                    cursor: 'pointer',
-                    borderRadius: '4px'
-                  }}
+                  style={{ fontSize: '10px' }}
                 >
                   {option.name}
                 </button>

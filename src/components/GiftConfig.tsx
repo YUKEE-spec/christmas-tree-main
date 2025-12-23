@@ -1,4 +1,5 @@
 import React from 'react';
+import { TechIcon } from './icons/TechIcons';
 
 // 礼物类型配置
 export interface GiftType {
@@ -16,7 +17,7 @@ export interface GiftType {
 export const GIFT_PRESETS: GiftType[] = [
   {
     id: 'christmas-red-box',
-    name: '大红礼盒',
+    name: 'RED BOX',
     shape: 'box',
     color: '#DC143C',
     size: 0.9,
@@ -26,7 +27,7 @@ export const GIFT_PRESETS: GiftType[] = [
   },
   {
     id: 'golden-gift-box',
-    name: '金色礼盒',
+    name: 'GOLD BOX',
     shape: 'box',
     color: '#FFD700',
     size: 0.8,
@@ -36,7 +37,7 @@ export const GIFT_PRESETS: GiftType[] = [
   },
   {
     id: 'orange-gift-box',
-    name: '橙色礼盒',
+    name: 'ORANGE BOX',
     shape: 'box',
     color: '#FF8C00',
     size: 0.85,
@@ -46,7 +47,7 @@ export const GIFT_PRESETS: GiftType[] = [
   },
   {
     id: 'christmas-hat',
-    name: '圣诞帽',
+    name: 'HAT',
     shape: 'cylinder',
     color: '#DC143C',
     size: 0.7,
@@ -56,7 +57,7 @@ export const GIFT_PRESETS: GiftType[] = [
   },
   {
     id: 'christmas-sock',
-    name: '圣诞袜',
+    name: 'SOCK',
     shape: 'cylinder',
     color: '#228B22',
     size: 0.6,
@@ -66,7 +67,7 @@ export const GIFT_PRESETS: GiftType[] = [
   },
   {
     id: 'gingerbread-man',
-    name: '姜饼人',
+    name: 'COOKIE',
     shape: 'star',
     color: '#D2691E',
     size: 0.75,
@@ -76,7 +77,7 @@ export const GIFT_PRESETS: GiftType[] = [
   },
   {
     id: 'christmas-bell',
-    name: '圣诞铃铛',
+    name: 'BELL',
     shape: 'sphere',
     color: '#FFD700',
     size: 0.6,
@@ -86,7 +87,7 @@ export const GIFT_PRESETS: GiftType[] = [
   },
   {
     id: 'candy-cane',
-    name: '拐杖糖',
+    name: 'CANE',
     shape: 'cylinder',
     color: '#FF0000',
     size: 0.8,
@@ -98,18 +99,18 @@ export const GIFT_PRESETS: GiftType[] = [
 
 // 礼物数量选项
 export const GIFT_COUNT_OPTIONS = [
-  { name: '少量', value: 30 },
-  { name: '适中', value: 60 },
-  { name: '丰富', value: 100 },
-  { name: '满载', value: 150 }
+  { name: 'MIN', value: 30 },
+  { name: 'MED', value: 60 },
+  { name: 'HIGH', value: 100 },
+  { name: 'MAX', value: 150 }
 ];
 
 // 礼物分布模式
 export const GIFT_DISTRIBUTION_OPTIONS = [
-  { name: '螺旋分布', value: 'spiral' },
-  { name: '随机分布', value: 'random' },
-  { name: '层次分布', value: 'layered' },
-  { name: '集中分布', value: 'clustered' }
+  { name: 'SPIRAL', value: 'spiral' },
+  { name: 'RANDOM', value: 'random' },
+  { name: 'LAYER', value: 'layered' },
+  { name: 'CLUSTER', value: 'clustered' }
 ];
 
 // 礼物配置接口
@@ -153,7 +154,7 @@ interface GiftConfigPanelProps {
 export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChange, onClose }) => {
   // 检测移动端
   const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
-  
+
   const updateConfig = (updates: Partial<GiftConfig>) => {
     onChange({ ...config, ...updates });
   };
@@ -168,7 +169,7 @@ export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChan
   const addCustomGift = () => {
     const newGift: GiftType = {
       id: `custom-${Date.now()}`,
-      name: '自定义礼物',
+      name: 'CUSTOM',
       shape: 'box',
       color: '#FF0000',
       size: 0.8,
@@ -176,7 +177,7 @@ export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChan
       roughness: 0.3,
       emissiveIntensity: 0.3
     };
-    updateConfig({ 
+    updateConfig({
       customTypes: [...config.customTypes, newGift],
       selectedTypes: [...config.selectedTypes, newGift.id]
     });
@@ -202,288 +203,227 @@ export const GiftConfigPanel: React.FC<GiftConfigPanelProps> = ({ config, onChan
       top: '50%',
       left: '50%',
       transform: 'translate(-50%, -50%)',
-      width: isMobile ? '90vw' : '500px',
-      maxHeight: isMobile ? '85vh' : '80vh',
-      backgroundColor: 'rgba(0,0,0,0.95)',
-      borderRadius: '12px',
-      backdropFilter: 'blur(10px)',
-      border: '1px solid rgba(255,255,255,0.1)',
-      padding: isMobile ? '15px' : '20px',
+      width: '100vw',
+      height: '100vh',
       zIndex: 1000,
-      overflowY: 'auto'
-    }}>
-      {/* 标题栏 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h3 style={{ color: '#fff', margin: 0, fontSize: '16px', fontWeight: 'bold' }}>礼物配置</h3>
-        <button
-          onClick={onClose}
-          style={{
-            width: '24px',
-            height: '24px',
-            padding: 0,
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: '#888',
-            fontSize: '16px',
-            cursor: 'pointer'
-          }}
-        >
-          ×
-        </button>
-      </div>
+      backgroundColor: 'rgba(0,0,0,0.8)',
+      backdropFilter: 'blur(5px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }} onClick={onClose}>
+      <div className="tech-panel" style={{
+        width: isMobile ? '90vw' : '500px',
+        maxHeight: isMobile ? '85vh' : '80vh',
+        padding: isMobile ? '20px' : '30px',
+        borderRadius: '16px',
+        overflowY: 'auto'
+      }} onClick={e => e.stopPropagation()}>
 
-      {/* 基础设置 */}
-      <div style={{ marginBottom: '20px' }}>
-        <h4 style={{ color: '#ccc', fontSize: '12px', margin: '0 0 10px 0', letterSpacing: '1px' }}>基础设置</h4>
-        
-        {/* 启用开关 */}
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#fff', cursor: 'pointer' }}>
+        {/* 标题栏 */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+          <h3 style={{ color: 'var(--tech-cyan)', margin: 0, fontSize: '14px', letterSpacing: '2px', fontFamily: 'Orbitron' }}>GIFT CONFIGURATION</h3>
+          <span onClick={onClose} style={{ cursor: 'pointer' }}>
+            <TechIcon name="close" size={20} color="var(--tech-cyan)" />
+          </span>
+        </div>
+
+        {/* 基础设置 */}
+        <div style={{ marginBottom: '20px' }}>
+          <div style={{ marginBottom: '15px' }}>
+            <button
+              className={`tech-btn ${config.enabled ? 'active' : ''}`}
+              onClick={() => updateConfig({ enabled: !config.enabled })}
+              style={{ width: '100%', justifyContent: 'center' }}
+            >
+              {config.enabled ? 'GIFTS ENABLED' : 'GIFTS DISABLED'}
+            </button>
+          </div>
+
+          {/* 数量选择 */}
+          <div style={{ marginBottom: '15px', opacity: config.enabled ? 1 : 0.5 }}>
+            <p style={{ color: 'var(--tech-cyan)', fontSize: '10px', margin: '0 0 8px 0', letterSpacing: '1px' }}>COUNT</p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {GIFT_COUNT_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  className={`tech-btn ${config.count === option.value ? 'active' : ''}`}
+                  onClick={() => updateConfig({ count: option.value })}
+                  style={{ flex: 1, fontSize: '10px' }}
+                >
+                  {option.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 分布模式 */}
+          <div style={{ marginBottom: '15px', opacity: config.enabled ? 1 : 0.5 }}>
+            <p style={{ color: 'var(--tech-cyan)', fontSize: '10px', margin: '0 0 8px 0', letterSpacing: '1px' }}>Please choose DISTRIBUTION</p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {GIFT_DISTRIBUTION_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  className={`tech-btn ${config.distribution === option.value ? 'active' : ''}`}
+                  onClick={() => updateConfig({ distribution: option.value })}
+                  style={{ flex: 1, fontSize: '10px' }}
+                >
+                  {option.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 亮度调节 */}
+          <div style={{ marginBottom: '15px', opacity: config.enabled ? 1 : 0.5 }}>
+            <p style={{ color: 'var(--tech-cyan)', fontSize: '10px', margin: '0 0 8px 0', letterSpacing: '1px' }}>INTENSITY: {config.brightness.toFixed(1)}</p>
             <input
-              type="checkbox"
-              checked={config.enabled}
-              onChange={(e) => updateConfig({ enabled: e.target.checked })}
-              style={{ 
-                margin: 0,
-                width: '16px',
-                height: '16px',
-                accentColor: '#D32F2F'
+              type="range"
+              min="0.5"
+              max="2"
+              step="0.1"
+              value={config.brightness}
+              onChange={(e) => updateConfig({ brightness: parseFloat(e.target.value) })}
+              style={{
+                width: '100%',
+                height: '4px',
+                background: 'var(--tech-cyan)',
+                borderRadius: '2px',
+                outline: 'none',
+                appearance: 'none'
               }}
             />
-            启用礼物显示
-          </label>
-        </div>
-        
-        {/* 数量选择 */}
-        <div style={{ marginBottom: '12px', opacity: config.enabled ? 1 : 0.5 }}>
-          <p style={{ color: '#888', fontSize: '10px', margin: '0 0 6px 0' }}>礼物数量</p>
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-            {GIFT_COUNT_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => updateConfig({ count: option.value })}
-                style={{
-                  padding: '6px 12px',
-                  backgroundColor: config.count === option.value ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
-                  border: `1px solid ${config.count === option.value ? '#888' : '#333'}`,
-                  color: config.count === option.value ? '#fff' : '#888',
-                  fontSize: '10px',
-                  cursor: 'pointer',
-                  borderRadius: '4px'
-                }}
-              >
-                {option.name} ({option.value})
-              </button>
-            ))}
           </div>
         </div>
 
-        {/* 分布模式 */}
-        <div style={{ marginBottom: '12px', opacity: config.enabled ? 1 : 0.5 }}>
-          <p style={{ color: '#888', fontSize: '10px', margin: '0 0 6px 0' }}>分布模式</p>
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-            {GIFT_DISTRIBUTION_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => updateConfig({ distribution: option.value })}
-                style={{
-                  padding: '6px 12px',
-                  backgroundColor: config.distribution === option.value ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
-                  border: `1px solid ${config.distribution === option.value ? '#888' : '#333'}`,
-                  color: config.distribution === option.value ? '#fff' : '#888',
-                  fontSize: '10px',
-                  cursor: 'pointer',
-                  borderRadius: '4px'
-                }}
-              >
-                {option.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 亮度调节 */}
-        <div style={{ marginBottom: '12px', opacity: config.enabled ? 1 : 0.5 }}>
-          <p style={{ color: '#888', fontSize: '10px', margin: '0 0 6px 0' }}>亮度调节</p>
-          <input
-            type="range"
-            min="0.5"
-            max="2"
-            step="0.1"
-            value={config.brightness}
-            onChange={(e) => updateConfig({ brightness: parseFloat(e.target.value) })}
-            style={{
-              width: '100%',
-              height: '4px',
-              backgroundColor: '#333',
-              borderRadius: '2px',
-              outline: 'none'
-            }}
-          />
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', color: '#666', marginTop: '2px' }}>
-            <span>暗淡</span>
-            <span>{config.brightness.toFixed(1)}</span>
-            <span>明亮</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 礼物类型选择 */}
-      <div style={{ marginBottom: '20px' }}>
-        <h4 style={{ color: '#ccc', fontSize: '12px', margin: '0 0 10px 0', letterSpacing: '1px' }}>礼物类型</h4>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '10px' }}>
-          {GIFT_PRESETS.map((gift) => (
-            <button
-              key={gift.id}
-              onClick={() => toggleGiftType(gift.id)}
-              style={{
-                padding: '8px',
-                backgroundColor: config.selectedTypes.includes(gift.id) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
-                border: `1px solid ${config.selectedTypes.includes(gift.id) ? gift.color : '#333'}`,
-                color: config.selectedTypes.includes(gift.id) ? '#fff' : '#888',
-                fontSize: '10px',
-                cursor: 'pointer',
-                borderRadius: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              <span style={{
-                width: '12px',
-                height: '12px',
-                backgroundColor: gift.color,
-                borderRadius: gift.shape === 'sphere' ? '50%' : '2px',
-                display: 'inline-block'
-              }}></span>
-              {gift.name}
-            </button>
-          ))}
-        </div>
-        
-        <button
-          onClick={addCustomGift}
-          style={{
-            width: '100%',
-            padding: '8px',
-            backgroundColor: 'rgba(255,255,255,0.05)',
-            border: '1px dashed #666',
-            color: '#888',
-            fontSize: '10px',
-            cursor: 'pointer',
-            borderRadius: '4px'
-          }}
-        >
-          + 添加自定义礼物
-        </button>
-      </div>
-
-      {/* 自定义礼物编辑 */}
-      {config.customTypes.length > 0 && (
+        {/* 礼物类型选择 */}
         <div style={{ marginBottom: '20px' }}>
-          <h4 style={{ color: '#ccc', fontSize: '12px', margin: '0 0 10px 0', letterSpacing: '1px' }}>自定义礼物</h4>
-          {config.customTypes.map((gift, index) => (
-            <div key={gift.id} style={{
-              padding: '10px',
-              backgroundColor: 'rgba(255,255,255,0.05)',
-              borderRadius: '6px',
-              marginBottom: '8px',
-              border: '1px solid #333'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <input
-                  type="text"
-                  value={gift.name}
-                  onChange={(e) => updateCustomGift(index, { name: e.target.value })}
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: '1px solid #555',
-                    color: '#fff',
-                    fontSize: '10px',
-                    padding: '4px 6px',
-                    borderRadius: '3px',
-                    width: '120px'
-                  }}
-                />
-                <button
-                  onClick={() => removeCustomGift(index)}
-                  style={{
-                    width: '16px',
-                    height: '16px',
-                    padding: 0,
-                    backgroundColor: '#333',
-                    border: 'none',
-                    color: '#888',
-                    fontSize: '10px',
-                    cursor: 'pointer',
-                    borderRadius: '50%'
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px', fontSize: '9px' }}>
-                <div>
-                  <label style={{ color: '#888', display: 'block', marginBottom: '2px' }}>形状</label>
-                  <select
-                    value={gift.shape}
-                    onChange={(e) => updateCustomGift(index, { shape: e.target.value as any })}
+          <h4 style={{ color: 'var(--tech-cyan)', fontSize: '12px', margin: '0 0 10px 0', letterSpacing: '2px', fontFamily: 'Orbitron' }}>GIFT PROTOCOLS</h4>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '10px' }}>
+            {GIFT_PRESETS.map((gift) => (
+              <button
+                key={gift.id}
+                className={`tech-btn ${config.selectedTypes.includes(gift.id) ? 'active' : ''}`}
+                onClick={() => toggleGiftType(gift.id)}
+                style={{ fontSize: '10px', justifyContent: 'flex-start' }}
+              >
+                <span style={{
+                  width: '8px',
+                  height: '8px',
+                  backgroundColor: gift.color,
+                  borderRadius: gift.shape === 'sphere' ? '50%' : '1px',
+                  display: 'inline-block',
+                  marginRight: '6px',
+                  boxShadow: `0 0 5px ${gift.color}`
+                }}></span>
+                {gift.name}
+              </button>
+            ))}
+          </div>
+
+          <button
+            className="tech-btn"
+            onClick={addCustomGift}
+            style={{ width: '100%', justifyContent: 'center' }}
+          >
+            <TechIcon name="plus" size={12} /> ADD CUSTOM UNIT
+          </button>
+        </div>
+
+        {/* 自定义礼物编辑 */}
+        {config.customTypes.length > 0 && (
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{ color: 'var(--tech-cyan)', fontSize: '12px', margin: '0 0 10px 0', letterSpacing: '2px' }}>CUSTOM UNITS</h4>
+            {config.customTypes.map((gift, index) => (
+              <div key={gift.id} style={{
+                padding: '10px',
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                borderRadius: '6px',
+                marginBottom: '8px',
+                border: '1px solid rgba(255,255,255,0.1)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <input
+                    type="text"
+                    value={gift.name}
+                    onChange={(e) => updateCustomGift(index, { name: e.target.value })}
                     style={{
-                      width: '100%',
-                      backgroundColor: '#333',
+                      backgroundColor: 'transparent',
                       border: '1px solid #555',
                       color: '#fff',
-                      fontSize: '9px',
-                      padding: '2px'
-                    }}
-                  >
-                    <option value="box">盒子</option>
-                    <option value="sphere">球体</option>
-                    <option value="cylinder">圆柱</option>
-                    <option value="star">星形</option>
-                    <option value="heart">心形</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label style={{ color: '#888', display: 'block', marginBottom: '2px' }}>颜色</label>
-                  <input
-                    type="color"
-                    value={gift.color}
-                    onChange={(e) => updateCustomGift(index, { color: e.target.value })}
-                    style={{
-                      width: '100%',
-                      height: '20px',
-                      border: 'none',
-                      borderRadius: '2px',
-                      cursor: 'pointer'
+                      fontSize: '10px',
+                      padding: '4px 6px',
+                      borderRadius: '3px',
+                      width: '120px'
                     }}
                   />
+                  <span onClick={() => removeCustomGift(index)} style={{ cursor: 'pointer', opacity: 0.8 }}>
+                    <TechIcon name="close" size={14} color="#888" />
+                  </span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px', fontSize: '9px' }}>
+                  <div>
+                    <label style={{ color: '#888', display: 'block', marginBottom: '2px' }}>SHAPE</label>
+                    <select
+                      value={gift.shape}
+                      onChange={(e) => updateCustomGift(index, { shape: e.target.value as any })}
+                      style={{
+                        width: '100%',
+                        backgroundColor: '#111',
+                        border: '1px solid #555',
+                        color: '#fff',
+                        fontSize: '9px',
+                        padding: '2px'
+                      }}
+                    >
+                      <option value="box">BOX</option>
+                      <option value="sphere">SPHERE</option>
+                      <option value="cylinder">CYLINDER</option>
+                      <option value="star">STAR</option>
+                      <option value="heart">HEART</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ color: '#888', display: 'block', marginBottom: '2px' }}>COLOR</label>
+                    <input
+                      type="color"
+                      value={gift.color}
+                      onChange={(e) => updateCustomGift(index, { color: e.target.value })}
+                      style={{
+                        width: '100%',
+                        height: '20px',
+                        border: 'none',
+                        borderRadius: '2px',
+                        cursor: 'pointer'
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
-      {/* 动画设置 */}
-      <div>
-        <h4 style={{ color: '#ccc', fontSize: '12px', margin: '0 0 10px 0', letterSpacing: '1px' }}>动画效果</h4>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          {Object.entries(config.animation).map(([key, value]) => (
-            <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', color: '#888' }}>
-              <input
-                type="checkbox"
-                checked={value}
-                onChange={(e) => updateConfig({
-                  animation: { ...config.animation, [key]: e.target.checked }
-                })}
-                style={{ margin: 0 }}
-              />
-              {key === 'wobble' ? '摆动' : key === 'rotation' ? '旋转' : '浮动'}
-            </label>
-          ))}
+        {/* 动画设置 */}
+        <div>
+          <h4 style={{ color: 'var(--tech-cyan)', fontSize: '12px', margin: '0 0 10px 0', letterSpacing: '2px' }}>ANIMATION MODES</h4>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            {Object.entries(config.animation).map(([key, value]) => (
+              <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#ccc', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={value}
+                  onChange={(e) => updateConfig({
+                    animation: { ...config.animation, [key]: e.target.checked }
+                  })}
+                  style={{ margin: 0, accentColor: 'var(--tech-cyan)' }}
+                />
+                {key.toUpperCase()}
+              </label>
+            ))}
+          </div>
         </div>
       </div>
     </div>

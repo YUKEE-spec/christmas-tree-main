@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import GIF from 'gif.js';
+import { TechIcon } from './icons/TechIcons';
 
 interface ExportCardProps {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -12,781 +13,439 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [exportType, setExportType] = useState<'image' | 'gif'>('image');
-  const [greeting, setGreeting] = useState('Merry Christmas');
+  const [greeting, setGreeting] = useState('Merry Christmas\n& Happy New Year');
   const [fromName, setFromName] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const recordingRef = useRef(false);
-  
+
   // 检测移动端
   const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
 
   // 获取 canvas 元素
   const getCanvas = useCallback((): HTMLCanvasElement | null => {
-    if (canvasRef.current) return canvasRef.current;
-    return document.querySelector('canvas');
+    // 优先使用传入的 ref
+    if (canvasRef && canvasRef.current) return canvasRef.current;
+    // 降级: 查询 DOM
+    const canvas = document.querySelector('canvas');
+    return canvas;
   }, [canvasRef]);
 
   // 截取当前画面
   const captureFrame = useCallback((): HTMLCanvasElement | null => {
     const canvas = getCanvas();
-    if (!canvas) return null;
-    
-    // 创建一个新的 canvas 来复制当前帧
-    const frameCanvas = document.createElement('canvas');
-    frameCanvas.width = canvas.width;
-    frameCanvas.height = canvas.height;
-    const ctx = frameCanvas.getContext('2d');
-    if (ctx) {
-      ctx.drawImage(canvas, 0, 0);
+    if (!canvas) {
+      console.error("Canvas not found");
+      return null;
     }
-    return frameCanvas;
+
+    try {
+      // 创建一个新的 canvas 来复制当前帧
+      const frameCanvas = document.createElement('canvas');
+      frameCanvas.width = canvas.width;
+      frameCanvas.height = canvas.height;
+      const ctx = frameCanvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(canvas, 0, 0);
+      }
+      return frameCanvas;
+    } catch (e) {
+      console.error("Capture frame failed", e);
+      return null;
+    }
   }, [getCanvas]);
 
-  // 创建贺卡 Canvas（用于 GIF 帧）- 烫金效果版
+  // 创建贺卡 Canvas（用于 GIF 帧）- 白色烫金效果版
   const createCardCanvas = useCallback((frameCanvas: HTMLCanvasElement, forGif: boolean = false): Promise<HTMLCanvasElement> => {
     return new Promise((resolve) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d')!;
-      
-      // GIF 用较小尺寸，图片用高分辨率
-      const scale = forGif ? 1 : 2;
-      const w = forGif ? 600 : 1080;
-      const h = forGif ? 750 : 1350;
-      canvas.width = w * scale;
-      canvas.height = h * scale;
-      ctx.scale(scale, scale);
-      
-      // 深色渐变背景 - 更深邃
-      const bgGradient = ctx.createLinearGradient(0, 0, w, h);
-      bgGradient.addColorStop(0, '#0a0812');
-      bgGradient.addColorStop(0.5, '#0d0a18');
-      bgGradient.addColorStop(1, '#08060f');
-      ctx.fillStyle = bgGradient;
-      ctx.fillRect(0, 0, w, h);
-      
-      // 烫金边框 - 多层渐变效果
-      const borderWidth = forGif ? 4 : 8;
-      const goldGradient = ctx.createLinearGradient(0, 0, w, h);
-      goldGradient.addColorStop(0, '#D4AF37');
-      goldGradient.addColorStop(0.25, '#FFD700');
-      goldGradient.addColorStop(0.5, '#FFF8DC');
-      goldGradient.addColorStop(0.75, '#FFD700');
-      goldGradient.addColorStop(1, '#D4AF37');
-      
-      ctx.strokeStyle = goldGradient;
-      ctx.lineWidth = borderWidth;
-      ctx.strokeRect(borderWidth / 2, borderWidth / 2, w - borderWidth, h - borderWidth);
-      
-      // 内边框 - 细金线
-      ctx.strokeStyle = 'rgba(255, 215, 0, 0.5)';
-      ctx.lineWidth = forGif ? 1 : 2;
-      ctx.strokeRect(borderWidth + 8, borderWidth + 8, w - borderWidth * 2 - 16, h - borderWidth * 2 - 16);
-      
-      // 顶部装饰 - 烫金花纹线
-      const topY = forGif ? 25 : 40;
-      ctx.strokeStyle = goldGradient;
-      ctx.lineWidth = forGif ? 1 : 2;
-      ctx.beginPath();
-      ctx.moveTo(50, topY);
-      ctx.lineTo(w / 2 - 30, topY);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(w / 2 + 30, topY);
-      ctx.lineTo(w - 50, topY);
-      ctx.stroke();
-      
-      // 顶部中央装饰 - 小星星
-      ctx.fillStyle = '#FFD700';
-      ctx.font = `${forGif ? 14 : 24}px serif`;
-      ctx.textAlign = 'center';
-      ctx.fillText('✦', w / 2, topY + 5);
-      
-      // 圣诞树区域 - 更大更醒目
-      const padding = forGif ? 20 : 35;
-      const treeY = forGif ? 40 : 60;
-      const treeWidth = w - padding * 2;
-      const treeHeight = forGif ? 480 : 950;
-      
-      // 圣诞树图片 - 完整显示，不裁剪
-      const imgAspect = frameCanvas.width / frameCanvas.height;
-      const boxAspect = treeWidth / treeHeight;
-      
-      let dx = padding, dy = treeY, dw = treeWidth, dh = treeHeight;
-      
-      // 保持原图比例，完整显示在框内
-      if (imgAspect > boxAspect) {
-        // 原图更宽，以宽度为准
-        dh = treeWidth / imgAspect;
-        dy = treeY + (treeHeight - dh) / 2;
-      } else {
-        // 原图更高，以高度为准
-        dw = treeHeight * imgAspect;
-        dx = padding + (treeWidth - dw) / 2;
-      }
-      
-      // 绘制圣诞树 - 完整显示
-      ctx.drawImage(frameCanvas, 0, 0, frameCanvas.width, frameCanvas.height, dx, dy, dw, dh);
-      
-      // 圣诞树边框 - 烫金效果
-      ctx.strokeStyle = goldGradient;
-      ctx.lineWidth = forGif ? 2 : 4;
-      ctx.strokeRect(padding, treeY, treeWidth, treeHeight);
-      
-      // 祝福语区域背景 - 渐变遮罩
-      const textAreaY = treeY + treeHeight + (forGif ? 10 : 20);
-      const textGradient = ctx.createLinearGradient(0, textAreaY - 20, 0, h);
-      textGradient.addColorStop(0, 'rgba(10, 8, 18, 0)');
-      textGradient.addColorStop(0.3, 'rgba(10, 8, 18, 0.9)');
-      textGradient.addColorStop(1, 'rgba(10, 8, 18, 1)');
-      ctx.fillStyle = textGradient;
-      ctx.fillRect(0, textAreaY - 20, w, h - textAreaY + 20);
-      
-      // 祝福语 - 烫金文字效果
-      ctx.fillStyle = goldGradient;
-      ctx.font = `bold ${forGif ? 32 : 56}px "Playfair Display", "Noto Serif SC", Georgia, serif`;
-      ctx.textAlign = 'center';
-      ctx.shadowColor = '#FFD700';
-      ctx.shadowBlur = forGif ? 20 : 40;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
-      ctx.fillText(greeting, w / 2, forGif ? 570 : 1090);
-      
-      // 二次绘制增强发光
-      ctx.shadowBlur = forGif ? 10 : 20;
-      ctx.fillText(greeting, w / 2, forGif ? 570 : 1090);
-      ctx.shadowBlur = 0;
-      
-      // 自定义文字
-      if (particleText) {
-        ctx.fillStyle = treeColor;
-        ctx.font = `${forGif ? 16 : 28}px "Noto Serif SC", serif`;
-        ctx.shadowColor = treeColor;
-        ctx.shadowBlur = forGif ? 10 : 20;
-        ctx.fillText(`"${particleText}"`, w / 2, forGif ? 605 : 1145);
-        ctx.shadowBlur = 0;
-      }
-      
-      // 发送者 - 斜体金色
-      if (fromName) {
-        ctx.fillStyle = 'rgba(255, 215, 0, 0.9)';
-        ctx.font = `italic ${forGif ? 14 : 26}px Georgia, serif`;
-        const fromY = particleText ? (forGif ? 640 : 1200) : (forGif ? 615 : 1165);
-        ctx.fillText(`— ${fromName}`, w / 2, fromY);
-      }
-      
-      // 底部装饰线
-      const bottomLineY = forGif ? 700 : 1280;
-      ctx.strokeStyle = goldGradient;
-      ctx.lineWidth = forGif ? 1 : 2;
-      ctx.beginPath();
-      ctx.moveTo(80, bottomLineY);
-      ctx.lineTo(w / 2 - 40, bottomLineY);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(w / 2 + 40, bottomLineY);
-      ctx.lineTo(w - 80, bottomLineY);
-      ctx.stroke();
-      
-      // 底部中央年份
-      ctx.fillStyle = goldGradient;
-      ctx.font = `${forGif ? 12 : 20}px sans-serif`;
-      ctx.fillText('✦ 2025 ✦', w / 2, bottomLineY + 5);
-      
-      // 四角装饰星星 - 烫金效果
-      const drawGoldStar = (x: number, y: number, size: number) => {
-        ctx.fillStyle = goldGradient;
-        ctx.shadowColor = '#FFD700';
-        ctx.shadowBlur = size;
+      // 动态加载字体确保渲染正确
+      document.fonts.ready.then(() => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d')!;
+
+        // GIF 用较小尺寸，图片用高分辨率
+        const scale = forGif ? 1 : 2;
+        const w = forGif ? 600 : 1080;
+        const h = forGif ? 750 : 1350;
+        canvas.width = w * scale;
+        canvas.height = h * scale;
+        ctx.scale(scale, scale);
+
+        // 1. 背景：纯白 + 纸纹质感（模拟）
+        ctx.fillStyle = '#FFFAF0'; // FloralWhite
+        ctx.fillRect(0, 0, w, h);
+
+        // 添加噪点纹理
+        // ... (简略)
+
+        // 2. 边框：烫金效果
+        // 使用渐变模拟金色
+        const goldGradient = ctx.createLinearGradient(0, 0, w, h);
+        goldGradient.addColorStop(0, '#B8860B'); // DarkGoldenRod
+        goldGradient.addColorStop(0.2, '#FFD700'); // Gold
+        goldGradient.addColorStop(0.4, '#FFFFE0'); // LightYellow
+        goldGradient.addColorStop(0.6, '#DAA520'); // GoldenRod
+        goldGradient.addColorStop(0.8, '#FFD700');
+        goldGradient.addColorStop(1, '#B8860B');
+
+        const borderWidth = forGif ? 10 : 20;
+        const innerMargin = forGif ? 15 : 30;
+
+        // 外框
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = goldGradient;
+        ctx.strokeRect(borderWidth, borderWidth, w - borderWidth * 2, h - borderWidth * 2);
+
+        // 内装饰框 (花纹角)
+        ctx.lineWidth = 1;
+        const cornerSize = 50;
+
+        // 左上
         ctx.beginPath();
-        for (let i = 0; i < 5; i++) {
-          const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
-          const px = x + Math.cos(angle) * size;
-          const py = y + Math.sin(angle) * size;
-          if (i === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
-        }
-        ctx.closePath();
-        ctx.fill();
+        ctx.moveTo(borderWidth + innerMargin, borderWidth + innerMargin + cornerSize);
+        ctx.lineTo(borderWidth + innerMargin, borderWidth + innerMargin);
+        ctx.lineTo(borderWidth + innerMargin + cornerSize, borderWidth + innerMargin);
+        ctx.stroke();
+
+        // 右上
+        ctx.beginPath();
+        ctx.moveTo(w - borderWidth - innerMargin - cornerSize, borderWidth + innerMargin);
+        ctx.lineTo(w - borderWidth - innerMargin, borderWidth + innerMargin);
+        ctx.lineTo(w - borderWidth - innerMargin, borderWidth + innerMargin + cornerSize);
+        ctx.stroke();
+
+        // 左下
+        ctx.beginPath();
+        ctx.moveTo(borderWidth + innerMargin, h - borderWidth - innerMargin - cornerSize);
+        ctx.lineTo(borderWidth + innerMargin, h - borderWidth - innerMargin);
+        ctx.lineTo(borderWidth + innerMargin + cornerSize, h - borderWidth - innerMargin);
+        ctx.stroke();
+
+        // 右下
+        ctx.beginPath();
+        ctx.moveTo(w - borderWidth - innerMargin - cornerSize, h - borderWidth - innerMargin);
+        ctx.lineTo(w - borderWidth - innerMargin, h - borderWidth - innerMargin);
+        ctx.lineTo(w - borderWidth - innerMargin, h - borderWidth - innerMargin - cornerSize);
+        ctx.stroke();
+
+        // 3. 顶部文字 (Logo/Title) - 烫金
+        ctx.fillStyle = goldGradient;
+        ctx.font = `400 ${forGif ? 24 : 40}px "Great Vibes", cursive`;
+        ctx.textAlign = 'center';
+        ctx.fillText('Magic Christmas', w / 2, forGif ? 60 : 100);
+
+        // 4. 圣诞树区域 (圆形遮罩或柔和边缘)
+        const treeY = forGif ? 80 : 140;
+        const treeH = forGif ? 400 : 700;
+        const treeW = w - (borderWidth + innerMargin) * 2;
+
+        // 保存状态进行裁剪
+        ctx.save();
+        // 这里我们简单居中放置，可以是矩形
+        // 为了融合白色背景，我们在树图周围加一个白色光晕
+        // 计算绘制位置
+
+        const imgAspect = frameCanvas.width / frameCanvas.height;
+        // 目标区域
+        const targetW = treeW;
+        const targetH = treeW / imgAspect; // 保持比例
+
+        const drawX = (w - targetW) / 2;
+        const drawY = treeY + (treeH - targetH) / 2;
+
+        // 绘制黑色背景以衬托树的粒子 (因为树是在黑背景下渲染的)
+        // 或者使用 destination-over 技巧，但这里是在白纸上画
+        // 最好的效果是保留树的黑底，然后做一个圆角矩形
+
+        const radius = 20;
+        ctx.beginPath();
+        ctx.roundRect(drawX, drawY, targetW, targetH, radius);
+        ctx.clip();
+
+        // 绘制树
+        ctx.drawImage(frameCanvas, 0, 0, frameCanvas.width, frameCanvas.height, drawX, drawY, targetW, targetH);
+        ctx.restore();
+
+        // 给树加一个金边框
+        ctx.beginPath();
+        ctx.roundRect(drawX, drawY, targetW, targetH, radius);
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = goldGradient;
+        ctx.stroke();
+
+        // 5. 祝福语 (多行支持)
+        const textYStart = drawY + targetH + (forGif ? 40 : 60);
+
+        ctx.fillStyle = goldGradient; // 烫金字
+        // 稍微加深一点阴影增加可读性
+        ctx.shadowColor = "rgba(0,0,0,0.1)";
+        ctx.shadowBlur = 2;
+
+        // 使用花体/手写体
+        // 检测是否有中文字符
+        const hasChinese = /[\u4e00-\u9fa5]/.test(greeting);
+        const fontName = hasChinese ? '"Ma Shan Zheng", cursive' : '"Great Vibes", cursive';
+        const fontSize = forGif ? 30 : 50;
+        ctx.font = `400 ${fontSize}px ${fontName}`;
+
+        const lines = greeting.split('\n');
+        const lineHeight = fontSize * 1.5;
+
+        lines.forEach((line, index) => {
+          ctx.fillText(line, w / 2, textYStart + index * lineHeight);
+        });
+
         ctx.shadowBlur = 0;
-      };
-      
-      const starSize = forGif ? 6 : 10;
-      const margin = forGif ? 20 : 30;
-      drawGoldStar(margin, margin, starSize);
-      drawGoldStar(w - margin, margin, starSize);
-      drawGoldStar(margin, h - margin, starSize);
-      drawGoldStar(w - margin, h - margin, starSize);
-      
-      // 额外装饰 - 角落花纹
-      ctx.strokeStyle = 'rgba(255, 215, 0, 0.3)';
-      ctx.lineWidth = 1;
-      const cornerSize = forGif ? 15 : 25;
-      
-      // 左上角
-      ctx.beginPath();
-      ctx.moveTo(margin + cornerSize, margin);
-      ctx.lineTo(margin, margin);
-      ctx.lineTo(margin, margin + cornerSize);
-      ctx.stroke();
-      
-      // 右上角
-      ctx.beginPath();
-      ctx.moveTo(w - margin - cornerSize, margin);
-      ctx.lineTo(w - margin, margin);
-      ctx.lineTo(w - margin, margin + cornerSize);
-      ctx.stroke();
-      
-      // 左下角
-      ctx.beginPath();
-      ctx.moveTo(margin + cornerSize, h - margin);
-      ctx.lineTo(margin, h - margin);
-      ctx.lineTo(margin, h - margin - cornerSize);
-      ctx.stroke();
-      
-      // 右下角
-      ctx.beginPath();
-      ctx.moveTo(w - margin - cornerSize, h - margin);
-      ctx.lineTo(w - margin, h - margin);
-      ctx.lineTo(w - margin, h - margin - cornerSize);
-      ctx.stroke();
-      
-      resolve(canvas);
+
+        // 6. 粒子文字 (如果有)
+        if (particleText) {
+          const ptY = textYStart + lines.length * lineHeight + (forGif ? 5 : 10);
+          ctx.font = `400 ${forGif ? 16 : 24}px monospace`;
+          ctx.fillStyle = '#555';
+          ctx.fillText(`— ${particleText} —`, w / 2, ptY);
+        }
+
+        // 7. 署名
+        if (fromName) {
+          const fromY = h - (forGif ? 40 : 70);
+          ctx.font = `400 ${forGif ? 18 : 32}px "Great Vibes", cursive`;
+          ctx.fillStyle = '#B8860B';
+          ctx.fillText(`By ${fromName}`, w / 2, fromY);
+        }
+
+        resolve(canvas);
+      });
     });
   }, [greeting, fromName, particleText, treeColor]);
 
   // 生成预览
-  const generatePreview = useCallback(async () => {
+  const handlePreview = useCallback(async () => {
     setIsExporting(true);
-    setExportProgress(0);
-    
-    const frameCanvas = captureFrame();
-    if (!frameCanvas) {
+    setExportProgress(10);
+
+    // 延时一小会确保 UI 渲染完成（防止菜单遮挡等，虽然是截取 canvas 这里其实不用担心 DOM）
+    setTimeout(async () => {
+      const frameCanvas = captureFrame();
+      if (!frameCanvas) {
+        setIsExporting(false);
+        alert('获取画面失败，请确保页面加载完成');
+        return;
+      }
+
+      setExportProgress(50);
+      const cardCanvas = await createCardCanvas(frameCanvas, true); // 预览用低清
+
+      setExportProgress(100);
+      const url = cardCanvas.toDataURL('image/png', 0.8);
+      setPreviewUrl(url);
+      setShowPreview(true);
       setIsExporting(false);
-      return;
-    }
-    
-    setExportProgress(50);
-    // 预览用较小尺寸
-    const cardCanvas = await createCardCanvas(frameCanvas, true);
-    
-    setExportProgress(100);
-    const url = cardCanvas.toDataURL('image/png', 0.8);
-    setPreviewUrl(url);
-    setShowPreview(true);
-    setIsExporting(false);
+    }, 100);
   }, [captureFrame, createCardCanvas]);
 
-  // 导出 GIF
+  // 导出 GIF (逻辑保持大致不变，更新样式)
   const exportGif = useCallback(async () => {
     setIsExporting(true);
     setExportProgress(0);
     recordingRef.current = true;
-    
+
     const frames: HTMLCanvasElement[] = [];
-    // 移动端减少帧数
-    const frameCount = isMobile ? 15 : 30;
-    const frameDelay = isMobile ? 100 : 66; // 移动端 10fps，桌面端 15fps
-    
-    // 录制帧
+    const frameCount = isMobile ? 15 : 20;
+    const frameDelay = 100;
+
     for (let i = 0; i < frameCount; i++) {
       if (!recordingRef.current) break;
-      
+
       const frameCanvas = captureFrame();
       if (frameCanvas) {
         const cardCanvas = await createCardCanvas(frameCanvas, true);
         frames.push(cardCanvas);
       }
-      
+
       setExportProgress(Math.round((i / frameCount) * 50));
       await new Promise(resolve => setTimeout(resolve, frameDelay));
     }
-    
+
     recordingRef.current = false;
-    
+
     if (frames.length === 0) {
       setIsExporting(false);
-      alert('录制失败，请重试');
       return;
     }
-    
-    // 创建 GIF
+
     const gif = new GIF({
-      workers: isMobile ? 1 : 2, // 移动端使用单线程减少内存
-      quality: isMobile ? 15 : 10, // 移动端降低质量
+      workers: 2,
+      quality: 10,
       width: frames[0].width,
       height: frames[0].height,
       workerScript: '/gif.worker.js'
     });
-    
-    // 添加帧
+
     frames.forEach((frame) => {
       gif.addFrame(frame, { delay: frameDelay, copy: true });
     });
-    
+
     gif.on('progress', (p: number) => {
       setExportProgress(50 + Math.round(p * 50));
     });
-    
+
     gif.on('finished', (blob: Blob) => {
-      clearTimeout(gifTimeout);
       const url = URL.createObjectURL(blob);
-      
       if (isMobile) {
-        // 移动端：直接在当前面板显示 GIF
         setMobileImageUrl(url);
         setIsExporting(false);
         setExportDone(true);
       } else {
-        // 桌面端：直接下载
         const link = document.createElement('a');
-        link.download = `christmas-card-${Date.now()}.gif`;
+        link.download = `white-gold-christmas-${Date.now()}.gif`;
         link.href = url;
         link.click();
-        URL.revokeObjectURL(url);
         setIsExporting(false);
-        setShowPreview(false);
-        setPreviewUrl(null);
         setIsOpen(false);
       }
     });
 
-    gif.on('abort', () => {
-      clearTimeout(gifTimeout);
-      console.warn('GIF生成被中止');
-      setIsExporting(false);
-    });
-
-    // 移动端添加超时处理（30秒）
-    const gifTimeout = setTimeout(() => {
-      if (recordingRef.current || isExporting) {
-        console.warn('GIF生成超时');
-        gif.abort();
-        setIsExporting(false);
-        alert('GIF生成超时，移动端建议使用图片格式');
-      }
-    }, 30000);
-    
-    try {
-      gif.render();
-    } catch (err) {
-      clearTimeout(gifTimeout);
-      console.error('GIF渲染失败:', err);
-      setIsExporting(false);
-      alert('GIF生成失败，请尝试导出图片格式');
-    }
+    gif.render();
   }, [captureFrame, createCardCanvas, isMobile]);
 
-  // 导出完成状态（移动端用于显示"完成"按钮）
   const [exportDone, setExportDone] = useState(false);
-  // 移动端保存的图片URL
   const [mobileImageUrl, setMobileImageUrl] = useState<string | null>(null);
 
-  // 确认导出
   const confirmExport = useCallback(async () => {
     if (exportType === 'image') {
-      // 重新生成高清版本
       setIsExporting(true);
-      setExportProgress(0);
-      
       const frameCanvas = captureFrame();
-      if (!frameCanvas) {
-        setIsExporting(false);
-        alert('无法获取画面，请重试');
-        return;
+      if (frameCanvas) {
+        const cardCanvas = await createCardCanvas(frameCanvas, false); // 高清
+        const dataUrl = cardCanvas.toDataURL('image/png', 1.0);
+
+        if (isMobile) {
+          setMobileImageUrl(dataUrl);
+          setExportDone(true);
+        } else {
+          const link = document.createElement('a');
+          link.download = `white-gold-christmas-${Date.now()}.png`;
+          link.href = dataUrl;
+          link.click();
+          setIsOpen(false);
+        }
       }
-      
-      setExportProgress(50);
-      const cardCanvas = await createCardCanvas(frameCanvas, false);
-      
-      setExportProgress(100);
-      
-      // 移动端使用不同的下载方式
-      const dataUrl = cardCanvas.toDataURL('image/png', 1.0);
-      
-      if (isMobile) {
-        // 移动端：直接在当前面板显示图片，用户可以长按保存
-        setMobileImageUrl(dataUrl);
-        setIsExporting(false);
-        setExportDone(true);
-      } else {
-        // 桌面端：直接下载并关闭
-        const link = document.createElement('a');
-        link.download = `christmas-card-${Date.now()}.png`;
-        link.href = dataUrl;
-        link.click();
-        
-        setIsExporting(false);
-        setShowPreview(false);
-        setPreviewUrl(null);
-        setIsOpen(false);
-      }
+      setIsExporting(false);
     } else {
       exportGif();
     }
   }, [captureFrame, createCardCanvas, exportType, exportGif, isMobile]);
 
-  // 完成并关闭（移动端用）
-  const handleFinish = useCallback(() => {
-    if (mobileImageUrl) {
-      URL.revokeObjectURL(mobileImageUrl);
-    }
-    setExportDone(false);
-    setMobileImageUrl(null);
-    setShowPreview(false);
-    setPreviewUrl(null);
-    setIsOpen(false);
-  }, [mobileImageUrl]);
-
-  const handlePreview = () => {
-    generatePreview();
-  };
-
-  const handleBackToEdit = () => {
-    setShowPreview(false);
-    setPreviewUrl(null);
-  };
-
-  // 打开导出面板
-  const handleOpenPanel = useCallback((e?: React.MouseEvent | React.TouchEvent) => {
-    if (e) {
-      e.stopPropagation();
-    }
-    setIsOpen(true);
-  }, []);
-
   return (
     <>
       <button
-        onClick={handleOpenPanel}
-        style={{
-          padding: isMobile ? '8px 10px' : '10px 14px',
-          backgroundColor: 'rgba(255,215,0,0.15)',
-          border: '1px solid #FFD700',
-          color: '#FFD700',
-          fontFamily: 'sans-serif',
-          fontSize: isMobile ? '9px' : '10px',
-          fontWeight: '500',
-          cursor: 'pointer',
-          backdropFilter: 'blur(4px)',
-          borderRadius: '6px',
-          letterSpacing: '1px',
-          WebkitTapHighlightColor: 'transparent',
-          touchAction: 'manipulation',
-          userSelect: 'none',
-          WebkitUserSelect: 'none'
-        }}
+        className={`tech-btn ${isOpen ? 'active' : ''}`}
+        onClick={() => setIsOpen(true)}
+        style={{ padding: '8px 12px', fontSize: '12px' }}
       >
-        导出贺卡
+        <TechIcon name="download" size={16} />
+        {!isMobile && " EXPORT"}
       </button>
 
       {isOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            backgroundColor: 'rgba(0,0,0,0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}
-          onClick={() => !isExporting && setIsOpen(false)}
-        >
-          <div
-            style={{
-              backgroundColor: 'rgba(20,20,40,0.95)',
-              padding: isMobile ? '20px' : '30px',
-              borderRadius: '12px',
-              border: '2px solid #FFD700',
-              width: isMobile ? '90vw' : 'auto',
-              minWidth: isMobile ? 'auto' : '350px',
-              maxWidth: isMobile ? '90vw' : '400px',
-              maxHeight: isMobile ? '85vh' : 'auto',
-              overflowY: isMobile ? 'auto' : 'visible'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 style={{ 
-              color: '#FFD700', 
-              margin: '0 0 20px 0', 
-              textAlign: 'center', 
-              fontFamily: 'serif',
-              fontSize: isMobile ? '16px' : '18px'
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          backgroundColor: 'rgba(5, 5, 10, 0.9)', backdropFilter: 'blur(10px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+        }} onClick={() => !isExporting && setIsOpen(false)}>
+
+          <div className="tech-panel" style={{
+            padding: '30px', borderRadius: '12px', width: isMobile ? '85vw' : '400px',
+            maxHeight: '90vh', overflowY: 'auto'
+          }} onClick={e => e.stopPropagation()}>
+
+            <h3 style={{
+              color: 'var(--tech-gold)', margin: '0 0 20px 0', textAlign: 'center',
+              fontFamily: 'Orbitron, sans-serif', letterSpacing: '2px'
             }}>
-              ✨ 导出圣诞贺卡 ✨
+              DATA EXPORT
             </h3>
 
-            {/* 祝福语 */}
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ color: '#888', fontSize: '11px', display: 'block', marginBottom: '5px' }}>祝福语</label>
-              <input
-                type="text"
-                value={greeting}
-                onChange={(e) => setGreeting(e.target.value)}
-                placeholder="Merry Christmas"
-                style={{
-                  width: '100%',
-                  padding: isMobile ? '12px' : '10px',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,215,0,0.3)',
-                  borderRadius: '4px',
-                  color: '#fff',
-                  fontSize: isMobile ? '16px' : '14px',
-                  boxSizing: 'border-box'
-                }}
-              />
-            </div>
-
-            {/* 署名 */}
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ color: '#888', fontSize: '11px', display: 'block', marginBottom: '5px' }}>署名（可选）</label>
-              <input
-                type="text"
-                value={fromName}
-                onChange={(e) => setFromName(e.target.value)}
-                placeholder="From: Your Name"
-                style={{
-                  width: '100%',
-                  padding: isMobile ? '12px' : '10px',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,215,0,0.3)',
-                  borderRadius: '4px',
-                  color: '#fff',
-                  fontSize: isMobile ? '16px' : '14px',
-                  boxSizing: 'border-box'
-                }}
-              />
-            </div>
-
-            {/* 导出类型 */}
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ color: '#888', fontSize: '11px', display: 'block', marginBottom: '8px' }}>导出格式</label>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button
-                  onClick={() => setExportType('image')}
-                  style={{
-                    flex: 1,
-                    padding: isMobile ? '12px' : '10px',
-                    backgroundColor: exportType === 'image' ? 'rgba(255,215,0,0.2)' : 'rgba(255,255,255,0.05)',
-                    border: `1px solid ${exportType === 'image' ? '#FFD700' : '#444'}`,
-                    borderRadius: '4px',
-                    color: exportType === 'image' ? '#FFD700' : '#888',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    WebkitTapHighlightColor: 'transparent'
-                  }}
-                >
-                  📷 图片
-                </button>
-                <button
-                  onClick={() => setExportType('gif')}
-                  style={{
-                    flex: 1,
-                    padding: isMobile ? '12px' : '10px',
-                    backgroundColor: exportType === 'gif' ? 'rgba(255,215,0,0.2)' : 'rgba(255,255,255,0.05)',
-                    border: `1px solid ${exportType === 'gif' ? '#FFD700' : '#444'}`,
-                    borderRadius: '4px',
-                    color: exportType === 'gif' ? '#FFD700' : '#888',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    WebkitTapHighlightColor: 'transparent'
-                  }}
-                >
-                  🎬 动图
-                </button>
+            {/* 预览区域 */}
+            {showPreview && previewUrl ? (
+              <div style={{ textAlign: 'center' }}>
+                {exportDone ? (
+                  <>
+                    <p style={{ color: '#4CAF50', marginBottom: 10 }}>generated successfully</p>
+                    <img src={mobileImageUrl!} style={{ width: '100%', border: '1px solid var(--tech-gold)', marginBottom: 20 }} />
+                    <p style={{ fontSize: 12, color: '#888' }}>Long press image to save</p>
+                    <button className="tech-btn" onClick={() => { setIsOpen(false); setExportDone(false); setShowPreview(false); }} style={{ width: '100%' }}>CLOSE</button>
+                  </>
+                ) : (
+                  <>
+                    <img src={previewUrl} style={{ width: '100%', border: '1px solid var(--tech-gold)', marginBottom: 20 }} />
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <button className="tech-btn" onClick={() => setShowPreview(false)} disabled={isExporting}>BACK</button>
+                      <button className="tech-btn gold" onClick={confirmExport} disabled={isExporting}>
+                        {isExporting ? 'SAVING...' : 'SAVE CARD'}
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
-            </div>
-
-            {/* 进度条 */}
-            {isExporting && (
-              <div style={{ marginBottom: '15px' }}>
-                <div style={{
-                  width: '100%',
-                  height: '6px',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  borderRadius: '3px',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    width: `${exportProgress}%`,
-                    height: '100%',
-                    backgroundColor: '#FFD700',
-                    transition: 'width 0.3s ease'
-                  }} />
-                </div>
-                <p style={{ color: '#888', fontSize: '10px', textAlign: 'center', marginTop: '5px' }}>
-                  {exportType === 'gif' ? '正在录制动画...' : '正在生成...'} {exportProgress}%
-                </p>
-              </div>
-            )}
-
-            {/* 预览图片 */}
-            {showPreview && previewUrl && (
-              <div style={{ marginBottom: '15px' }}>
-                <p style={{ color: '#888', fontSize: '11px', marginBottom: '8px', textAlign: 'center' }}>贺卡预览</p>
-                <div style={{
-                  width: '100%',
-                  maxHeight: isMobile ? '40vh' : '300px',
-                  overflow: 'hidden',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255,215,0,0.3)'
-                }}>
-                  <img 
-                    src={previewUrl} 
-                    alt="贺卡预览" 
+            ) : (
+              <>
+                {/* 表单区域 */}
+                <div style={{ marginBottom: 20 }}>
+                  <label style={{ display: 'block', color: 'var(--tech-cyan)', fontSize: 10, marginBottom: 5 }}>BLESSING (MULTILINE)</label>
+                  <textarea
+                    value={greeting}
+                    onChange={(e) => setGreeting(e.target.value)}
                     style={{
-                      width: '100%',
-                      height: 'auto',
-                      display: 'block'
+                      width: '100%', height: 80, background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid var(--tech-cyan)', color: 'white', padding: 10,
+                      fontFamily: 'Ma Shan Zheng, cursive'
                     }}
                   />
                 </div>
-              </div>
-            )}
 
-            {/* 按钮区域 */}
-            {!showPreview ? (
-              <>
-                {/* 预览按钮 */}
+                <div style={{ marginBottom: 20 }}>
+                  <label style={{ display: 'block', color: 'var(--tech-cyan)', fontSize: 10, marginBottom: 5 }}>FROM</label>
+                  <input
+                    type="text"
+                    value={fromName}
+                    onChange={(e) => setFromName(e.target.value)}
+                    style={{
+                      width: '100%', background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid var(--tech-cyan)', color: 'white', padding: 10
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: 20 }}>
+                  <label style={{ display: 'block', color: 'var(--tech-cyan)', fontSize: 10, marginBottom: 5 }}>FORMAT</label>
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <button
+                      className={`tech-btn ${exportType === 'image' ? 'active' : ''}`}
+                      style={{ flex: 1 }}
+                      onClick={() => setExportType('image')}
+                    >
+                      PNG IMAGE
+                    </button>
+                    <button
+                      className={`tech-btn ${exportType === 'gif' ? 'active' : ''}`}
+                      style={{ flex: 1 }}
+                      onClick={() => setExportType('gif')}
+                    >
+                      GIF ANIMATION
+                    </button>
+                  </div>
+                </div>
+
                 <button
+                  className="tech-btn purple"
+                  style={{ width: '100%', padding: 15 }}
                   onClick={handlePreview}
                   disabled={isExporting}
-                  style={{
-                    width: '100%',
-                    padding: isMobile ? '14px' : '12px',
-                    backgroundColor: isExporting ? 'rgba(255,215,0,0.1)' : 'rgba(255,215,0,0.2)',
-                    border: '2px solid #FFD700',
-                    borderRadius: '6px',
-                    color: '#FFD700',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    cursor: isExporting ? 'wait' : 'pointer',
-                    letterSpacing: '2px',
-                    WebkitTapHighlightColor: 'transparent'
-                  }}
                 >
-                  {isExporting ? '正在生成...' : '预览贺卡'}
+                  {isExporting ? `PROCESSING ${exportProgress}%` : 'PREVIEW CARD'}
                 </button>
-                <p style={{ color: '#555', fontSize: '10px', textAlign: 'center', marginTop: '15px' }}>
-                  {exportType === 'gif' ? '动图将录制约2秒的动画' : '点击预览后可确认效果再导出'}
-                </p>
               </>
-            ) : exportDone ? (
-              // 移动端导出完成后显示图片和完成按钮
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {/* 显示可长按保存的图片 */}
-                {mobileImageUrl && (
-                  <div style={{
-                    width: '100%',
-                    maxHeight: '50vh',
-                    overflow: 'auto',
-                    borderRadius: '8px',
-                    border: '2px solid #4CAF50',
-                    marginBottom: '10px',
-                    WebkitTouchCallout: 'default'
-                  }}>
-                    <img 
-                      src={mobileImageUrl} 
-                      alt="圣诞贺卡" 
-                      style={{
-                        width: '100%',
-                        height: 'auto',
-                        display: 'block',
-                        WebkitTouchCallout: 'default',
-                        WebkitUserSelect: 'auto',
-                        userSelect: 'auto'
-                      }}
-                    />
-                  </div>
-                )}
-                <p style={{ color: '#4CAF50', fontSize: '12px', textAlign: 'center', margin: 0 }}>
-                  ✅ 长按上方图片保存到相册
-                </p>
-                <p style={{ color: '#888', fontSize: '10px', textAlign: 'center', margin: 0 }}>
-                  如无法保存，请截图
-                </p>
-                <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
-                  <button
-                    onClick={() => {
-                      setExportDone(false);
-                      setMobileImageUrl(null);
-                    }}
-                    style={{
-                      flex: 1,
-                      padding: isMobile ? '14px' : '12px',
-                      backgroundColor: 'rgba(255,255,255,0.05)',
-                      border: '1px solid #666',
-                      borderRadius: '6px',
-                      color: '#888',
-                      fontSize: '12px',
-                      cursor: 'pointer',
-                      WebkitTapHighlightColor: 'transparent'
-                    }}
-                  >
-                    重新导出
-                  </button>
-                  <button
-                    onClick={handleFinish}
-                    style={{
-                      flex: 1,
-                      padding: isMobile ? '14px' : '12px',
-                      backgroundColor: 'rgba(76,175,80,0.2)',
-                      border: '2px solid #4CAF50',
-                      borderRadius: '6px',
-                      color: '#4CAF50',
-                      fontSize: '12px',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      WebkitTapHighlightColor: 'transparent'
-                    }}
-                  >
-                    完成
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', gap: '10px' }}>
-                {/* 返回修改按钮 */}
-                <button
-                  onClick={handleBackToEdit}
-                  style={{
-                    flex: 1,
-                    padding: isMobile ? '14px' : '12px',
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    border: '1px solid #666',
-                    borderRadius: '6px',
-                    color: '#888',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    WebkitTapHighlightColor: 'transparent'
-                  }}
-                >
-                  返回修改
-                </button>
-                {/* 确认导出按钮 */}
-                <button
-                  onClick={confirmExport}
-                  disabled={isExporting}
-                  style={{
-                    flex: 1,
-                    padding: isMobile ? '14px' : '12px',
-                    backgroundColor: 'rgba(255,215,0,0.2)',
-                    border: '2px solid #FFD700',
-                    borderRadius: '6px',
-                    color: '#FFD700',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    cursor: isExporting ? 'wait' : 'pointer',
-                    WebkitTapHighlightColor: 'transparent'
-                  }}
-                >
-                  {isExporting ? '导出中...' : '确认导出'}
-                </button>
-              </div>
             )}
           </div>
         </div>

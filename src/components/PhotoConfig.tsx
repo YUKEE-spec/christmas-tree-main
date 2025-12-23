@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { TechIcon } from './icons/TechIcons';
 
 // 照片配置接口
 export interface PhotoConfig {
@@ -24,14 +25,15 @@ interface PhotoConfigPanelProps {
 }
 
 // 照片配置面板组件
-export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({ 
-  config, 
-  onChange, 
-  isOpen, 
+export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
+  config,
+  onChange,
+  isOpen,
   onToggle,
-  buttonLabel = '照片'
+  buttonLabel = 'PHOTOS'
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window);
 
   const updateConfig = (updates: Partial<PhotoConfig>) => {
     onChange({ ...config, ...updates });
@@ -41,32 +43,23 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    
-    console.log('Uploading files:', files.length);
-    
+
     const newPhotos: string[] = [];
     Array.from(files).forEach(file => {
       const url = URL.createObjectURL(file);
-      console.log('Created blob URL:', url);
       newPhotos.push(url);
     });
-    
+
     // 合并新照片到现有列表
     const updatedPhotos = [...config.customPhotos, ...newPhotos];
-    console.log('Total photos after upload:', updatedPhotos.length);
-    
-    onChange({ 
+
+    onChange({
       ...config,
       customPhotos: updatedPhotos,
       enabled: true,
       uploadSuccess: true
     });
 
-    // 上传成功后自动关闭上传面板，但不重置照片
-    setTimeout(() => {
-      onToggle();
-    }, 1500);
-    
     // 清空文件输入，允许重复上传相同文件
     e.target.value = '';
   };
@@ -88,83 +81,46 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
   return (
     <>
       <button
+        className={`tech-btn ${isOpen ? 'active' : ''}`}
         onClick={onToggle}
-        style={{
-          padding: '10px 16px',
-          backgroundColor: config.enabled ? 'rgba(255,182,193,0.15)' : 'rgba(0,0,0,0.6)',
-          border: `1px solid ${config.enabled ? '#FFB6C1' : '#444'}`,
-          color: config.enabled ? '#FFB6C1' : '#666',
-          fontFamily: 'sans-serif',
-          fontSize: '11px',
-          fontWeight: '500',
-          cursor: 'pointer',
-          backdropFilter: 'blur(4px)',
-          borderRadius: '6px',
-          transition: 'all 0.2s ease',
-          letterSpacing: '1px'
-        }}
+        style={{ padding: '8px 12px', fontSize: '12px' }}
       >
-        {buttonLabel} {config.customPhotos.length > 0 ? `(${config.customPhotos.length})` : ''}
+        <TechIcon name="photo" size={16} />
+        {!isMobile && (
+          <>
+            {" " + buttonLabel}
+            {config.customPhotos.length > 0 && <span style={{ opacity: 0.7, marginLeft: '4px' }}>({config.customPhotos.length})</span>}
+          </>
+        )}
       </button>
 
       {isOpen && (
-        <div style={{
+        <div className="tech-panel" style={{
+          position: 'absolute',
+          top: isMobile ? '40px' : '0',
+          left: isMobile ? '-220px' : '110%',
+          width: '240px',
           padding: '15px',
-          backgroundColor: 'rgba(0,0,0,0.9)',
-          borderRadius: '8px',
-          backdropFilter: 'blur(8px)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          minWidth: '200px',
-          position: 'relative'
+          borderRadius: '12px',
+          zIndex: 20
         }}>
-          {/* 关闭按钮 */}
-          <button
-            onClick={() => {
-              onToggle();
-            }}
-            style={{
-              position: 'absolute',
-              top: '8px',
-              right: '8px',
-              width: '20px',
-              height: '20px',
-              padding: 0,
-              backgroundColor: 'transparent',
-              border: 'none',
-              color: config.uploadSuccess ? '#90EE90' : '#666',
-              fontSize: '14px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'color 0.3s ease'
-            }}
-            title={config.uploadSuccess ? '上传成功，点击关闭' : '关闭'}
-          >
-            {config.uploadSuccess ? '✓' : '×'}
-          </button>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', paddingRight: '20px' }}>
-            <span style={{ color: config.uploadSuccess ? '#90EE90' : '#FFB6C1', fontSize: '12px', fontWeight: 'bold' }}>
-              {config.uploadSuccess ? '✓ 上传成功！' : '上传照片'}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+            <span style={{ color: 'var(--tech-cyan)', fontSize: '10px', letterSpacing: '2px' }}>
+              MEMORY MODULE
             </span>
             <button
+              className={`tech-btn ${config.enabled ? 'active' : ''}`}
               onClick={() => updateConfig({ enabled: !config.enabled })}
               style={{
                 padding: '4px 8px',
-                backgroundColor: config.enabled ? '#FFB6C1' : 'transparent',
-                border: '1px solid #FFB6C1',
-                color: config.enabled ? '#000' : '#FFB6C1',
                 fontSize: '9px',
-                cursor: 'pointer',
-                borderRadius: '4px',
-                letterSpacing: '1px'
+                height: 'auto'
               }}
             >
-              {config.enabled ? '显示' : '隐藏'}
+              <TechIcon name={config.enabled ? "check" : "close"} size={10} />
             </button>
           </div>
-          
+
           <input
             ref={fileInputRef}
             type="file"
@@ -173,69 +129,48 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
             onChange={handlePhotoUpload}
             style={{ display: 'none' }}
           />
-          
+
           <button
+            className="tech-btn"
             onClick={() => fileInputRef.current?.click()}
-            disabled={config.uploadSuccess}
             style={{
               width: '100%',
-              padding: '12px',
-              backgroundColor: config.uploadSuccess ? 'rgba(144,238,144,0.15)' : 'rgba(255,255,255,0.05)',
-              border: config.uploadSuccess ? '1px solid #90EE90' : '1px dashed #555',
-              color: config.uploadSuccess ? '#90EE90' : '#888',
-              fontSize: '11px',
-              cursor: config.uploadSuccess ? 'default' : 'pointer',
-              borderRadius: '6px',
+              justifyContent: 'center',
               marginBottom: '10px',
-              letterSpacing: '1px',
-              transition: 'all 0.3s ease'
+              borderStyle: 'dashed'
             }}
           >
-            {config.uploadSuccess ? '✓ 照片已添加到圣诞树' : '+ 上传照片'}
+            <TechIcon name="plus" size={12} /> UPLOAD
           </button>
-          
-          <p style={{ color: '#555', fontSize: '9px', margin: '0 0 10px 0' }}>
-            {config.uploadSuccess 
-              ? `✨ ${config.customPhotos.length} 张照片已装饰到圣诞树上` 
-              : `${config.customPhotos.length} 已上传 · 50 个位置`
-            }
+
+          <p style={{ color: '#555', fontSize: '9px', margin: '0 0 10px 0', textAlign: 'center' }}>
+            {config.customPhotos.length} / 50 SLOTS USED
           </p>
-          
-          {config.uploadSuccess && (
-            <p style={{ 
-              color: '#90EE90', 
-              fontSize: '8px', 
-              margin: '0 0 10px 0', 
-              textAlign: 'center',
-              opacity: 0.8
-            }}>
-              面板将自动关闭，请欣赏您的圣诞树 🎄
-            </p>
-          )}
-          
+
           {/* 照片预览 */}
           {config.customPhotos.length > 0 && (
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '4px',
+              gap: '6px',
               maxHeight: '120px',
-              overflowY: 'auto'
+              overflowY: 'auto',
+              marginBottom: '10px'
             }}>
               {config.customPhotos.map((url, i) => (
-                <div key={i} style={{ position: 'relative' }}>
+                <div key={i} style={{ position: 'relative', aspectRatio: '1' }}>
                   <img
                     src={url}
-                    alt={`照片 ${i + 1}`}
+                    alt={`Photo ${i + 1}`}
                     style={{
                       width: '100%',
-                      aspectRatio: '1',
+                      height: '100%',
                       objectFit: 'cover',
-                      borderRadius: '2px',
+                      borderRadius: '4px',
                       border: '1px solid rgba(255,255,255,0.1)'
                     }}
                   />
-                  <button
+                  <div
                     onClick={() => removePhoto(i)}
                     style={{
                       position: 'absolute',
@@ -243,42 +178,38 @@ export const PhotoConfigPanel: React.FC<PhotoConfigPanelProps> = ({
                       right: '-4px',
                       width: '14px',
                       height: '14px',
-                      padding: 0,
-                      backgroundColor: '#333',
-                      border: 'none',
+                      backgroundColor: '#000',
+                      border: '1px solid #333',
                       borderRadius: '50%',
-                      color: '#888',
+                      color: '#fff',
                       fontSize: '10px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center'
+                      justifyContent: 'center',
+                      zIndex: 2
                     }}
                   >
                     ×
-                  </button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
-          
+
           {config.customPhotos.length > 0 && (
             <button
+              className="tech-btn"
               onClick={clearAllPhotos}
               style={{
                 width: '100%',
-                padding: '8px',
-                marginTop: '10px',
-                backgroundColor: 'transparent',
-                border: '1px solid #444',
-                color: '#666',
+                justifyContent: 'center',
                 fontSize: '10px',
-                cursor: 'pointer',
-                borderRadius: '4px',
-                letterSpacing: '1px'
+                borderColor: '#442222',
+                color: '#ff4444'
               }}
             >
-              清空全部
+              CLEAR ALL
             </button>
           )}
         </div>
