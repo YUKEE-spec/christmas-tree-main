@@ -7,159 +7,254 @@ interface ParticleOlafProps {
     scale?: number;
 }
 
-export const ParticleOlaf: React.FC<ParticleOlafProps> = ({ position = [15, -15, 10], scale = 1 }) => {
+export const ParticleOlaf: React.FC<ParticleOlafProps> = ({ position = [18, -12, 12], scale = 1 }) => {
     const groupRef = useRef<THREE.Group>(null);
 
-    // 生成 Olaf 的粒子数据
-    const { particles } = useMemo(() => {
-        const p: { pos: [number, number, number], color: string, size: number, speed: number }[] = [];
+    const { positions, colors } = useMemo(() => {
+        const particles: { x: number; y: number; z: number; color: THREE.Color }[] = [];
 
-        // 辅助函数：生成球体粒子
-        const addSphere = (center: [number, number, number], radius: number, count: number, color: string, size: number) => {
+        // 颜色定义
+        const snowWhite = new THREE.Color('#ffffff');
+        const snowBlue = new THREE.Color('#e8f4fc');
+        const eyeBlack = new THREE.Color('#0a0a0a');
+        const eyeBrow = new THREE.Color('#4a3c31');
+        const carrotOrange = new THREE.Color('#ff6b00');
+        const carrotTip = new THREE.Color('#ff8c00');
+        const stickBrown = new THREE.Color('#5d4037');
+        const stickDark = new THREE.Color('#3e2723');
+        const toothWhite = new THREE.Color('#fffef0');
+
+        // 辅助函数：生成填充球体
+        const addSphere = (
+            center: [number, number, number],
+            rx: number, ry: number, rz: number,
+            count: number,
+            color: THREE.Color
+        ) => {
             for (let i = 0; i < count; i++) {
-                const phi = Math.acos(-1 + (2 * i) / count);
-                const theta = Math.sqrt(count * Math.PI) * phi;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                const r = Math.cbrt(Math.random());
 
-                // 添加一些随机性，不那么完美
-                const r = radius * (0.9 + Math.random() * 0.2);
-
-                p.push({
-                    pos: [
-                        center[0] + r * Math.cos(theta) * Math.sin(phi),
-                        center[1] + r * Math.sin(theta) * Math.sin(phi),
-                        center[2] + r * Math.cos(phi)
-                    ],
-                    color,
-                    size: size * (0.8 + Math.random() * 0.4),
-                    speed: Math.random()
+                particles.push({
+                    x: center[0] + r * rx * Math.sin(phi) * Math.cos(theta),
+                    y: center[1] + r * ry * Math.sin(phi) * Math.sin(theta),
+                    z: center[2] + r * rz * Math.cos(phi),
+                    color: color.clone()
                 });
             }
         };
 
-        // 1. 底部大雪球 (身体)
-        addSphere([0, 0, 0], 2.5, 400, '#ffffff', 0.25);
+        // 辅助函数：表面粒子（雪花效果）
+        const addSnowSurface = (
+            center: [number, number, number],
+            rx: number, ry: number, rz: number,
+            count: number
+        ) => {
+            for (let i = 0; i < count; i++) {
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                const r = 0.95 + Math.random() * 0.1;
 
-        // 2. 中间雪球 (胸部)
-        addSphere([0, 3.5, 0], 1.8, 300, '#ffffff', 0.22);
+                particles.push({
+                    x: center[0] + r * rx * Math.sin(phi) * Math.cos(theta),
+                    y: center[1] + r * ry * Math.sin(phi) * Math.sin(theta),
+                    z: center[2] + r * rz * Math.cos(phi),
+                    color: Math.random() > 0.5 ? snowWhite.clone() : snowBlue.clone()
+                });
+            }
+        };
 
-        // 3. 头部 (椭圆，用球体变形模拟，这里简化)
-        addSphere([0, 6.5, 0], 1.4, 250, '#ffffff', 0.2);
+        // ========== 雪宝身体 ==========
 
-        // 4. 纽扣 (黑色粒子团)
-        addSphere([0, 3.5, 1.6], 0.3, 30, '#1a1a1a', 0.15); // 胸扣
-        addSphere([0, 0.5, 2.3], 0.35, 40, '#1a1a1a', 0.15); // 肚扣
+        // 底部大雪球 (屁股)
+        addSphere([0, 0, 0], 2.8, 2.5, 2.5, 1200, snowWhite);
+        addSnowSurface([0, 0, 0], 3.0, 2.7, 2.7, 400);
 
-        // 5. 眼睛
-        addSphere([-0.5, 7, 1.2], 0.25, 20, '#1a1a1a', 0.15);
-        addSphere([0.5, 7, 1.2], 0.25, 20, '#1a1a1a', 0.15);
+        // 中间小一点的雪球 (肚子)
+        addSphere([0, 4.0, 0], 2.0, 1.8, 1.8, 800, snowWhite);
+        addSnowSurface([0, 4.0, 0], 2.2, 2.0, 2.0, 300);
 
-        // 6. 鼻子 (橙色胡萝卜)
-        // 需要旋转一下方向，这里简化直接用坐标堆叠
+        // 头部 (略扁的椭圆)
+        addSphere([0, 7.2, 0], 1.8, 1.6, 1.5, 700, snowWhite);
+        addSnowSurface([0, 7.2, 0], 1.9, 1.7, 1.6, 250);
+
+        // ========== 面部特征 ==========
+
+        // 眼睛 - 大而圆，黑色（雪宝标志性的大眼睛）
+        // 左眼
+        addSphere([-0.6, 7.5, 1.3], 0.28, 0.32, 0.15, 80, eyeBlack);
+        // 右眼
+        addSphere([0.6, 7.5, 1.3], 0.28, 0.32, 0.15, 80, eyeBlack);
+
+        // 眉毛 - 用树枝一样的深棕色
+        for (let i = 0; i < 40; i++) {
+            const t = Math.random();
+            particles.push({
+                x: -0.6 - 0.3 + t * 0.6,
+                y: 7.9 + Math.sin(t * Math.PI) * 0.15,
+                z: 1.3 + Math.random() * 0.1,
+                color: eyeBrow.clone()
+            });
+        }
+        for (let i = 0; i < 40; i++) {
+            const t = Math.random();
+            particles.push({
+                x: 0.6 - 0.3 + t * 0.6,
+                y: 7.9 + Math.sin(t * Math.PI) * 0.15,
+                z: 1.3 + Math.random() * 0.1,
+                color: eyeBrow.clone()
+            });
+        }
+
+        // 胡萝卜鼻子 (锥形向前)
+        for (let i = 0; i < 150; i++) {
+            const t = i / 150; // 0到1
+            const radius = 0.35 * (1 - t * 0.85);
+            const angle = Math.random() * Math.PI * 2;
+            const r = Math.random() * radius;
+
+            particles.push({
+                x: r * Math.cos(angle),
+                y: 7.0 + r * Math.sin(angle) * 0.3,
+                z: 1.5 + t * 2.5,
+                color: t < 0.7 ? carrotOrange.clone() : carrotTip.clone()
+            });
+        }
+
+        // 嘴巴 - 微笑弧线
         for (let i = 0; i < 60; i++) {
             const t = i / 60;
-            const r = 0.3 * (1 - t);
-            const angle = Math.random() * Math.PI * 2;
-            const rad = Math.random() * r;
-            p.push({
-                pos: [
-                    rad * Math.cos(angle),
-                    6.5 + rad * Math.sin(angle),
-                    1.4 + t * 2 // 向前伸出 2 单位
-                ],
-                color: '#ff8800',
-                size: 0.2,
-                speed: Math.random()
-            })
-        }
-
-        // 7. 树枝头发
-        for (let i = 0; i < 30; i++) {
-            p.push({
-                pos: [
-                    (Math.random() - 0.5) * 0.5,
-                    7.8 + Math.random() * 1.5,
-                    (Math.random() - 0.5) * 0.5
-                ],
-                color: '#5d4037',
-                size: 0.1,
-                speed: Math.random()
+            const angle = -Math.PI * 0.3 + t * Math.PI * 0.6;
+            particles.push({
+                x: Math.cos(angle) * 0.8,
+                y: 6.3 + Math.sin(angle) * 0.3,
+                z: 1.3 + Math.random() * 0.05,
+                color: stickDark.clone()
             });
         }
 
-        // 8. 树枝手臂 (简化为两团长条粒子)
-        // 左臂
-        for (let i = 0; i < 50; i++) {
-            p.push({
-                pos: [-2 - Math.random() * 2, 4 + Math.random(), 0 + Math.random() * 0.5],
-                color: '#5d4037',
-                size: 0.12,
-                speed: Math.random()
+        // 牙齿 (雪宝标志性的大门牙)
+        addSphere([0, 6.4, 1.4], 0.25, 0.2, 0.1, 40, toothWhite);
+
+        // ========== 头顶树枝头发 ==========
+        // 三根主要的树枝
+        for (let branch = 0; branch < 3; branch++) {
+            const baseX = (branch - 1) * 0.4;
+            for (let i = 0; i < 50; i++) {
+                const t = i / 50;
+                particles.push({
+                    x: baseX + (Math.random() - 0.5) * 0.15,
+                    y: 8.8 + t * 1.8 + Math.random() * 0.2,
+                    z: (Math.random() - 0.5) * 0.15,
+                    color: t < 0.7 ? stickBrown.clone() : stickDark.clone()
+                });
+            }
+        }
+
+        // ========== 纽扣 ==========
+        // 胸口两颗
+        addSphere([0, 4.5, 1.8], 0.22, 0.22, 0.15, 50, stickDark);
+        addSphere([0, 3.5, 1.9], 0.22, 0.22, 0.15, 50, stickDark);
+        // 肚子一颗
+        addSphere([0, 1.0, 2.3], 0.25, 0.25, 0.15, 50, stickDark);
+
+        // ========== 树枝手臂 ==========
+        // 左臂 (向外伸展)
+        for (let i = 0; i < 80; i++) {
+            const t = i / 80;
+            particles.push({
+                x: -2.0 - t * 2.5,
+                y: 4.5 + Math.sin(t * Math.PI * 0.5) * 0.5 + (Math.random() - 0.5) * 0.2,
+                z: 0.5 + t * 0.8 + (Math.random() - 0.5) * 0.2,
+                color: stickBrown.clone()
             });
         }
+        // 左手指（分叉）
+        for (let finger = 0; finger < 3; finger++) {
+            for (let i = 0; i < 20; i++) {
+                const t = i / 20;
+                const angle = (finger - 1) * 0.4;
+                particles.push({
+                    x: -4.5 - t * 0.8,
+                    y: 4.8 + Math.sin(angle) * t * 0.5,
+                    z: 1.3 + Math.cos(angle) * t * 0.5,
+                    color: stickDark.clone()
+                });
+            }
+        }
+
         // 右臂
-        for (let i = 0; i < 50; i++) {
-            p.push({
-                pos: [2 + Math.random() * 2, 4 + Math.random(), 0 + Math.random() * 0.5],
-                color: '#5d4037',
-                size: 0.12,
-                speed: Math.random()
+        for (let i = 0; i < 80; i++) {
+            const t = i / 80;
+            particles.push({
+                x: 2.0 + t * 2.5,
+                y: 4.5 + Math.sin(t * Math.PI * 0.5) * 0.5 + (Math.random() - 0.5) * 0.2,
+                z: 0.5 + t * 0.8 + (Math.random() - 0.5) * 0.2,
+                color: stickBrown.clone()
             });
         }
+        // 右手指
+        for (let finger = 0; finger < 3; finger++) {
+            for (let i = 0; i < 20; i++) {
+                const t = i / 20;
+                const angle = (finger - 1) * 0.4;
+                particles.push({
+                    x: 4.5 + t * 0.8,
+                    y: 4.8 + Math.sin(angle) * t * 0.5,
+                    z: 1.3 + Math.cos(angle) * t * 0.5,
+                    color: stickDark.clone()
+                });
+            }
+        }
 
-        return { particles: p };
+        // ========== 雪脚 ==========
+        // 左脚
+        addSphere([-1.2, -2.5, 0.5], 0.8, 0.5, 1.0, 150, snowWhite);
+        // 右脚
+        addSphere([1.2, -2.5, 0.5], 0.8, 0.5, 1.0, 150, snowWhite);
+
+        // 转换为 Float32Array
+        const posArray = new Float32Array(particles.length * 3);
+        const colArray = new Float32Array(particles.length * 3);
+
+        particles.forEach((pt, i) => {
+            posArray[i * 3] = pt.x;
+            posArray[i * 3 + 1] = pt.y;
+            posArray[i * 3 + 2] = pt.z;
+
+            colArray[i * 3] = pt.color.r;
+            colArray[i * 3 + 1] = pt.color.g;
+            colArray[i * 3 + 2] = pt.color.b;
+        });
+
+        return { positions: posArray, colors: colArray };
     }, []);
-
-    const positions = useMemo(() => {
-        const pos = new Float32Array(particles.length * 3);
-        particles.forEach((p, i) => {
-            pos[i * 3] = p.pos[0];
-            pos[i * 3 + 1] = p.pos[1];
-            pos[i * 3 + 2] = p.pos[2];
-        });
-        return pos;
-    }, [particles]);
-
-    const colors = useMemo(() => {
-        const cols = new Float32Array(particles.length * 3);
-        const colorObj = new THREE.Color();
-        particles.forEach((p, i) => {
-            colorObj.set(p.color);
-            cols[i * 3] = colorObj.r;
-            cols[i * 3 + 1] = colorObj.g;
-            cols[i * 3 + 2] = colorObj.b;
-        });
-        return cols;
-    }, [particles]);
-
-    const sizes = useMemo(() => {
-        return new Float32Array(particles.map(p => p.size));
-    }, [particles]);
 
     useFrame((state) => {
         if (groupRef.current) {
             const t = state.clock.elapsedTime;
-            // 整体欢乐摇摆
-            groupRef.current.rotation.z = Math.sin(t * 2) * 0.05;
-            groupRef.current.rotation.y = Math.sin(t * 1.5) * 0.05;
-            groupRef.current.position.y = position[1] + Math.sin(t * 3) * 0.2; // 上下跳动
+            // 欢乐摇摆
+            groupRef.current.rotation.z = Math.sin(t * 2.5) * 0.08;
+            groupRef.current.rotation.y = Math.sin(t * 1.5) * 0.1;
+            // 上下弹跳
+            groupRef.current.position.y = position[1] + Math.sin(t * 3) * 0.3;
         }
     });
 
     return (
-        <group ref={groupRef} position={position} scale={scale}>
+        <group ref={groupRef} position={position} scale={scale * 0.6}>
             <points>
                 <bufferGeometry>
                     <bufferAttribute attach="attributes-position" args={[positions, 3]} />
                     <bufferAttribute attach="attributes-color" args={[colors, 3]} />
-                    <bufferAttribute attach="attributes-size" args={[sizes, 1]} />
                 </bufferGeometry>
-                {/* @ts-ignore */}
                 <pointsMaterial
                     vertexColors
-                    size={1}
+                    size={0.18}
                     sizeAttenuation
                     transparent
-                    opacity={0.9}
+                    opacity={0.95}
                     depthWrite={false}
                     blending={THREE.AdditiveBlending}
                 />
