@@ -209,7 +209,7 @@ export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, pa
               const numStickers = Math.min(customPhotos.length, Math.floor(Math.random() * 2) + 3);
               const shuffled = [...customPhotos].sort(() => 0.5 - Math.random()).slice(0, numStickers);
 
-              const stickerImages = await Promise.all(shuffled.map(url => new Promise<HTMLImageElement>((resolve, reject) => {
+              const stickerImages = await Promise.all(shuffled.map(url => new Promise<HTMLImageElement>((resolve) => {
                 const img = new Image();
                 img.crossOrigin = 'Anonymous';
                 img.onload = () => resolve(img);
