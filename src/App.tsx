@@ -34,7 +34,7 @@ export default function GrandTreeApp() {
   const [isMobile, setIsMobile] = useState(false);
 
   // Canvas 引用
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     const checkMobile = () => {
