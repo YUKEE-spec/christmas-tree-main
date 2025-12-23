@@ -15,6 +15,11 @@ import { MathUtils } from 'three';
 import * as random from 'maath/random';
 import { EnhancedGifts } from './EnhancedGifts';
 import type { GiftConfig } from './GiftConfig';
+import { GoldenNebula } from './GoldenNebula';
+import { Snowfall } from './Snowfall';
+import { SnowGround } from './SnowGround';
+import { ParticleOlaf } from './ParticleOlaf';
+import { ParticleAnimals } from './ParticleAnimals';
 import { ParticleText } from './ParticleText';
 
 // 装饰配置类型
@@ -1421,7 +1426,14 @@ export const Experience: React.FC<ExperienceProps> = ({
       {!isMobile && <pointLight position={[0, -20, 10]} intensity={30} color="#ffffff" />}
 
       {decorations.showGoldenNebula && <GoldenNebula state={sceneState} />}
-      {decorations.showSnow && <Snowfall />}
+      {decorations.showSnow && (
+        <>
+          <Snowfall />
+          <SnowGround />
+          <ParticleOlaf position={[18, -12, 10]} scale={1.2} />
+          <ParticleAnimals />
+        </>
+      )}
 
       {/* 粒子文字 */}
       {particleText && (
