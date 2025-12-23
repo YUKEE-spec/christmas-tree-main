@@ -372,7 +372,7 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
         return (
           <group key={i} scale={[obj.scale, obj.scale, obj.scale]} rotation={state === 'CHAOS' ? obj.chaosRotation : [0, 0, 0]}>
             {/* 正面 */}
-            <group position={[0, 0, 0.02]}>
+            <group position={[0, 0, 0.05]}>
               <mesh
                 geometry={photoGeometry}
                 onDoubleClick={(e) => {
@@ -392,7 +392,7 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
               </mesh>
               {obj.frameType === 'ornate' ? (
                 <>
-                  <mesh geometry={borderGeometry} position={[0, -0.15, -0.01]}>
+                  <mesh geometry={borderGeometry} position={[0, -0.15, -0.04]}>
                     <meshStandardMaterial
                       color={obj.borderColor}
                       roughness={0.2}
@@ -402,7 +402,7 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
                       side={THREE.FrontSide}
                     />
                   </mesh>
-                  <mesh geometry={new THREE.PlaneGeometry(1.2, 1.5)} position={[0, -0.15, -0.005]}>
+                  <mesh geometry={new THREE.PlaneGeometry(1.2, 1.5)} position={[0, -0.15, -0.02]}>
                     <meshStandardMaterial
                       color={obj.borderColor === '#FFD700' ? '#FFF8DC' : '#FFFFFF'}
                       roughness={0.8}
@@ -412,7 +412,7 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
                   </mesh>
                 </>
               ) : (
-                <mesh geometry={borderGeometry} position={[0, -0.15, -0.01]}>
+                <mesh geometry={borderGeometry} position={[0, -0.15, -0.04]}>
                   <meshStandardMaterial
                     color={obj.borderColor}
                     roughness={0.5}
@@ -425,7 +425,7 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
               )}
             </group>
             {/* 背面 */}
-            <group position={[0, 0, -0.02]} rotation={[0, Math.PI, 0]}>
+            <group position={[0, 0, -0.05]} rotation={[0, Math.PI, 0]}>
               <mesh
                 geometry={photoGeometry}
                 onDoubleClick={(e) => {
@@ -443,7 +443,7 @@ const PhotoOrnamentsInner = ({ state, textureArray, onPhotoClick }: {
                   side={THREE.FrontSide}
                 />
               </mesh>
-              <mesh geometry={borderGeometry} position={[0, -0.15, -0.01]}>
+              <mesh geometry={borderGeometry} position={[0, -0.15, -0.04]}>
                 <meshStandardMaterial
                   color={obj.borderColor}
                   roughness={0.6}
