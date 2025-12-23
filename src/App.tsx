@@ -455,6 +455,7 @@ export default function GrandTreeApp() {
           canvasRef={canvasRef}
           treeColor={actualTreeColor}
           particleText={particleText}
+          customPhotos={photoConfig.photos}
         />
 
         {/* 桌面端额外按钮 */}

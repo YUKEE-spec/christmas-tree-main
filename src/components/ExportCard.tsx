@@ -6,6 +6,7 @@ interface ExportCardProps {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   treeColor: string;
   particleText: string;
+  customPhotos?: string[];
 }
 
 // 字体选项接口
@@ -18,14 +19,14 @@ interface FontOption {
 // 字体配置
 const FONT_OPTIONS: FontOption[] = [
   { name: 'inter', family: '"Inter", sans-serif', label: '现代黑体 (Inter)' },
-  { name: 'bodoni-moda', family: '"Bodoni Moda", serif', label: '时尚宋体' },
+  { name: 'bodoni-moda', family: '"Bodoni Moda\", serif', label: '时尚宋体' },
   { name: 'dancing-script', family: '"Dancing Script", cursive', label: '舞蹈手写' },
   { name: 'ma-shan-zheng', family: '"Ma Shan Zheng", cursive', label: '马善政' },
   { name: 'zhi-mang-xing', family: '"Zhi Mang Xing", cursive', label: '志莽行书' },
   { name: 'long-cang', family: '"Long Cang", cursive', label: '龙苍' },
 ];
 
-export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, particleText }) => {
+export const ExportCard: React.FC<ExportCardProps> = ({ canvasRef, treeColor, particleText, customPhotos = [] }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
