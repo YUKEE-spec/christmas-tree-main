@@ -18,7 +18,8 @@ const getTextPixels = (text: string, fontSize: number = 120): { x: number; y: nu
 
   // 使用更高级的字体组合
   // 优先使用装饰性字体，回退到系统字体
-  const fontFamily = '"Playfair Display", "Georgia", "Times New Roman", "Noto Serif SC", "Source Han Serif CN", "SimSun", serif';
+  // 优先使用花体/手写字体，回退到系统字体
+  const fontFamily = '"Great Vibes", "Dancing Script", "Ma Shan Zheng", "Zhi Mang Xing", "Long Cang", "Playfair Display", "Georgia", "Times New Roman", "Noto Serif SC", "Source Han Serif CN", "SimSun", cursive, serif';
 
   // 设置字体
   ctx.font = `bold ${fontSize}px ${fontFamily}`;
@@ -74,60 +75,60 @@ export const ParticleText: React.FC<ParticleTextProps> = ({
 }) => {
   const pointsRef = useRef<THREE.Points>(null);
   const materialRef = useRef<THREE.PointsMaterial>(null);
-  
+
   // 生成粒子数据
   const { positions, targetPositions, randoms, count } = useMemo(() => {
     const pixels = getTextPixels(text);
     const count = pixels.length;
-    
+
     const positions = new Float32Array(count * 3);
     const targetPositions = new Float32Array(count * 3);
     const randoms = new Float32Array(count);
-    
+
     for (let i = 0; i < count; i++) {
       // 初始位置：随机散开
       positions[i * 3] = (Math.random() - 0.5) * 100;
       positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
       positions[i * 3 + 2] = (Math.random() - 0.5) * 50;
-      
+
       // 目标位置：文字形状
       targetPositions[i * 3] = pixels[i].x * size;
       targetPositions[i * 3 + 1] = pixels[i].y * size;
       targetPositions[i * 3 + 2] = (Math.random() - 0.5) * 0.5;
-      
+
       randoms[i] = Math.random();
     }
-    
+
     return { positions, targetPositions, randoms, count };
   }, [text, size]);
-  
+
   // 更新颜色
   useEffect(() => {
     if (materialRef.current) {
       materialRef.current.color.set(color);
     }
   }, [color]);
-  
+
   // 动画
   useFrame((stateObj, delta) => {
     if (!pointsRef.current) return;
-    
+
     const posAttr = pointsRef.current.geometry.attributes.position;
     const targetAttr = pointsRef.current.geometry.attributes.aTargetPos;
     const randomAttr = pointsRef.current.geometry.attributes.aRandom;
     const time = stateObj.clock.elapsedTime;
     const isFormed = state === 'FORMED';
-    
+
     for (let i = 0; i < count; i++) {
       const tx = targetAttr.getX(i);
       const ty = targetAttr.getY(i);
       const tz = targetAttr.getZ(i);
       const rand = randomAttr.getX(i);
-      
+
       const cx = posAttr.getX(i);
       const cy = posAttr.getY(i);
       const cz = posAttr.getZ(i);
-      
+
       if (isFormed) {
         // 聚合到文字形状
         const wobble = Math.sin(time * 2 + rand * 10) * 0.03;
@@ -152,9 +153,9 @@ export const ParticleText: React.FC<ParticleTextProps> = ({
     }
     posAttr.needsUpdate = true;
   });
-  
+
   if (count === 0) return null;
-  
+
   return (
     <group position={position}>
       <points ref={pointsRef}>
